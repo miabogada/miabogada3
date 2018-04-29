@@ -11,8 +11,8 @@ if ( file_exists( dirname( __FILE__ ) . '/local-config.php' ) ) {
 //	define( 'DB_USER', '' );
 //	define( 'DB_PASSWORD', '' );
 //	define( 'DB_HOST', '' ); // Probably 'localhost'
-//	include('../wp-config.php');
-	require('../wp-config.php');
+	include __DIR__ . '/../wp-config.php';
+
 }
 
 define('WP_HOME','http://www.miabogada.com');
