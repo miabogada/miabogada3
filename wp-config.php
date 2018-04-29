@@ -7,10 +7,12 @@ if ( file_exists( dirname( __FILE__ ) . '/local-config.php' ) ) {
 	include( dirname( __FILE__ ) . '/local-config.php' );
 } else {
 	define( 'WP_LOCAL_DEV', false );
-	define( 'DB_NAME', '' );
-	define( 'DB_USER', '' );
-	define( 'DB_PASSWORD', '' );
-	define( 'DB_HOST', '' ); // Probably 'localhost'
+//	define( 'DB_NAME', 'root' );
+//	define( 'DB_USER', '' );
+//	define( 'DB_PASSWORD', '' );
+//	define( 'DB_HOST', '' ); // Probably 'localhost'
+//	include('../wp-config.php');
+	require('../wp-config.php');
 }
 
 define('WP_HOME','http://www.miabogada.com');
