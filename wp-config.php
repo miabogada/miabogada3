@@ -7,11 +7,14 @@ if ( file_exists( dirname( __FILE__ ) . '/local-config.php' ) ) {
 	include( dirname( __FILE__ ) . '/local-config.php' );
 } else {
 	define( 'WP_LOCAL_DEV', false );
-	define( 'DB_NAME', '%%DB_NAME%%' );
-	define( 'DB_USER', '%%DB_USER%%' );
-	define( 'DB_PASSWORD', '%%DB_PASSWORD%%' );
-	define( 'DB_HOST', '%%DB_HOST%%' ); // Probably 'localhost'
+	define( 'DB_NAME', '' );
+	define( 'DB_USER', '' );
+	define( 'DB_PASSWORD', '' );
+	define( 'DB_HOST', '' ); // Probably 'localhost'
 }
+
+define('WP_HOME','http://www.miabogada.com');
+define('WP_SITEURL','http://www.miabogada.com/wp/');
 
 // ========================
 // Custom Content Directory
@@ -42,7 +45,7 @@ define( 'NONCE_SALT',       'put your unique phrase here' );
 // Table prefix
 // Change this if you have multiple installs in the same database
 // ==============================================================
-$table_prefix  = 'wp_';
+$table_prefix  = 'wp1_';
 
 // ================================
 // Language

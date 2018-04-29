@@ -1,0 +1,94 @@
+.wprc.box {
+	width:300px;
+	height:100px;
+}
+
+.wprc.details-boxes {
+	display:none;
+	margin:5px 0 0 19px;
+}
+
+.wprc.subdetails-boxes {
+	display:none;
+	margin:0 0 5px 19px;
+}
+
+.wprc.option-wrap {
+	width:100%;
+	height:100%;
+	padding:5px;
+}
+
+.wprc.option-wrap.selected {
+	background-color:#FAFAFA;
+	border:1px solid #EEE;
+}
+
+.wprc.validation-errors{
+	color: red;
+	margin:5px 0 0 18px;
+}
+
+/* table list */
+table.list{border-width: 1px;border-spacing: 2px;border-style: solid;border-color: #EFEFEF;border-collapse: collapse;background-color: #ffffff;color: #21759B;}
+table.list tr.new{background-color: #F5F5F5;}
+table.list th{border-width: 1px;padding: 3px;border-style: solid;color: #21759B;font-size:14px;background-color: #ECECEC;border: 1px solid #DFDFDF;}
+table.list td{border-width: 1px;padding: 0px;border-style: solid;border-color: #DFDFDF;padding:3px;font-size:14px;}
+
+#wprc-loader,.wprc-loader
+{
+width:50px;
+height:50px;
+background:url(290.gif);
+}
+
+.wprc-message-icon
+{
+display:inline-block;
+background:url(../images/notice-sprite.png);
+margin:3px;
+position:relative;
+vertical-align:middle;
+}
+.wprc-notify-icon
+{
+width:40px;
+height:37px;
+background-position:0 0;
+}
+.wprc-security-icon
+{
+width:40px;
+height:40px;
+background-position:0 -50px;
+}
+.wprc-admin-message
+{
+position:relative;
+}
+.wprc-admin-message-hide
+{
+float:right;
+position:absolute;
+right:0;
+bottom:0;
+}
+
+.wprc-repository-hightlight
+{
+background-color:#ffffa0;
+}
+
+.wprc-box
+{
+width:50%;
+position:relative;
+min-width:200px;
+margin:20px auto;
+background:#FFFBCC !important;
+}
+
+.wprc-box .inside
+{
+background:#FFFBCC;
+}

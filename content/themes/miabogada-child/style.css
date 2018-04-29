@@ -1,0 +1,13 @@
+/*
+Theme Name: Miabogada Child
+Description: Child theme for the main Atahualpa theme 
+Author: Forrest
+Template: atahualpa
+*/
+
+@import url("../atahualpa/style.css");
+
+#site-title a {
+    color: #009900;
+}
+
