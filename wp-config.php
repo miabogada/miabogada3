@@ -16,7 +16,7 @@ if ( file_exists( dirname( __FILE__ ) . '/local-config.php' ) ) {
 }
 
 define('WP_HOME','http://www.miabogada.com');
-define('WP_SITEURL','http://www.miabogada.com/wp/');
+define('WP_SITEURL','http://www.miabogada.com/wp');
 
 // ========================
 // Custom Content Directory
