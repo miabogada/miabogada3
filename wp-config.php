@@ -15,14 +15,26 @@ if ( file_exists( dirname( __FILE__ ) . '/local-config.php' ) ) {
 
 }
 
-define('WP_HOME','http://www.miabogada.com');
-define('WP_SITEURL','http://www.miabogada.com/wp');
+// define('WP_HOME','http://www.miabogada.com');
+// define('WP_SITEURL','http://www.miabogada.com/wp');
+////define('WP_HOME', 'http://' . $_SERVER['HTTP_HOST'] . '/');
+////define('WP_SITEURL', 'http://' . $_SERVER['HTTP_HOST'] . '/wp');
+if ($_SERVER['HTTP_HOST'] == 'www.miabogada.com') {
+    define('WP_SITEURL', 'https://www.miabogada.com/wp');
+    define('WP_HOME',    'https://www.miabogada.com');
+    define( 'WP_CONTENT_URL', 'https://' . $_SERVER['HTTP_HOST'] . '/content' );
+    $_SERVER['HTTPS'] = 'on';
+} else {
+    define('WP_SITEURL', 'http://www0.miabogada.com/wp');
+    define('WP_HOME',    'http://www0.miabogada.com');
+    define( 'WP_CONTENT_URL', 'http://' . $_SERVER['HTTP_HOST'] . '/content' );
+}
 
 // ========================
 // Custom Content Directory
 // ========================
 define( 'WP_CONTENT_DIR', dirname( __FILE__ ) . '/content' );
-define( 'WP_CONTENT_URL', 'http://' . $_SERVER['HTTP_HOST'] . '/content' );
+//define( 'WP_CONTENT_URL', 'http://' . $_SERVER['HTTP_HOST'] . '/content' );
 
 // ================================================
 // You almost certainly do not want to change these

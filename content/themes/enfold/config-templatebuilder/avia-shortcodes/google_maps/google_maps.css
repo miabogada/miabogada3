@@ -1,0 +1,11 @@
+/* ======================================================================================================================================================
+GOOGLE MAPS
+====================================================================================================================================================== */
+
+.avia-google-maps-section{border:none;}
+.avia-google-maps-section.avia-builder-el-0{border-top-style: solid; border-top-width: 1px;}
+.avia-google-map-container{position: relative; clear:both;}
+.avia-google-map-container img { max-width: none; }
+.avia-google-map-container div, .avia-google-map-container img, .avia-google-map-container a{
+-webkit-box-sizing: content-box; -moz-box-sizing: content-box; box-sizing: content-box;}
+.avia-google-map-container .gm-style-iw p {color: #444;}

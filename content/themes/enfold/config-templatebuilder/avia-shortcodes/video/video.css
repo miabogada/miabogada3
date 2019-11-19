@@ -1,0 +1,33 @@
+/* ======================================================================================================================================================
+Video
+====================================================================================================================================================== */
+.avia-video, .avia-iframe-wrap{clear:both; position: relative; margin-bottom:20px; }
+
+/*responsive iframe trick*/
+.avia-video iframe, .js_active .avia-iframe-wrap iframe, div .avia-video .avia-iframe-wrap{position: absolute; width:100%; height:100%; left:0; top:0; padding:0;}
+.avia-video-custom{height:0;}
+.avia-video-16-9, .js_active .avia-iframe-wrap{padding-bottom: 56.25%; height:0;}
+.avia-video-4-3{padding-bottom: 75%; height:0;}
+
+/*html 5 video - always has 100 width and natural height. behaves like image when it comes to aspect ratio*/
+
+video{
+	width:100%;
+	height:auto;
+}
+
+.mejs-layer {
+    z-index: 1;
+    width: 100% !important;
+}
+
+.mejs-layer.mejs-overlay-play{
+	height:100% !important;
+}
+
+#top .avia-video .mejs-container, 
+#top .avia-video .mejs-container video{
+	height:100% !important;
+	width: 100% !important;
+	position: absolute;
+}
