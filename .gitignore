@@ -16,6 +16,6 @@ wp-content/cache/supercache/*
 wp-content/w3tc/*
 wp-content/w3-total-cache-config.php
 wp-content/w3-total-cache-config-preview.php
-sitemap.xml
+/content/sitemap.xml
 sitemap.xml.gz
 
