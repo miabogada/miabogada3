@@ -1,17 +1,23 @@
 <?php
 
-class WPML_WP_API {
-	public function get_file_mime_type( $filename ) {
+use WPML\Core\Twig_LoaderInterface;
+use WPML\Core\Twig_Environment;
+use WPML\Core\Twig_Loader_Filesystem;
+use WPML\Core\Twig_Loader_String;
 
-		$mime_type = 'application/octet-stream';
-		if ( file_exists( $filename ) ) {
-			if ( function_exists( 'finfo_open' ) ) {
-				$finfo     = finfo_open( FILEINFO_MIME_TYPE ); // return mime type ala mimetype extension
-				$mime_type = finfo_file( $finfo, $filename );
-				finfo_close( $finfo );
-			} else {
-				$mime_type = mime_content_type( $filename );
-			}
+class WPML_WP_API extends WPML_PHP_Functions {
+	/**
+	 * @param string $file
+	 * @param string $filename
+	 *
+	 * @return false | string
+	 */
+	public function get_file_mime_type( $file, $filename ) {
+
+		$mime_type = false;
+		if ( file_exists( $file ) ) {
+			$file_info = wp_check_filetype_and_ext( $file, $filename );
+			$mime_type = $file_info['type'];
 		}
 
 		return $mime_type;
@@ -367,13 +373,27 @@ class WPML_WP_API {
 		return $this->is_tm_page( 'jobs' );
 	}
 
-	public function is_tm_page( $tab = null ) {
+	/**
+	 * @param string|null $tab
+	 * @param string|null $page_type
+	 *
+	 * @return bool
+	 */
+	public function is_tm_page( $tab = null, $page_type = 'management' ) {
+		if ( 'settings' === $page_type ) {
+			$page_suffix = '/menu/settings';
+			$default_tab = 'mcsetup';
+		} else {
+			$page_suffix = '/menu/main.php';
+			$default_tab = 'dashboard';
+		}
+
 		$result = is_admin()
 		          && isset( $_GET['page'] )
-		          && $_GET['page'] == $this->constant( 'WPML_TM_FOLDER' ) . '/menu/main.php';
+		          && $_GET['page'] == $this->constant( 'WPML_TM_FOLDER' ) . $page_suffix;
 
 		if ( $tab ) {
-			if ( $tab == 'dashboard' && ! isset( $_GET['sm'] ) ) {
+			if ( $tab == $default_tab && ! isset( $_GET['sm'] ) ) {
 				$result = $result && true;
 			} else {
 				$result = $result && isset( $_GET['sm'] ) && $_GET['sm'] == $tab;
@@ -426,14 +446,6 @@ class WPML_WP_API {
 		return $result;
 	}
 
-	public function mb_strtolower( $string ) {
-		if ( function_exists( 'mb_strtolower' ) ) {
-			return mb_strtolower( $string );
-		}
-
-		return strtolower( $string );
-	}
-
 	public function is_cron_job() {
 		return defined( 'DOING_CRON' ) && DOING_CRON;
 	}
@@ -442,6 +454,18 @@ class WPML_WP_API {
 		$action = filter_input( INPUT_POST, 'action', FILTER_SANITIZE_STRING );
 
 		return 'heartbeat' === $action;
+	}
+
+	public function is_post_edit_page() {
+		global $pagenow;
+
+		return 'post.php' === $pagenow && isset( $_GET['action'], $_GET['post'] ) && 'edit' === filter_var( $_GET['action'] );
+	}
+
+	public function is_new_post_page() {
+		global $pagenow;
+
+		return 'post-new.php' === $pagenow;
 	}
 
 	public function is_term_edit_page() {
@@ -712,29 +736,6 @@ class WPML_WP_API {
 	}
 
 	/**
-	 * Wrapper around PHP constant defined
-	 *
-	 * @param string $constant_name
-	 *
-	 * @return bool
-	 */
-	public function defined( $constant_name ) {
-		return defined( $constant_name );
-	}
-
-	/**
-	 * Wrapper around PHP constant lookup
-	 *
-	 * @param string $constant_name
-	 *
-	 * @return string|int
-	 */
-	public function constant( $constant_name ) {
-
-		return $this->defined( $constant_name ) ? constant( $constant_name ) : null;
-	}
-
-	/**
 	 * Wrapper for \load_textdomain
 	 *
 	 * @param string $domain
@@ -1000,35 +1001,6 @@ class WPML_WP_API {
 	}
 
 	/**
-	 * Wrapper for \phpversion()
-	 *
-	 * * @param string $extension (optional)
-	 *
-	 * @return string
-	 */
-	public function phpversion( $extension = null ) {
-		if ( defined( 'PHP_VERSION' ) ) {
-			return PHP_VERSION;
-		} else {
-			return phpversion( $extension );
-		}
-	}
-
-	/**
-	 * Compares two "PHP-standardized" version number strings
-	 * @see \WPML_WP_API::version_compare
-	 *
-	 * @param string $version1
-	 * @param string $version2
-	 * @param null   $operator
-	 *
-	 * @return mixed
-	 */
-	public function version_compare( $version1, $version2, $operator = null ) {
-		return version_compare( $version1, $version2, $operator );
-	}
-
-	/**
 	 * Compare version in their "naked" form
 	 * @see \WPML_WP_API::get_naked_version
 	 * @see \WPML_WP_API::version_compare
@@ -1081,44 +1053,6 @@ class WPML_WP_API {
 		return get_current_screen();
 	}
 
-	public function array_unique( $array, $sort_flags = SORT_REGULAR ) {
-		if ( version_compare( $this->phpversion(), '5.2.9', '>=' ) ) {
-			return array_unique( $array, $sort_flags );
-		} else {
-			return $this->array_unique_fallback( $array, true );
-		}
-	}
-
-	/**
-	 * @param $array
-	 * @param $keep_key_assoc
-	 *
-	 * @return array
-	 */
-	private function array_unique_fallback( $array, $keep_key_assoc ) {
-		$duplicate_keys = array();
-		$tmp            = array();
-
-		foreach ( $array as $key => $val ) {
-			// convert objects to arrays, in_array() does not support objects
-			if ( is_object( $val ) ) {
-				$val = (array) $val;
-			}
-
-			if ( ! in_array( $val, $tmp ) ) {
-				$tmp[] = $val;
-			} else {
-				$duplicate_keys[] = $key;
-			}
-		}
-
-		foreach ( $duplicate_keys as $key ) {
-			unset( $array[ $key ] );
-		}
-
-		return $keep_key_assoc ? $array : array_values( $array );
-	}
-
 	/**
 	 * Wrapper for \get_query_var
 	 *
@@ -1149,37 +1083,6 @@ class WPML_WP_API {
 
 	public function wp_verify_nonce( $nonce, $action = -1 ) {
 		return wp_verify_nonce( $nonce, $action );
-	}
-
-	/**
-	 * @param string $class_name The class name. The name is matched in a case-insensitive manner.
-	 * @param bool   $autoload   [optional] Whether or not to call &link.autoload; by default.
-	 *
-	 * @return bool true if <i>class_name</i> is a defined class, false otherwise.
-	 * @return bool
-	 */
-	public function class_exists( $class_name, $autoload = true ) {
-		return class_exists( $class_name, $autoload );
-	}
-
-	/**
-	 * @param string $function_name The function name, as a string.
-	 *
-	 * @return bool true if <i>function_name</i> exists and is a function, false otherwise.
-	 * This function will return false for constructs, such as <b>include_once</b> and <b>echo</b>.
-	 * @return bool
-	 */
-	public function function_exists( $function_name ) {
-		return function_exists( $function_name );
-	}
-
-	/**
-	 * @param string $name The extension name
-	 *
-	 * @return bool true if the extension identified by <i>name</i> is loaded, false otherwise.
-	 */
-	public function extension_loaded( $name ) {
-		return extension_loaded( $name );
 	}
 
 	/**
@@ -1264,9 +1167,14 @@ class WPML_WP_API {
 				$options |= DEBUG_BACKTRACE_PROVIDE_OBJECT;
 			}
 			if ( $ignore_args ) {
+				// phpcs:disable PHPCompatibility.Constants.NewConstants.debug_backtrace_ignore_argsFound -- It has a version check
 				$options |= DEBUG_BACKTRACE_IGNORE_ARGS;
+				// phpcs:enable PHPCompatibility.Constants.NewConstants.debug_backtrace_ignore_argsFound
 			}
 		}
+
+		// phpcs:disable PHPCompatibility.FunctionUse.ArgumentFunctionsReportCurrentValue.NeedsInspection -- It has a version check
+		// phpcs:disable PHPCompatibility.FunctionUse.NewFunctionParameters.debug_backtrace_limitFound -- It has a version check
 		if ( version_compare( $this->phpversion(), '5.4.0' ) >= 0 ) {
 			$debug_backtrace = debug_backtrace( $options, $limit ); //add one item to include the current frame
 		} elseif ( version_compare( $this->phpversion(), '5.2.4' ) >= 0 ) {
@@ -1275,6 +1183,8 @@ class WPML_WP_API {
 		} else {
 			$debug_backtrace = debug_backtrace( $options );
 		}
+		// phpcs:enable PHPCompatibility.FunctionUse.NewFunctionParameters.debug_backtrace_limitFound
+		// phpcs:enable PHPCompatibility.FunctionUse.ArgumentFunctionsReportCurrentValue.NeedsInspection
 
 		//Remove the current frame
 		if($debug_backtrace) {
@@ -1287,6 +1197,19 @@ class WPML_WP_API {
 	 * @return WP_Filesystem_Direct
 	 */
 	public function get_wp_filesystem_direct() {
+		global $wp_filesystem;
+
+		require_once( ABSPATH . 'wp-admin/includes/file.php' );
+
+		/**
+		 * We need to make sure that `WP_Filesystem` has been called
+		 * at least once so that some constants are defined with
+		 * default values.
+		 */
+		if ( ! $wp_filesystem ) {
+			WP_Filesystem();
+		}
+
 		require_once( ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php' );
 		require_once( ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php' );
 
@@ -1333,15 +1256,7 @@ class WPML_WP_API {
 		return new Twig_Loader_String();
 	}
 
-	/**
-	 * @param string $message
-	 * @param int    $message_type
-	 * @param string $destination
-	 * @param string $extra_headers
-	 *
-	 * @return bool
-	 */
-	public function error_log( $message, $message_type = null, $destination = null, $extra_headers = null ) {
-		return error_log( $message, $message_type, $destination, $extra_headers );
+	public function is_a_REST_request() {
+		return defined( 'REST_REQUEST' ) && REST_REQUEST;
 	}
 }

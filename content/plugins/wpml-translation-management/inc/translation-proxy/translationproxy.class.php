@@ -3,6 +3,9 @@
  * @package    wpml-core
  * @subpackage wpml-core
  */
+
+use WPML\TM\TranslationProxy\Services\AuthorizationFactory;
+
 require_once WPML_TM_PATH . '/inc/translation-proxy/functions.php';
 require_once WPML_TM_PATH . '/inc/translation-proxy/translationproxy-basket.class.php';
 require_once WPML_TM_PATH . '/inc/translation-proxy/translationproxy-api.class.php';
@@ -14,20 +17,15 @@ require_once WPML_TM_PATH . '/inc/translation-proxy/translationproxy-translator.
 define( 'CUSTOM_TEXT_MAX_LENGTH', 1000 );
 
 class TranslationProxy {
+	private static $tp_client;
 
-	static $errors = array();
-
-	static $tp_client;
-
+	/**
+	 * @param bool $reload
+	 *
+	 * @return WPML_TP_Service[]
+	 */
 	public static function services( $reload = true ) {
-		$services = get_transient( 'wpml_translation_service_list' );
-		$services = $services ? $services : array();
-		if ( $reload || empty( $services ) ) {
-			$services = TranslationProxy_Service::list_services();
-			set_transient( 'wpml_translation_service_list', $services );
-		}
-
-		return apply_filters( 'otgs_translation_get_services', $services );
+		return self::get_tp_client()->services()->get_all( $reload );
 	}
 
 	public static function get_tp_default_suid() {
@@ -56,10 +54,11 @@ class TranslationProxy {
 	/**
 	 * @param int $service_id
 	 *
-	 * @return TranslationProxy_Service
+	 * @return stdClass
 	 */
 	public static function get_service( $service_id ) {
-		return TranslationProxy_Api::proxy_request( "/services/{$service_id}.json" );
+		// @todo: implement usage of WPML_TP_Service for the active service
+		return (object) (array) self::get_tp_client()->services()->get_service( $service_id, true );
 	}
 
 	/**
@@ -69,7 +68,7 @@ class TranslationProxy {
 	 * @throws \WPMLTranslationProxyApiException
 	 * @throws \InvalidArgumentException
 	 */
-	public static function select_service( $service_id, $custom_fields_data = false ) {
+	public static function select_service( $service_id, $credentials = null ) {
 		global $sitepress;
 
 		$service_selected = false;
@@ -81,24 +80,13 @@ class TranslationProxy {
 		if ( $service ) {
 			self::deselect_active_service();
 
-			//set language map
-			$service->languages_map = self::languages_map( $service );
-
-			//set information about custom fields
-			$service->custom_fields      = self::get_custom_fields( $service_id, true );
-			$service->custom_fields_data = $custom_fields_data;
-
-			$sitepress->set_setting( 'translation_service', $service, true );
+			$service          = self::build_and_store_active_translation_service( $service, $credentials );
 			$result           = $service;
 			$service_selected = true;
 
 			//Force authentication if no user input is needed
 			if ( ! self::service_requires_authentication( $service ) ) {
-				$networking      = wpml_tm_load_tp_networking();
-				$project_factory = new WPML_TP_Project_Factory();
-				$auth            = new WPML_TP_Service_Authentication( $sitepress,
-					$networking, $project_factory, new stdClass() );
-				$auth->run();
+				( new AuthorizationFactory() )->create()->authorize( new \stdClass() );
 			}
 		} else {
 			$result = new WP_Error( '0', 'No service selected',
@@ -126,6 +114,32 @@ class TranslationProxy {
 		$sitepress->set_setting( 'translators_management_info', false );
 		$sitepress->set_setting( 'language_pairs', false );
 		$sitepress->save_settings();
+
+		do_action( 'wpml_tp_service_dectivated', self::get_current_service() );
+	}
+
+	/**
+	 * @param      $service
+	 * @param bool $custom_fields_data
+	 *
+	 * @return mixed
+	 * @throws \WPMLTranslationProxyApiException
+	 */
+	public static function build_and_store_active_translation_service( $service, $custom_fields_data = false ) {
+		global $sitepress;
+
+		//set language map
+		$service->languages_map = self::languages_map( $service );
+
+		//set information about custom fields
+		$service->custom_fields      = self::get_custom_fields( $service->id, true );
+		$service->custom_fields_data = $custom_fields_data;
+
+		$service->last_refresh = time();
+
+		$sitepress->set_setting( 'translation_service', $service, true );
+
+		return $service;
 	}
 
 	/**
@@ -301,7 +315,7 @@ class TranslationProxy {
 				$format_string = self::sanitize_custom_text( $string->format_string );
 
 				if ( $paragraph ) {
-					$format = '<p class="icl_status_jobs">' . $format_string . '</p>';
+					$format = '<p>' . $format_string . '</p>';
 				} else {
 					$format = '<div>' . $format_string . '</div>';
 				}
@@ -398,6 +412,7 @@ class TranslationProxy {
 	 *
 	 * @return bool
 	 * @throws \InvalidArgumentException
+	 * @throws \WPMLTranslationProxyApiException
 	 */
 	public static function service_requires_authentication( $service = false ) {
 		if ( ! $service ) {
@@ -525,11 +540,7 @@ class TranslationProxy {
 			return null !== $translation_service->custom_fields ? $translation_service->custom_fields : false;
 		}
 
-		$params = array(
-			'service_id' => $service_id,
-		);
-
-		return TranslationProxy_Api::proxy_request( '/services/{service_id}/custom_fields.json', $params );
+		return self::get_tp_client()->services()->get_custom_fields( $service_id );
 	}
 
 	/**
@@ -626,7 +637,7 @@ class TranslationProxy {
 
 	private static function languages_map( $service ) {
 		$languages_map = array();
-		$languages     = TranslationProxy_Api::proxy_request( "/services/{$service->id}/language_identifiers.json" );
+		$languages     = self::get_tp_client()->services()->get_languages_map( $service->id );
 		if ( ! empty( $languages ) ) {
 			foreach ( $languages as $language ) {
 				$languages_map[ $language->iso_code ] = $language->value;

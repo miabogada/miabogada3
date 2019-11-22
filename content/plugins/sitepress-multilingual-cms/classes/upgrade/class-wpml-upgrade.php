@@ -1,8 +1,10 @@
 <?php
 
+use WPML\Upgrade\CommandsStatus;
+
 class WPML_Upgrade {
-	const SCOPE_ADMIN = 'admin';
-	const SCOPE_AJAX = 'ajax';
+	const SCOPE_ADMIN     = 'admin';
+	const SCOPE_AJAX      = 'ajax';
 	const SCOPE_FRONT_END = 'front-end';
 
 	/** @var array */
@@ -15,34 +17,76 @@ class WPML_Upgrade {
 	/** @var WPML_Upgrade_Command_Factory */
 	private $command_factory;
 
+	/** @var CommandsStatus */
+	private $command_status;
+
+	/** @var bool $upgrade_in_progress */
+	private $upgrade_in_progress;
+
 	/**
 	 * WPML_Upgrade constructor.
 	 *
-	 * @param array $commands
-	 * @param SitePress $sitepress
+	 * @param array                        $commands
+	 * @param SitePress                    $sitepress
 	 * @param WPML_Upgrade_Command_Factory $command_factory
+	 * @param CommandsStatus               $command_status
 	 */
-	public function __construct( array $commands, SitePress $sitepress, WPML_Upgrade_Command_Factory $command_factory ) {
+	public function __construct(
+		array $commands,
+		SitePress $sitepress,
+		WPML_Upgrade_Command_Factory $command_factory,
+		CommandsStatus $command_status = null
+	) {
+		$this->add_commands( $commands );
+		$this->sitepress       = $sitepress;
+		$this->command_factory = $command_factory;
+		$this->command_status  = $command_status ?: new CommandsStatus();
+	}
+
+	/**
+	 * @param array $commands
+	 */
+	public function add_commands( array $commands ) {
 		foreach ( $commands as $command ) {
 			if ( $command instanceof WPML_Upgrade_Command_Definition ) {
 				$this->commands[] = $command;
 			}
 		}
-
-		$this->sitepress       = $sitepress;
-		$this->command_factory = $command_factory;
 	}
 
 	public function run() {
+		$result = false;
+
+		/**
+		 * Add commands to the upgrade logic.
+		 *
+		 * The filter must be added before the `wpml_loaded` action is fired (the action is fired on `plugins_loaded`).
+		 *
+		 * @param array $commands An empty array.
+		 * @param array $new_commands Array of classes created with \wpml_create_upgrade_command_definition.
+		 *
+		 * @since 4.1.0
+		 * @see   \wpml_create_upgrade_command_definition
+		 *
+		 */
+		$new_commands = apply_filters( 'wpml_upgrade_commands', array() );
+		if ( $new_commands && is_array( $new_commands ) ) {
+			$this->add_commands( $new_commands );
+		}
+
 		if ( $this->sitepress->get_wp_api()->is_admin() ) {
 			if ( $this->sitepress->get_wp_api()->is_ajax() ) {
-				return $this->run_ajax();
+				$result = $this->run_ajax();
 			} else {
-				return $this->run_admin();
+				$result = $this->run_admin();
 			}
 		} elseif ( $this->sitepress->get_wp_api()->is_front_end() ) {
-			return $this->run_front_end();
+			$result = $this->run_front_end();
 		}
+
+		$this->set_upgrade_completed();
+
+		return $result;
 	}
 
 	private function get_commands_by_scope( $scope ) {
@@ -91,14 +135,16 @@ class WPML_Upgrade {
 		return $results;
 	}
 
-	private function run_command( WPML_Upgrade_Command_Definition $command, $default ) {
+	private function run_command( WPML_Upgrade_Command_Definition $command_definition, $default ) {
 		$method = $default;
-		if ( $command->get_method() ) {
-			$method = $command->get_method();
+		if ( $command_definition->get_method() ) {
+			$method = $command_definition->get_method();
 		}
 
-		if ( ! $this->has_been_command_executed( $command ) ) {
-			$upgrade = $this->command_factory->create( $command->get_class_name(), $command->get_dependencies() );
+		if ( ! $this->command_status->hasBeenExecuted( $command_definition->get_class_name() ) ) {
+			$this->set_upgrade_in_progress();
+			$upgrade = $command_definition->create();
+
 			return $this->$method( $upgrade );
 		}
 
@@ -161,19 +207,9 @@ class WPML_Upgrade {
 
 	/**
 	 * @param IWPML_Upgrade_Command $class
-	 *
-	 * @return bool
 	 */
-	private function has_been_command_executed( WPML_Upgrade_Command_Definition $command ) {
-		return (bool) $this->get_update_option_value( $this->get_command_id( $command->get_class_name() ) );
-	}
-
-	/**
-	 * @param IWPML_Upgrade_Command $class
-	 */
-	private function mark_command_as_executed( IWPML_Upgrade_Command $class ) {
-		$this->set_update_status( $this->get_command_id( get_class( $class ) ), true );
-		wp_cache_flush();
+	public function mark_command_as_executed( IWPML_Upgrade_Command $class ) {
+		$this->command_status->markAsExecuted( get_class( $class ) );
 	}
 
 	/**
@@ -185,20 +221,18 @@ class WPML_Upgrade {
 		return str_replace( '_', '-', strtolower( $class_name ) );
 	}
 
-	private function get_update_option_value( $id ) {
-		$update_options = get_option( self::UPDATE_STATUSES_KEY, array() );
-
-		if ( $update_options && array_key_exists( $id, $update_options ) ) {
-			return $update_options[ $id ];
+	private function set_upgrade_in_progress() {
+		if ( ! $this->upgrade_in_progress ) {
+			$this->upgrade_in_progress = true;
+			set_transient( WPML_Upgrade_Loader::TRANSIENT_UPGRADE_IN_PROGRESS, true, MINUTE_IN_SECONDS );
 		}
-
-		return null;
 	}
 
-	private function set_update_status( $id, $value ) {
-		$update_options        = get_option( self::UPDATE_STATUSES_KEY, array() );
-		$update_options[ $id ] = $value;
-		update_option( self::UPDATE_STATUSES_KEY, $update_options, true );
+	private function set_upgrade_completed() {
+		if ( $this->upgrade_in_progress ) {
+			$this->upgrade_in_progress = false;
+			delete_transient( WPML_Upgrade_Loader::TRANSIENT_UPGRADE_IN_PROGRESS );
+		}
 	}
 }
 

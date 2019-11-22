@@ -4,20 +4,20 @@ Module Name: WPML Dependency Check Module
 Description: This is not a plugin! This module must be included in other plugins (WPML and add-ons) to handle compatibility checks
 Author: OnTheGoSystems
 Author URI: http://www.onthegosystems.com/
-Version: 2.0
+Version: 2.1
 */
 
 /** @noinspection PhpUndefinedClassInspection */
 class WPML_Dependencies {
-	private static $instance;
-	private        $admin_notice;
-	private        $current_product;
-	private        $current_version    = array();
-	private        $expected_versions  = array();
-	private        $installed_plugins  = array();
-	private        $invalid_plugins    = array();
-	private        $valid_plugins      = array();
-	private        $validation_results = array();
+	protected static $instance;
+	private $admin_notice;
+	private $current_product;
+	private $current_version = array();
+	private $expected_versions = array();
+	private $installed_plugins = array();
+	private $invalid_plugins = array();
+	private $valid_plugins = array();
+	private $validation_results = array();
 
 	public $data_key             = 'wpml_dependencies:';
 	public $needs_validation_key = 'wpml_dependencies:needs_validation';
@@ -37,7 +37,7 @@ class WPML_Dependencies {
 		}
 	}
 
-	private function remove_old_admin_notices() {
+	protected function remove_old_admin_notices() {
 		if ( class_exists( 'WPML_Bundle_Check' ) ) {
 			global $WPML_Bundle_Check;
 
@@ -51,6 +51,12 @@ class WPML_Dependencies {
 		add_action( 'admin_notices', array( $this, 'admin_notices_action' ) );
 		add_action( 'activated_plugin', array( $this, 'activated_plugin_action' ) );
 		add_action( 'deactivated_plugin', array( $this, 'deactivated_plugin_action' ) );
+		add_action( 'upgrader_process_complete',  array( $this, 'upgrader_process_complete_action' ), 10, 2 );
+		add_action( 'load-plugins.php', array( $this, 'run_validation_on_plugins_page' ) );
+	}
+
+	public function run_validation_on_plugins_page() {
+		$this->reset_validation();
 	}
 
 	public function activated_plugin_action() {
@@ -59,6 +65,12 @@ class WPML_Dependencies {
 
 	public function deactivated_plugin_action() {
 		$this->reset_validation();
+	}
+
+	public function upgrader_process_complete_action( $upgrader_object, $options ) {
+		if ( 'update' === $options['action'] && 'plugin' === $options['type'] ) {
+			$this->reset_validation();
+		}
 	}
 
 	private function reset_validation() {
@@ -155,10 +167,11 @@ class WPML_Dependencies {
 
 	private function add_installed_plugin( $plugin ) {
 		$data       = get_plugin_data( $plugin );
-		$plugin_dir = dirname( $plugin );
+		$plugin_dir = realpath( dirname( $plugin ) );
 
-		if ( WP_PLUGIN_DIR . DIRECTORY_SEPARATOR !== $plugin_dir ) {
-			$plugin_folder = str_replace( WP_PLUGIN_DIR . DIRECTORY_SEPARATOR, '', $plugin_dir );
+		$wp_plugin_dir = realpath( WP_PLUGIN_DIR ) . DIRECTORY_SEPARATOR;
+		if ( false !== $plugin_dir && $wp_plugin_dir !== $plugin_dir ) {
+			$plugin_folder = str_replace( $wp_plugin_dir, '', $plugin_dir );
 			$plugin_slug   = $this->guess_plugin_slug( $data, $plugin_folder );
 
 			if ( $this->is_valid_plugin( $plugin_slug ) ) {

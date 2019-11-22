@@ -212,6 +212,16 @@ function _potx_format_quoted_string($str) {
 }
 
 /**
+ * @param string $string
+ * 
+ * @return string
+ */
+function wpml_potx_unquote_context_or_domain( $string ) {
+	$quote_type = mb_substr( $string, 0, 1 );
+	return trim( $string, $quote_type );
+}
+
+/**
  * Output a marker error with an extract of where the error was found.
  *
  * @param $file
@@ -418,6 +428,8 @@ function _potx_find_t_calls_with_context(
 ) {
 	global $_potx_tokens, $_potx_lookup;
 
+	$filter_by_domain = isset( $_GET['domain'] ) ? filter_var( $_GET['domain'], FILTER_SANITIZE_STRING ) : null;
+
 	// Lookup tokens by function name.
 	if ( isset( $_potx_lookup[ $function_name ] ) ) {
 		foreach ( $_potx_lookup[ $function_name ] as $ti ) {
@@ -460,7 +472,7 @@ function _potx_find_t_calls_with_context(
 								continue;
 							}
 						} else {
-							$domain = trim( $_potx_tokens[ $ti + $domain_offset ][ 1 ], "\"' " );
+							$domain = wpml_potx_unquote_context_or_domain( $_potx_tokens[ $ti + $domain_offset ][ 1 ] );
 						}
 
 						// exception for gettext calls with contexts
@@ -480,14 +492,18 @@ function _potx_find_t_calls_with_context(
 									}
 								}
 							} else {
-								$context = trim( $_potx_tokens[ $ti + $context_offset ][ 1 ], "' " );
+								$context = wpml_potx_unquote_context_or_domain( $_potx_tokens[ $ti + $context_offset ][ 1 ] );
 							}
 
 						} else {
 							$context = false;
 						}
 					}
-					if ( $domain !== POTX_CONTEXT_ERROR && is_callable( $save_callback, false, $callback_name ) ) {
+					if (
+						$domain !== POTX_CONTEXT_ERROR &&
+						( ! $filter_by_domain || $filter_by_domain === $domain ) &&
+						is_callable( $save_callback, false, $callback_name )
+					) {
 						// Only save if there was no error in context parsing.
 						call_user_func( $save_callback,
 										_potx_format_quoted_string( $mid[ 1 ] ),

@@ -29,6 +29,27 @@ class WPML_Post_Translation_Job extends WPML_Element_Translation_Job {
 		return apply_filters( 'wpml_element_translation_job_url', $url, $original, $element_id, $this->get_original_document() );
 	}
 
+	/**
+	 * It checks that the post type is translatable.
+	 *
+	 * @return bool
+	 */
+	function is_translatable_post_type() {
+		$post_type = $this->get_post_type();
+
+		if ( $post_type ) {
+			/** @var SitePress $sitepress */
+			global $sitepress;
+			if ( $sitepress ) {
+				$post_types = array_keys( $sitepress->get_translatable_documents() );
+
+				return in_array( $post_type, $post_types, true );
+			}
+		}
+
+		return false;
+	}
+
 	function update_fields_from_post() {
 		global $iclTranslationManagement, $wpdb, $wpml_translation_job_factory;
 
@@ -105,12 +126,6 @@ class WPML_Post_Translation_Job extends WPML_Element_Translation_Job {
 		$delete = isset( $delete ) ? $delete : $sitepress->get_setting( 'tm_block_retranslating_terms' );
 		$this->set_translated_term_values( $delete );
 	}
-
-	public function maybe_load_terms_from_post_into_job( $delete ) {
-		if ( $delete || $this->get_status_value() != ICL_TM_IN_PROGRESS ) {
-			$this->load_terms_from_post_into_job( $delete );
-		}
-	}
 	
 	/**
 	 * @return string
@@ -128,15 +143,22 @@ class WPML_Post_Translation_Job extends WPML_Element_Translation_Job {
 			? $original_post->post_title : $this->original_del_text;
 	}
 
-
 	/**
 	 * @return string
 	 */
 	public function get_type_title() {
-		$original_post = $this->get_original_document();
-		$post_type = get_post_type_object( $original_post->post_type );
+		$post_type = get_post_type_object( $this->get_post_type() );
 
 		return $post_type->labels->singular_name;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function get_post_type() {
+		$original_post = $this->get_original_document();
+
+		return $original_post->post_type;
 	}
 
 	protected function load_resultant_element_id() {

@@ -2,10 +2,13 @@
 
 class WPML_Package_Translation_Schema {
 
+	const OPTION_NAME      = 'wpml-package-translation-db-updates-run';
+	const REQUIRED_VERSION = '0.0.2';
+
 	private static $table_name;
 
 	static function run_update() {
-		$updates_run = get_option( 'wpml-package-translation-db-updates-run', array() );
+		$updates_run = get_option( self::OPTION_NAME, array() );
 
 		if ( defined( 'WPML_PT_VERSION_DEV' ) ) {
 			delete_option( 'wpml-package-translation-string-packages-table-updated' );
@@ -14,7 +17,7 @@ class WPML_Package_Translation_Schema {
 			}
 		}
 
-		if ( ! in_array( '0.0.2', $updates_run ) ) {
+		if ( ! in_array( self::REQUIRED_VERSION, $updates_run ) ) {
 			// We need to make sure we build everything for 0.0.2 because users may
 			// only be updating the string translation plugin and may not do an
 			// activation.
@@ -23,9 +26,9 @@ class WPML_Package_Translation_Schema {
 			self::fix_icl_string_packages_ID_column();
 			self::build_icl_strings_columns_if_required();
 
-			$updates_run[ ] = '0.0.2';
+			$updates_run[ ] = self::REQUIRED_VERSION;
 
-			update_option( 'wpml-package-translation-db-updates-run', $updates_run );
+			update_option( self::OPTION_NAME, $updates_run );
 		}
 
 	}
@@ -140,7 +143,7 @@ class WPML_Package_Translation_Schema {
 	private static function build_icl_string_packages_table() {
 		global $wpdb;
 
-		$charset_collate = self::build_charset_collate();
+		$charset_collate = SitePress_Setup::get_charset_collate();
 
 		self::$table_name = $wpdb->prefix . 'icl_string_packages';
 		$sql              = "
@@ -153,47 +156,12 @@ class WPML_Package_Translation_Schema {
                   `edit_link` TEXT NOT NULL,
                   `view_link` TEXT NOT NULL,
                   `post_id` INTEGER DEFAULT NULL,
+                  `word_count` VARCHAR(2000) DEFAULT NULL,
                   PRIMARY KEY  (`ID`)
                 ) " . $charset_collate . "";
 		if ( $wpdb->query( $sql ) === false ) {
 			throw new Exception( $wpdb->last_error );
 		}
-	}
-
-	private static function build_charset_collate() {
-		$charset_collate = '';
-		if ( self::wpdb_has_cap_collation() ) {
-			$charset_collate .= self::build_default_char_set();
-			$charset_collate .= self::build_collate();
-		}
-
-		return $charset_collate;
-	}
-
-	private static function wpdb_has_cap_collation() {
-		global $wpdb;
-
-		return method_exists( $wpdb, 'has_cap' ) && $wpdb->has_cap( 'collation' );
-	}
-
-	private static function build_default_char_set() {
-		global $wpdb;
-		$charset_collate = '';
-		if ( ! empty( $wpdb->charset ) ) {
-			$charset_collate = "DEFAULT CHARACTER SET $wpdb->charset";
-		}
-
-		return $charset_collate;
-	}
-
-	private static function build_collate() {
-		global $wpdb;
-		$charset_collate = '';
-		if ( ! empty( $wpdb->collate ) ) {
-			$charset_collate .= " COLLATE $wpdb->collate";
-		}
-
-		return $charset_collate;
 	}
 
 	private static function update_kind_slug() {

@@ -23,7 +23,6 @@ class WPML_Verify_SitePress_Settings {
 			'interview_translators'              => 1,
 			'existing_content_language_verified' => 0,
 			'language_negotiation_type'          => 3,
-			'theme_localization_type'            => 1,
 			'icl_lso_link_empty'                 => 0,
 			'sync_page_ordering'                 => 1,
 			'sync_page_parent'                   => 1,
@@ -56,7 +55,10 @@ class WPML_Verify_SitePress_Settings {
 				'canonicalization_duplicates' => 1,
 				'head_langs_priority'         => 1
 			),
-			'posts_slug_translation'             => array( 'on' => 0 ),
+			'posts_slug_translation'             => array(
+				/** @deprected key `on`, use option `wpml_base_slug_translation` instead */
+				'on' => 1,
+			),
 			'languages_order'                    => array(),
 			'urls'                               => array(
 				'directory_for_default_language' => 0,
@@ -74,6 +76,7 @@ class WPML_Verify_SitePress_Settings {
 				'category' => WPML_CONTENT_TYPE_TRANSLATE,
 				'post_tag' => WPML_CONTENT_TYPE_TRANSLATE
 			),
+			'tm_block_retranslating_terms' => 1,
 		);
 
 		//configured for three levels
