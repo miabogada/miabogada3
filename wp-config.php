@@ -30,6 +30,8 @@ if ($_SERVER['HTTP_HOST'] == 'www.miabogada.com') {
     define( 'WP_CONTENT_URL', 'http://' . $_SERVER['HTTP_HOST'] . '/content' );
 }
 
+define('ICL_DONT_LOAD_LANGUAGE_SELECTOR_CSS', true);
+
 // ========================
 // Custom Content Directory
 // ========================
