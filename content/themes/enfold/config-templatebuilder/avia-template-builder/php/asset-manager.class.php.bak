@@ -1,15 +1,19 @@
 <?php
 // Don't load directly
 if ( !defined('ABSPATH') ) { die('-1'); }	
+
 /*
 Description:  	Allows for asset generation/inclusion like css files and js. Also allows to combine files.
 				Basic idea: allows us to enqueue scripts and styles and before the files get enqueued individually, 
 				we try to generate a compressed version and enqueue this one instead.
+
 Author: 		Kriesi
 Since:			4.2.4
 */
 	
+
 if ( !class_exists( 'aviaAssetManager' ) ) {
+
 	class aviaAssetManager
 	{
 		//the database prefix we use to store the script name
@@ -64,6 +68,8 @@ if ( !class_exists( 'aviaAssetManager' ) ) {
 			
 			//force include an asset, even if the $whichfiles setting does not include it
 			$this->force_include  = apply_filters( 'avf_force_include_asset'  , $this->force_include  );
+
+
 			//before enqueuing the css and js files check if we can serve a compressed version (only frontend)
 			add_action('wp_enqueue_scripts', 	array(&$this, 'try_minifying_scripts') , 999999 );
 			
@@ -100,6 +106,8 @@ if ( !class_exists( 'aviaAssetManager' ) ) {
 		{
 			$this->merge('js',  'avia-footer-scripts', array('groups'=>1));
 		}
+
+
 		//function that checks if we can merge a group of files based on the passed params
 		public function merge( $file_type , $file_group_name , $conditions = array())
 		{
@@ -193,10 +201,12 @@ if ( !class_exists( 'aviaAssetManager' ) ) {
 		{
 			$avia_upload_dir = wp_upload_dir();
 			if(is_ssl()) $avia_upload_dir['baseurl'] = str_replace("http://", "https://", $avia_upload_dir['baseurl']);
+
 			$url = $avia_upload_dir['baseurl'] . '/dynamic_avia/'.$data['hash'].'.'.$file_type;
 			
 			return $url;
 		}
+
 		
 		// returns a file data array with hash, version number and scripts we need to dequeue. 
 		// the hash we generate consists of parent theme version, child theme version and files to include. if any of this changes we create a new file
@@ -232,9 +242,7 @@ if ( !class_exists( 'aviaAssetManager' ) ) {
 				if( ('all' == $this->which_files[$file_type] ) || 
 					('avia-module' == $this->which_files[$file_type] && strpos($file, 'avia-module') !== false ) ||
 					('avia' == $this->which_files[$file_type] && strpos($file, 'avia') !== false ) ||
-					( $force_print ) ||
-					( in_array( $file, $this->force_include[ $file_type ] ) ) 
-				   ) 
+					( $force_print )) 
 					{
 						//dont use excluded files like admin bar or already used files
 						if(in_array($file, $this->exclude_files[$file_type])) continue;
@@ -310,25 +318,15 @@ if ( !class_exists( 'aviaAssetManager' ) ) {
 		//retrieve the content of a css or js file, compress it and return it
 		public function get_file_content( $path , $file_type , $fallback_url = "")
 		{
-			$new_content = false;
-			
 			//try to retrieve the data by accessing the server
-			if( ! empty( $path ) )
-			{
-				$new_content = file_get_contents( trailingslashit( ABSPATH ) . $path  );
-			}
+			$new_content = file_get_contents( trailingslashit( ABSPATH ) . $path  );
 			
 			//we got a file that we cant read, lets try to access it via remote get
 			if(gettype($new_content) == "boolean" && $new_content === false)
 			{
-				if( empty( $fallback_url ) )
-				{
-					return '';
-				}
-				
 				$response = wp_remote_get( esc_url_raw( $fallback_url ) );
 				
-				if( ! is_wp_error( $response ) && ( $response['response']['code'] === 200 ) )
+				if($response['response']['code'] === 200)
 				{
 					$new_content = wp_remote_retrieve_body( $response );
 				}
@@ -339,14 +337,12 @@ if ( !class_exists( 'aviaAssetManager' ) ) {
 			{
 				$new_content = $this->compress_content($new_content , $file_type, $path);
 			}
-			else
-			{
-				$new_content = '';
-			}
 			
 			return $new_content;
 		}
+
 	
+
 		//generates the merged and compressed file
 		public function generate_file( $file_type , $data , $enqueued)
 		{
@@ -461,104 +457,37 @@ if ( !class_exists( 'aviaAssetManager' ) ) {
 		}
 		
 		#################
-		/**
-		 * Switch relative urls in the stylesheet to absolute urls
-		 * For relative paths: https://css-tricks.com/quick-reminder-about-file-paths/
-		 * Full paths: are returned unchanged
-		 *					start with // or http:// or https:// 
-		 * 
-		 * @since 4.2.4  modified 4.5.5
-		 * @param string $content
-		 * @param string $path
-		 * @return string
-		 */
-		public function rel_to_abs_url( $content, $path )
+		//switch relative urls in the stylesheet to absolute urls
+		public function rel_to_abs_url($content, $path)
 		{
 			
 			// test drive for the regexp : https://regexr.com/3kq8q
-			// @since 4.5.5 supports UNICODE characters &#8216; - &#8221;
 			
-			$this->base_url = trailingslashit(dirname( get_site_url( NULL, $path ) ) );
-			$reg_exUrl 		= '/url\s*?\([\"|\'|\s|\/|\x{2018}|\x{2019}|\x{201C}|\x{201D}]*([^\:]+?)[\"|\'|\s|\x{2018}|\x{2019}|\x{201C}|\x{201D}]*\)/imu';
+			$this->base_url = trailingslashit(dirname( get_site_url(NULL, $path) ));
+			$reg_exUrl 		= '/url\s*?\([\"|\'|\s|\/]*([^\:]+?)[\"|\'|\s]*\)/im';
 			
-			$content = preg_replace_callback( $reg_exUrl, array( $this, '_url_callback'), $content );
+			$content = preg_replace_callback($reg_exUrl, array($this, '_url_callback'), $content);
 			
 			return $content;
 		}
 		
 		
-				/**
-				 * callback function. todo once wp switches to 5.3: make it anonymous again
-				 * remove ../../ from urls and iterate into higher folder from the baseurl
-				 * 
-				 * $match[0]: url( path_to_file )
-				 * $match[1]: path_to_file, { ", ', &#8216; - &#8221; } removed and trailing / or \ removed
-				 * 
-				 * @since 4.2.4  modified 4.5.5, 4.5.6
-				 * @param array $match
-				 * @return string
-				 */
+				//callback function. todo once wp switches to 5.3: make it anonymous again
+				//remove ../../ from urls and iterate into higher folder from the baseurl
 				public function _url_callback( $match )
 				{
-					/**
-					 * Check if we have already an absolute url
-					 * (localhost is a special url - starts with //localhost
-					 */
-					if( ( false !== stripos( $match[1], 'http://' ) ) || ( false !== stripos( $match[1], 'https://' ) ) )
-					{
-						return $match[0];
-					}
-					
-					$base_url = str_replace( array( 'http:', 'https:' ), '', get_home_url() );
-					
-					/**
-					 * Check if user enters URL to the root directory (starts with / or \ for windows systems)
-					 * or an absolute URL
-					 * 
-					 * e.g. /wp-content/themes/enfold/imgages/xxx.jpg
-					 */
-					$start = strpos( $match[0], $match[1] );
-					if( false == $start )
-					{
-						return $match[0];
-					}
-					
-					$absolute = substr( $match[0], $start - 2, 2 );	
-					if( in_array( $absolute, array( '//', '\\\\' ) ) )
-					{
-						/**
-						 * Cross server references currently must be returned with http: because it had been removed in avia_style_generator::create_styles
-						 */
-						if( false !== stripos( $match[0], $base_url ) )
-						{
-							$match[0] = str_ireplace( $base_url, get_home_url(), $match[0] );
-						}
-						else
-						{
-							$match[0] = "url('http://" . trim( $match[1] ) . "')";
-						}
-						
-						return $match[0];
-					}
-					
-					$root = substr( $match[0], $start - 1, 1 );
-					if( in_array( $root, array( '/', '\\' ) ) )
-					{
-						return "url('" . trailingslashit( get_home_url() ) . trim( $match[1] ) . "')";
-					}
-					
 					$current_base 	= $this->base_url;
-					$segments 		= explode( "../", $match[1] );
+					$segments 		= explode("../", $match[1]);
 					$seg_count		= count($segments) - 1;
 					
-					for( $i = $seg_count; $i > 0; $i-- )
+					for($i = $seg_count; $i > 0; $i--)
 					{
-						$current_base = dirname( $current_base );
+						$current_base = dirname($current_base);
 					}
 					
-					$new_url = trailingslashit( $current_base ) . end( $segments );
+					$new_url = trailingslashit($current_base) . end($segments);
 					
-					return "url('{$new_url}')";
+					return "url('".$new_url."')";
 				}
 		
 		#################
@@ -629,6 +558,7 @@ if ( !class_exists( 'aviaAssetManager' ) ) {
 				$remove_files = 0;
 				if(count($files_to_delete) > 100) $remove_files = 5;
 				if($delete_files) $remove_files = count($files_to_delete);
+
 				foreach($files_to_delete as $creation => $file)
 				{
 					if($remove_files > 0)
@@ -708,6 +638,7 @@ if ( !class_exists( 'aviaAssetManager' ) ) {
 					}
 				}*/
 			}
+
 		}
 		
 		public function set_path( $registered_path )
@@ -729,6 +660,7 @@ if ( !class_exists( 'aviaAssetManager' ) ) {
 		
 		public function inline_print_assets()
 		{
+
 			global $wp_styles, $wp_scripts;
 			
 			$assets_to_print = array_merge_recursive($this->force_print_to_head, $this->additional_print_to_head);
@@ -774,5 +706,7 @@ if ( !class_exists( 'aviaAssetManager' ) ) {
 		
 		
 		
+
 	} // end class
+
 } // end if !class_exists
