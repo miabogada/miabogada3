@@ -430,7 +430,7 @@ if( !class_exists( 'avia_style_generator' ) )
 				
 				f.type 	= 'text/css';
 				f.rel 	= 'stylesheet';
-				f.href 	= '//fonts.googleapis.com/css?family=".apply_filters('avf_google_fontlist', $this->google_fontlist)."';
+				f.href 	= '//fonts.googleapis.com/css?family=".apply_filters('avf_google_fontlist', $this->google_fontlist)."&display=swap';
 				f.id 	= 'avia-google-webfont';
 				
 				document.getElementsByTagName('head')[0].appendChild(f);
