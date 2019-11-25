@@ -524,7 +524,7 @@ class avia_font_manager{
 				$fstring 		= $font_list['folder'].'/'.$font_name;
 				
 				$output .="
-@font-face {font-family: '{$font_name}'; font-weight: normal; font-style: normal;
+@font-face {font-family: '{$font_name}'; font-weight: normal; font-style: normal; font-display: swap;
 src: url('{$fstring}.eot{$append}');
 src: url('{$fstring}.eot{$qmark}#iefix') format('embedded-opentype'), 
 url('{$fstring}.woff{$append}') format('woff'), 
