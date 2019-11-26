@@ -3,6 +3,15 @@ if ( !defined('ABSPATH') ){ die(); }
 
 global $avia_config;
 
+/* remove "Debugging Info For Theme Support:" message
+*
+*/
+if (!function_exists('avia_debugging_info')){
+  function avia_debugging_info() {
+    // 
+  }
+}
+
 /*
  * if you run a child theme and dont want to load the default functions.php file
  * set the global var below in you childthemes function.php to true:
@@ -693,3 +702,4 @@ require_once( 'functions-enfold.php');
 
 		
 		
+
