@@ -18,4 +18,4 @@ wp-content/w3-total-cache-config.php
 wp-content/w3-total-cache-config-preview.php
 /content/sitemap.xml
 sitemap.xml.gz
-
+content/cache/autoptimize/*
