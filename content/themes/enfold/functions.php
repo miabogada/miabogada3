@@ -12,6 +12,22 @@ if (!function_exists('avia_debugging_info')){
   }
 }
 
+add_action('wp_head', 'preconnect_wp_head');
+function preconnect_wp_head(){
+    //Close PHP tags 
+    ?>
+        <link rel="dns-prefetch" href="https://www.google-analytics.com/">
+        <link rel="preconnect" href="https://www.google-analytics.com/">
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com/">
+        <link rel="preconnect" href="https://www.googletagmanager.com/">
+        <link rel="dns-prefetch" href="https://fonts.gstatic.com/">
+        <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+        <link rel="dns-prefetch" href="https://fonts.googleapis.com/">
+        <link rel="preconnect" href="https://fonts.googleapis.com/" crossorigin>
+    <?php //Open PHP tags
+}
+
+
 /*
  * if you run a child theme and dont want to load the default functions.php file
  * set the global var below in you childthemes function.php to true:
