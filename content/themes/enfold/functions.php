@@ -27,6 +27,13 @@ function preconnect_wp_head(){
     <?php //Open PHP tags
 }
 
+/* remove html from comments */
+remove_filter('comment_text', 'make_clickable', 9);
+
+function remove_html($comment) {
+   return strip_tags($comment, '<strong><b><em><p>');
+}
+add_filter('get_comment_text', 'remove_html');
 
 /*
  * if you run a child theme and dont want to load the default functions.php file
