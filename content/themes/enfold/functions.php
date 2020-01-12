@@ -35,6 +35,31 @@ function remove_html($comment) {
 }
 add_filter('get_comment_text', 'remove_html');
 
+// Begin Facebook Pixel Code
+function my_facebook_pixel_code(){
+?>
+
+<!-- Facebook Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '2921958934494148');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=2921958934494148&ev=PageView&noscript=1"
+/></noscript>
+<!-- DO NOT MODIFY -->
+<!-- End Facebook Pixel Code -->
+
+<?php 
+}
+add_action( 'wp_head', 'my_facebook_pixel_code' );
+// End Facebook Pixel Code
+
 /*
  * if you run a child theme and dont want to load the default functions.php file
  * set the global var below in you childthemes function.php to true:
