@@ -1,7 +1,7 @@
-<?php 
-	
-	if ( !defined('ABSPATH') ){ die(); }
-	
+<?php
+
+if( ! defined( 'ABSPATH' ) ){ die(); }
+
 /**
  * The template for displaying Comments.
  *
@@ -13,7 +13,7 @@
  */
 ?>
 
-<?php if ( post_password_required() ) : 
+<?php if ( post_password_required() ) :
 
  if (comments_open() ) :
 	?>
@@ -25,55 +25,55 @@ endif;
 		 * to fully load the template.
 		 */
 		return;
-	
+
 endif;
 ?>
 
 <?php
 	// You can start editing here -- including this comment!
-	
+
 	//create seperator
 	//if(comments_open() || get_comments_number()) echo "<div class='hr hr_invisible'></div>";
 ?>
 
-	        	
-	        	
+
+
 <div class='comment-entry post-entry'>
 
 <?php
 
  if ( get_comments_number() != "0" || comments_open() ) : ?>
 <div class='comment_meta_container'>
-			
+
 			<div class='side-container-comment'>
-	        		
+
 	        		<div class='side-container-comment-inner'>
-	        			<?php 
+	        			<?php
 	        			$ccount = (int) get_comments_number();
 	        			$rep	= __( 'replies', 'avia_framework' );
 	        			if($ccount === 1) $rep	= __( 'reply', 'avia_framework' );
 	        			?>
-	        			
+
 	        			<span class='comment-count'><?php echo $ccount; ?></span>
    						<span class='comment-text'><?php echo $rep; ?></span>
    						<span class='center-border center-border-left'></span>
    						<span class='center-border center-border-right'></span>
-   						
+
 	        		</div>
-	        		
+
 	        	</div>
-			
+
 			</div>
 
-<?php 
+<?php
 endif;
 
 if ( have_comments() ) : ?>
-			
-			<div class='comment_container'>
-			
 
-<?php 		
+			<div class='comment_container'>
+
+
+<?php
 		if ( get_comment_pages_count() > 1 && get_option( 'page_comments' ) ) : // Are there comments to navigate through?
 			echo "<span class='comment_page_nav_links comment_page_nav_links_top'>";
 			echo "<span class='comment_prev_page'>";
@@ -84,13 +84,13 @@ if ( have_comments() ) : ?>
 			echo "</span>";
 			echo "</span>";
 		endif; // check for comment navigation
-		
-		
+
+
 			//get comments
 			$comment_entries = get_comments(array( 'type'=> 'comment', 'post_id' => $post->ID ));
-			
+
 			if(!empty($comment_entries)){
-			
+
 		 	?>
 			<ol class="commentlist" id="comments">
 				<?php
@@ -103,32 +103,32 @@ if ( have_comments() ) : ?>
 					wp_list_comments( array( 'type'=> 'comment', 'callback' => 'avia_inc_custom_comments' ) );
 				?>
 			</ol>
-			<?php 
+			<?php
 			}
-			
-			
+
+
 			//get ping and trackbacks
 			$ping_entries = get_comments(array( 'type'=> 'pings', 'post_id' => $post->ID ));
-			
+
 			if(!empty($ping_entries)){
 			echo "<h4 id='pingback_heading'>".__('Trackbacks &amp; Pingbacks','avia_framework')."</h4>";
 			?>
-			
+
 			<ol class="pingbacklist">
 				<?php
-					/* 
-					 * Loop through and list the pingbacks and trackbacks. 
+					/*
+					 * Loop through and list the pingbacks and trackbacks.
 					 */
 					wp_list_comments( array( 'type'=> 'pings', 'reverse_top_level'=>true ) );
 				?>
 			</ol>
 			<?php } ?>
-			
-			
-			
-			
-			
-<?php 
+
+
+
+
+
+<?php
 		if ( get_comment_pages_count() > 1 && get_option( 'page_comments' ) ) : // Are there comments to navigate through?
 			echo "<span class='comment_page_nav_links comment_page_nav_links_bottom'>";
 			echo "<span class='comment_prev_page'>";
@@ -139,43 +139,73 @@ if ( have_comments() ) : ?>
 			echo "</span>";
 			echo "</span>";
 		endif; // check for comment navigation
-	
+
 	echo "</div> <!-- end grid div-->";
-	
-	
+
+
 	else : // or, if we don't have comments:
-	
+
 	//do nothing
-	
-	
+
+
 
 endif; // end have_comments()
 
- 
+
 
 	/* Last but not least the comment_form() wordpress function
 	 * renders the comment form as defined by wordpress itself
 	 * if you want to modify the submission form check the documentation here:
 	 * http://codex.wordpress.org/Function_Reference/comment_form
 	 */
-	 if(comments_open()){
-		
-		 
+	 if(comments_open())
+	 {
+		$default_heading = 'h3';
+		$args = array(
+					'heading'		=> $default_heading,
+					'extra_class'	=> ''
+				);
+
+		/**
+		 * @since 4.5.5
+		 * @return array
+		 */
+		$args = apply_filters( 'avf_customize_heading_settings', $args, 'comments_open', array() );
+
+		$heading = ! empty( $args['heading'] ) ? $args['heading'] : $default_heading;
+		$css = ! empty( $args['extra_class'] ) ? $args['extra_class'] : '';
+
 		 echo "<div class='comment_container'>";
-		 echo "<h3 class='miniheading'>".__('Leave a Reply','avia_framework')."</h3>";
+		 echo "<{$heading} class='miniheading {$css}'>".__('Leave a Reply','avia_framework')."</{$heading}>";
 		 echo "<span class='minitext'>".__('Want to join the discussion?','avia_framework')." <br/>".__('Feel free to contribute!','avia_framework')."</span>";
 		 comment_form();
 		 echo "</div>";
 	 }
 	 else if(get_comments_number())
 	 {
+		$default_heading = 'h3';
+		$args = array(
+					'heading'		=> $default_heading,
+					'extra_class'	=> ''
+				);
+
+		/**
+		 * @since 4.5.5
+		 * @return array
+		 */
+		$args = apply_filters( 'avf_customize_heading_settings', $args, 'comments_closed', array() );
+
+		$heading = ! empty( $args['heading'] ) ? $args['heading'] : $default_heading;
+		$css = ! empty( $args['extra_class'] ) ? $args['extra_class'] : '';
+
+
 		 /* If there are no comments and comments are closed,
 		 * let's leave a little note, shall we?
 		 */
-	 	
-	 	echo "<h3 class=' commentsclosed'>".__( 'Comments are closed.', 'avia_framework' )."</h3>";
-	 } 
-	  
+
+	 	echo "<{$heading} class='commentsclosed {$css}'>".__( 'Comments are closed.', 'avia_framework' )."</{$heading}>";
+	 }
+
 	  ?>
 
 </div>

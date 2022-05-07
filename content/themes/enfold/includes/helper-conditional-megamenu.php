@@ -1,10 +1,21 @@
 <?php
-if( !class_exists( 'avia_conditional_mega_menu' ) )
+/**
+ * Must be activated with 
+ *
+ *	add_theme_support( 'avia_conditionals_for_mega_menu' );
+ *
+ *
+ */
+if( ! defined( 'ABSPATH' ) ) {  exit;  }    // Exit if accessed directly
+
+
+if( ! class_exists( 'avia_conditional_mega_menu' ) )
 {
-    add_filter('avf_mega_menu_post_meta_fields','avia_save_conditional_menu_options',10,3);
-    function avia_save_conditional_menu_options($check, $menu_id, $menu_item_db)
+    add_filter( 'avf_mega_menu_post_meta_fields', 'avia_save_conditional_menu_options', 10, 3 );
+
+    function avia_save_conditional_menu_options( $check, $menu_id, $menu_item_db )
     {
-        $check = array_merge($check, array('conditional'));
+        $check = array_merge( $check, array( 'conditional' ) );
         return $check;
     }
 
@@ -13,21 +24,21 @@ if( !class_exists( 'avia_conditional_mega_menu' ) )
      */
     class avia_conditional_mega_menu
     {
-        function __construct()
-        {	
-            add_action('admin_enqueue_scripts', array(&$this,'load_script'));
-            add_action('init', array(&$this,'add_conditionals_to_config'));
-            add_action('avia_mega_menu_option_fields', array(&$this,'output_conditional_menu_options'), 10, 4);
+        public function __construct()
+        {
+            add_action( 'admin_enqueue_scripts', array( $this, 'load_script') );
+            add_action( 'init', array( $this, 'add_conditionals_to_config') );
+            add_action( 'avia_mega_menu_option_fields', array( $this, 'output_conditional_menu_options' ), 10, 4 );
 
-            add_filter( 'wp_nav_menu_objects', array(&$this,'apply_conditional_rules'), 10, 1);
+            add_filter( 'wp_nav_menu_objects', array( $this, 'apply_conditional_rules' ), 10, 1 );
         }
 
-        function __destruct()
+        public function __destruct()
         {
 
         }
 
-        function load_script($hook)
+        public function load_script($hook)
         {
             if( $hook != 'nav-menus.php' ) return;
 
@@ -35,7 +46,7 @@ if( !class_exists( 'avia_conditional_mega_menu' ) )
             wp_enqueue_script( 'avia-conditional-mega-menu' );
         }
 
-        function add_conditionals_to_config()
+        public function add_conditionals_to_config()
         {
             global $avia_config;
             /*
@@ -59,11 +70,11 @@ if( !class_exists( 'avia_conditional_mega_menu' ) )
         }
 
 
-        function get_menu_item_settings($item)
+        function get_menu_item_settings( $item )
         {
-            $conditional_logic = get_post_meta($item->ID, '_menu-item-avia-conditional', false);
+            $conditional_logic = get_post_meta( $item->ID, '_menu-item-avia-conditional', false );
 
-            if(!empty($conditional_logic) && is_array($conditional_logic))
+            if( is_array( $conditional_logic ) && ! empty( $conditional_logic[0] ) )
             {
                 $conditional_logic = $conditional_logic[0];
             }
@@ -76,9 +87,10 @@ if( !class_exists( 'avia_conditional_mega_menu' ) )
         }
 
 
-        function output_conditional_menu_options($output, $item, $depth, $args)
+        function output_conditional_menu_options( $output, $item, $depth, $args )
         {
             global $avia_config;
+
             if(!empty($avia_config['menu_conditions']) && is_array($avia_config['menu_conditions']))
             {
                 $item_id = $item->ID;
@@ -144,15 +156,16 @@ if( !class_exists( 'avia_conditional_mega_menu' ) )
 
 
 
-        function apply_conditional_rules($items)
+        function apply_conditional_rules( $items )
         {
             global $avia_config;
+
             $hidden_items = array();
 
-            foreach($items as $key => $item)
+            foreach( $items as $key => $item )
             {
                 $show = true;
-                $conditional_logic = $this->get_menu_item_settings($item);
+                $conditional_logic = $this->get_menu_item_settings( $item );
 
                 /* check if parent item is hidden. If yes we must hide the submenu item too */
                 if(empty($conditional_logic['enableconditionallogic']) && !empty($hidden_items))

@@ -1,3 +1,6 @@
+<?php
+if( ! defined( 'ABSPATH' ) ) {  exit;  }    // Exit if accessed directly
+?>
 
 <p class='entry-content'><strong><?php _e('Nothing Found', 'avia_framework'); ?></strong><br/>
 

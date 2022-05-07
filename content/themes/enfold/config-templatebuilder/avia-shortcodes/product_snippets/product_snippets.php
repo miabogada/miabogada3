@@ -11,4 +11,5 @@ include_once( 'product_snippet_info.php' );
 include_once( 'product_snippet_review.php' );
 include_once( 'product_snippet_tabs.php' );
 include_once( 'product_snippet_upsells.php' );
-
+include_once( 'product_snippet_meta.php' );
+include_once( 'product_snippet_price.php' );

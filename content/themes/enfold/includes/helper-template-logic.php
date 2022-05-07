@@ -1,6 +1,8 @@
 <?php
+if( ! defined( 'ABSPATH' ) ) {  exit;  }    // Exit if accessed directly
 
-if(!function_exists('avia_modify_front'))
+
+if( ! function_exists( 'avia_modify_front' ) )
 {
 	/**
 	*
@@ -17,7 +19,7 @@ if(!function_exists('avia_modify_front'))
 			{
 				add_filter('pre_option_show_on_front', 'avia_show_on_front_filter');
 				add_filter('pre_option_page_on_front', 'avia_page_on_front_filter');
-				
+
 				if(avia_get_option('blogpage'))
 				{
 					add_filter('pre_option_page_for_posts', 'avia_page_for_posts_filter');
@@ -42,7 +44,7 @@ if(!function_exists('avia_search_query_filter'))
 	{
 		//don't check query on admin page - otherwise we'll break the sort/filter options on the Pages > All Pages screen, etc.
 		if(is_admin()) return;
-		
+
 	   	// If 's' request variable is set but empty
 		if (isset($_GET['s']) && empty($_GET['s']) && empty($_GET['adv_search']) && $query->is_main_query() && empty($query->queried_object))
 		{
@@ -121,7 +123,7 @@ if(!function_exists('avia_modify_breadcrumb'))
 				}
 				else
 				{
-					$newtrail = avia_breadcrumbs_get_parents( $page, '' );
+					$newtrail = Avia_Breadcrumb_Trail()->get_parents( $page, '' );
 					array_unshift($newtrail, $trail[0]);
 					$newtrail['trail_end'] = $trail['trail_end'];
 					$trail = $newtrail;
@@ -145,7 +147,7 @@ if(!function_exists('avia_modify_breadcrumb'))
 			$front 			= avia_get_option('frontpage');
 			$blog 			= avia_get_option('blogpage');
 			$custom_blog 	= avia_get_option('blog_style') === 'custom' ? true : false;
-			
+
 			if(!$custom_blog)
 			{
 				if($blog == $front)
@@ -162,13 +164,15 @@ if(!function_exists('avia_modify_breadcrumb'))
 				}
 			}
 		}
-		
+
 		return $trail;
 	}
 
 
 	add_filter('avia_breadcrumbs_trail','avia_modify_breadcrumb');
 }
+
+
 
 
 
@@ -245,9 +249,9 @@ if(!function_exists('avia_set_layout_array'))
 		//check which string to use
 		$result = false;
 		$layout = 'blog_layout';
-		
+
 		if(empty($post_id)) $post_id = avia_get_the_ID();
-		
+
 		if(is_page() || is_search() || is_404() || is_attachment()) $layout = 'page_layout';
 		if(is_archive()) $layout = 'archive_layout';
 		if(is_single()) $layout = 'single_layout';
@@ -269,13 +273,13 @@ if(!function_exists('avia_set_layout_array'))
 		{
             $result = 'sidebar_right';
 		}
-		
+
 		if($result)
 		{
 			$avia_config['layout']['current'] = $avia_config['layout'][$result];
 			$avia_config['layout']['current']['main'] = $result;
 		}
-		
+
 		$avia_config['layout'] = apply_filters('avia_layout_filter', $avia_config['layout'], $post_id);
 	}
 }
@@ -290,3 +294,28 @@ if(!function_exists('avia_has_sidebar'))
 		return strpos($avia_config['layout']['current']['main'], 'sidebar') !== false ? true : false;
 	}
 }
+
+
+
+/*
+* Function that disbales the session cookie for breadcrumb when breadcrumb navigation is disabled globaly
+
+* @author Kriesi
+* @since 4.4
+*/
+
+if(!function_exists('avia_disable_portfolio_sessions'))
+{
+	function avia_disable_portfolio_sessions()
+	{
+		$bc = avia_get_option('header_title_bar');
+
+		if( strpos($bc, 'breadcrumb') === false )
+		{
+			add_theme_support( 'avia_no_session_support' );
+		}
+	}
+
+	add_action('init', 'avia_disable_portfolio_sessions', 10);
+}
+

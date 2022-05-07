@@ -1,11 +1,14 @@
 <?php
 
-if ( ! defined( 'ABSPATH' ) ) {  exit;  }    // Exit if accessed directly
+if( ! defined( 'ABSPATH' ) ) {  exit;  }    // Exit if accessed directly
 
 
 //if either calendar plugin or modified version of the plugin that is included in the theme is available we can make use of it, otherwise return
 
-if ( !class_exists( 'Tribe__Events__Main' ) ) return false;
+if( ! class_exists( 'Tribe__Events__Main' ) )
+{
+	return false;
+}
 
 define( 'AVIA_EVENT_PATH', AVIA_BASE . 'config-events-calendar/' );
 
@@ -13,35 +16,38 @@ include( 'event-mod-css-dynamic.php');
 
 
 //register my own styles
-if(!function_exists('avia_events_register_assets'))
+if( ! function_exists( 'avia_events_register_assets' ) )
 {
-	if(!is_admin()){ add_action('wp_enqueue_scripts', 'avia_events_register_assets',15); }
-	
-	function avia_events_register_assets($styleUrl)
+	if( ! is_admin() )
 	{
-		wp_enqueue_style( 'avia-events-cal', AVIA_BASE_URL.'config-events-calendar/event-mod.css');
+		add_action( 'wp_enqueue_scripts', 'avia_events_register_assets', 15 );
+	}
+
+	function avia_events_register_assets( $styleUrl )
+	{
+		wp_enqueue_style( 'avia-events-cal', AVIA_BASE_URL . 'config-events-calendar/event-mod.css' );
 	}
 }
 
 
 //register own default template
-if(!function_exists('avia_events_tempalte_paths'))
+if( ! function_exists( 'avia_events_template_paths' ) )
 {
-	add_action('tribe_events_template', 'avia_events_tempalte_paths', 10, 2);
-	
-	function avia_events_tempalte_paths($file, $template)
+	add_action( 'tribe_events_template', 'avia_events_template_paths', 10, 2 );
+
+	function avia_events_template_paths( $file, $template )
 	{
-		$redirect = array('default-template.php' , 'single-event.php' , 'pro/map.php' );
-		
-		if(in_array($template, $redirect))
+		$redirect = array( 'default-template.php', 'single-event.php', 'pro/map.php' );
+
+		if( in_array( $template, $redirect ) )
 		{
-			$file = AVIA_EVENT_PATH . "views/" . $template;
-			
+			$file = AVIA_EVENT_PATH . 'views/' . $template;
+
 			/**
 			 * https://github.com/KriesiMedia/wp-themes/issues/1676
-			 * 
+			 *
 			 * with 4.2.5 we added a better support for mobile view, which broke output of this plugin. We revert to old style.
-			 * 
+			 *
 			 * @since 4.2.7
 			 */
 			if( class_exists( 'Tribe__Tickets_Plus__Main' ) )
@@ -52,92 +58,169 @@ if(!function_exists('avia_events_tempalte_paths'))
 				}
 			}
 		}
-		
+
 		return $file;
 	}
 }
 
 
+function avia_events_v2_template_paths( $folders ) {
+	$tec_path = AVIA_EVENT_PATH . 'views/v2/';
+
+	/*
+	 * Custom loading location for overriding The Events Calendar's templates from the theme.
+	 */
+	$folders['av_tec_v2_templates'] = [
+		'id'       => 'av_tec_v2_templates',
+		'priority' => 5, // TEC is 20, ET is 17, so do something earlier, like 5
+		'path'     => $tec_path,
+	];
+
+	return $folders;
+}
+
+add_filter( 'tribe_template_path_list', 'avia_events_v2_template_paths' );
+
+/*
+if( ! function_exists( 'avia_events_template_paths_v2' ) )
+{
+	add_filter( 'tribe_template_file', 'avia_events_template_paths_v2', 10, 2 );
+
+	/**
+	 * Register default v2 templates
+	 * https://github.com/KriesiMedia/wp-themes/issues/3088
+	 *
+	 * @since 4.8.2
+	 * @param string $found_file
+	 * @param array $name
+	 * @return string
+	 *//*
+	function avia_events_template_paths_v2( $found_file, $name )
+	{
+		if( ! is_array( $name ) || empty( $name ) )
+		{
+			return $found_file;
+		}
+
+		if( $name[0] == 'default-template' && is_single() )
+		{
+			$found_file = AVIA_EVENT_PATH . 'views/' . $name[0] . '.php';
+		}
+
+		return $found_file;
+	}
+}
+*/
+
+
+
+
 //remove ability to change some of the avialble options (eg: template choice)
 
-if(!function_exists('avia_events_general_tab'))
+if( ! function_exists( 'avia_events_perma_options' ) )
 {
-	add_action('option_tribe_events_calendar_options', 'avia_events_perma_options', 10);
-	
-	function avia_events_perma_options($options)
+	add_action( 'option_tribe_events_calendar_options', 'avia_events_perma_options', 10 );
+
+	function avia_events_perma_options( $options )
 	{
-		$edit_elements 	= array('tribeEventsTemplate' => '', 'stylesheetOption' => 'full' , 'tribeDisableTribeBar'=>false); // stylesheetOption: skeleton, full, tribe
-		$options= array_merge($options, $edit_elements);
-		
+		$edit_elements = array(
+							'tribeEventsTemplate'	=> '',
+							'stylesheetOption'		=> 'full' ,
+							'tribeDisableTribeBar'	=> false
+						);				// stylesheetOption: skeleton, full, tribe
+
+		$options = array_merge( $options, $edit_elements );
+
 		return $options;
 	}
 }
 
 //edit/remove some of the options from general tab
-if(!function_exists('avia_events_general_tab'))
+if( ! function_exists( 'avia_events_general_tab' ) )
 {
-	add_action('tribe_general_settings_tab_fields', 'avia_events_general_tab', 10);
-	
-	function avia_events_general_tab($options)
+	add_action( 'tribe_general_settings_tab_fields', 'avia_events_general_tab', 10 );
+
+	function avia_events_general_tab( $options )
 	{
-		$edit_elements 	= array('info-start' => array('html' => '<div id="modern-tribe-info">'), 
-				'upsell-info', 'upsell-info', 'donate-link-info', 'donate-link-pro-info', 'donate-link-heading', 'donate-link', 'info-end'=> array('html'=> avia_tribe_ref()."</div>"));
-				
-		$options 		= avia_events_modify_options($options, $edit_elements);
+		$edit_elements = array(
+							'info-start'	=> array( 'html' => '<div id="modern-tribe-info">' ),
+							'upsell-info',
+							'upsell-info',
+							'donate-link-info',
+							'donate-link-pro-info',
+							'donate-link-heading',
+							'donate-link',
+							'info-end'		=> array( 'html' => avia_tribe_ref() . '</div>' ) );
+
+		$options = avia_events_modify_options( $options, $edit_elements );
+
 		return $options;
 	}
 }
 
 //edit/remove some of the options from display tab
-if(!function_exists('avia_events_display_tab'))
+if( ! function_exists( 'avia_events_display_tab' ) )
 {
-	add_action('tribe_display_settings_tab_fields', 'avia_events_display_tab', 10);
-	
-	function avia_events_display_tab($options)
+	add_action( 'tribe_display_settings_tab_fields', 'avia_events_display_tab', 10 );
+
+	function avia_events_display_tab( $options )
 	{
-		$edit_elements 	= array('info-start', 'info-box-title', 'info-box-description', 'info-end', 'stylesheetOption', 'tribeEventsTemplate', 'tribeDisableTribeBar'); 
-		$options 		= avia_events_modify_options($options, $edit_elements);
-		
+		$edit_elements = array(
+							'info-start',
+							'info-box-title',
+							'info-box-description',
+							'info-end',
+							'stylesheetOption',
+							'tribeEventsTemplate',
+							'tribeDisableTribeBar'
+						);
+
+		$options = avia_events_modify_options( $options, $edit_elements );
+
 		return $options;
 	}
 }
 
 
-
-if(!function_exists('avia_events_modify_options'))
+if( ! function_exists( 'avia_events_modify_options' ) )
 {
-	function avia_events_modify_options($options, $edit_elements)
+	function avia_events_modify_options( $options, $edit_elements )
 	{
-		foreach($edit_elements as $key => $element)
+		foreach( $edit_elements as $key => $element )
 			{
-				if(is_array($element))
+				if( is_array( $element ) )
 				{
-					$options[$key] = array_merge_recursive($options, $element);
+					$options[ $key ] = array_merge_recursive( $options, $element );
 				}
 				else
 				{
-					if(array_key_exists($element, $options)) unset($options[$element]);
+					if( array_key_exists( $element, $options ) )
+					{
+						unset( $options[ $element ] );
+					}
 				}
 			}
-			
+
 			return $options;
 	}
 }
 
 
-if(!function_exists('avia_events_upsell'))
+if( ! function_exists( 'avia_events_upsell' ) )
 {
 	$tec = Tribe__Events__Main::instance();
-	remove_action( 'tribe_events_cost_table', array($tec, 'maybeShowMetaUpsell'));
-	add_action( 'tribe_events_cost_table', 'avia_events_upsell', 10);
+
+	remove_action( 'tribe_events_cost_table', array( $tec, 'maybeShowMetaUpsell' ) );
+	add_action( 'tribe_events_cost_table', 'avia_events_upsell', 10 );
 
 	function avia_events_upsell()
-	{	
-		if(!class_exists( 'Tribe__Events__Pro__Main' )){
-	
+	{
+		if( ! class_exists( 'Tribe__Events__Pro__Main' ) )
+		{
+
 		?><tr class="eventBritePluginPlug">
 		<td colspan="2" class="tribe_sectionheader">
-		<h4><?php _e('Additional Functionality', 'avia_framework'); ?></h4>
+		<h4><?php _e( 'Additional Functionality', 'avia_framework' ); ?></h4>
 		</td>
 		</tr>
 		<tr class="eventBritePluginPlug">
@@ -145,111 +228,151 @@ if(!function_exists('avia_events_upsell'))
 		<?php echo avia_tribe_ref(); ?>
 		</td>
 		</tr><?php
-		
+
 		}
 	}
 }
 
-if(!function_exists('avia_tribe_ref'))
+if( ! function_exists( 'avia_tribe_ref' ) )
 {
+	function avia_tribe_ref()
+	{
+		if( class_exists( 'Tribe__Events__Pro__Main' ) )
+		{
+			return '';
+		}
 
-function avia_tribe_ref()
-{
-	if(class_exists( 'Tribe__Events__Pro__Main' )) return "";
+		$output = '<p>';
+		$output .= __( 'Looking for additional functionality including recurring events, ticket sales, publicly submitted events, new views and more?', 'avia_framework' ) . ' ';
+		$output .=  __( 'Check out the', 'avia_framework' ).
+					' <a href="https://theeventscalendar.pxf.io/pro">' .
+					__( 'available add-ons', 'avia_framework' ).
+					'</a>';
 
-	$output = "<p>";
-	$output .= __('Looking for additional functionality including recurring events, ticket sales, publicly submitted events, new views and more?', 'avia_framework' )." ";
-	$output .=  __('Check out the', 'avia_framework' ).
-				" <a href='http://mbsy.co/6cr37'>".
-				__('available add-ons', 'avia_framework' ).
-				"</a>"; 
-	
-	$output .= "</p>";
-	return $output;
-	
+		$output .= '</p>';
+
+		return $output;
 	}
 }
 
 
-/*modfiy post navigation*/
-
-if(!function_exists('avia_events_custom_post_nav'))
+if( ! function_exists( 'avia_events_custom_post_nav' ) )
 {
-	add_action( 'avia_post_nav_entries', 'avia_events_custom_post_nav', 10);
+	add_filter( 'avf_post_nav_entries', 'avia_events_custom_post_nav', 10, 3 );
 
-	function avia_events_custom_post_nav($entry)
+	/**
+	 * Modfiy post navigation
+	 *
+	 * @since < 4.0    modified 4.5.6
+	 * @param array $entry
+	 * @param array $settings
+	 * @param array $queried_entries
+	 * @return array
+	 */
+	function avia_events_custom_post_nav( array $entry, array $settings, array $queried_entries )
 	{
-		if(tribe_is_event())
+		if( tribe_is_event() )
 		{
-			$final = $links = $entry = array();
-			$links['next'] = tribe_get_next_event_link("{-{%title%}-}");
-			$links['prev'] = tribe_get_prev_event_link("{-{%title%}-}");
-				
-			foreach($links as $key => $link)
+			$final = $links = array();
+			$entry = array(
+							'prev'	=> '',
+							'next'	=> ''
+						);
+
+			if( version_compare( Tribe__Events__Main::VERSION, '4.6.22', '>=' ) )
 			{
-				preg_match('/^<a.*?href=(["\'])(.*?)\1.*$/', $link, $m);
-				$final[$key]['link_url'] = !empty($m[2]) ? $m[2] : "";
-				
-				preg_match('/\{\-\{(.+)\}\-\}/', $link, $m2);
-				$final[$key]['link_text'] = !empty($m2[1]) ? $m2[1] : "";
-				
-				if(!empty($final[$key]['link_text']))
+				$old_prev = tribe( 'tec.adjacent-events' )->previous_event_link;
+				$old_next = tribe( 'tec.adjacent-events' )->next_event_link;
+
+				tribe( 'tec.adjacent-events' )->previous_event_link = '';
+				tribe( 'tec.adjacent-events' )->next_event_link = '';
+			}
+
+			$links['prev'] = tribe_get_prev_event_link( '{-{%title%}-}' );
+			$links['next'] = tribe_get_next_event_link( '{-{%title%}-}' );
+
+			foreach( $links as $key => $link )
+			{
+				if( empty( $link ) )
 				{
-					$entry[$key] = new stdClass();
-					$entry[$key]->av_custom_link  = $final[$key]['link_url'];
-					$entry[$key]->av_custom_title = $final[$key]['link_text'];
-					$entry[$key]->av_custom_image = false;
+					continue;
 				}
-				
+
+				preg_match( '/^<a.*?href=(["\'])(.*?)\1.*$/', $link, $m );
+				$final[ $key ]['link_url'] = ! empty( $m[2] ) ? $m[2] : '';
+
+				preg_match( '/\{\-\{(.+)\}\-\}/', $link, $m2 );
+				$final[ $key ]['link_text'] = ! empty( $m2[1] ) ? $m2[1] : '';
+
+				if( ! empty( $final[ $key ]['link_text'] ) )
+				{
+					$mode = 'prev' == $key ? 'previous' : 'next';
+					$event = tribe( 'tec.adjacent-events' )->get_closest_event( $mode );
+
+					$entry[ $key ] = new stdClass();
+					$entry[ $key ]->av_custom_link  = $final[ $key ]['link_url'];
+					$entry[ $key ]->av_custom_title = $final[ $key ]['link_text'];
+					$entry[ $key ]->av_custom_image = get_the_post_thumbnail( $event->ID, 'thumbnail' );
+				}
+			}
+
+			if( version_compare( Tribe__Events__Main::VERSION, '4.6.22', '>=' ) )
+			{
+				tribe( 'tec.adjacent-events' )->previous_event_link = $old_prev;
+				tribe( 'tec.adjacent-events' )->next_event_link = $old_next;
 			}
 		}
+
 		return $entry;
 	}
 }
 
 /*modfiy breadcrumb navigation*/
-if(!function_exists('avia_events_breadcrumb'))
+if( ! function_exists( 'avia_events_breadcrumb') )
 {
-	add_filter('avia_breadcrumbs_trail','avia_events_breadcrumb');
+	add_filter( 'avia_breadcrumbs_trail', 'avia_events_breadcrumb' );
 
-	function avia_events_breadcrumb($trail)
-	{ 
+	function avia_events_breadcrumb( $trail )
+	{
 		global $avia_config, $wp_query;
-		
-		if(is_404() && isset($wp_query) && !empty($wp_query->tribe_is_event))
+
+		if( is_404() && isset( $wp_query ) && ! empty( $wp_query->tribe_is_event ) )
 		{
-			$events = __('Events','avia_framework');
-			$events_link = '<a href="'.tribe_get_events_link().'">'.$events.'</a>';
-			$last = array_pop($trail);
+			$events = __( 'Events','avia_framework' );
+			$events_link = '<a href="' . tribe_get_events_link().'">' . $events . '</a>';
+			$last = array_pop( $trail );
 			$trail[] = $events_link;
-			$trail['trail_end'] = __('No Events Found','avia_framework');
+			$trail['trail_end'] = __( 'No Events Found', 'avia_framework' );
 		}
-		
-		if((isset($avia_config['currently_viewing']) && $avia_config['currently_viewing'] == 'events') || tribe_is_month() || get_post_type() === Tribe__Events__Main::POSTTYPE || is_tax(Tribe__Events__Main::TAXONOMY) )
-		{	
-			$events = __('Events','avia_framework');
-			$events_link = '<a href="'.tribe_get_events_link().'">'.$events.'</a>';
-			
-			if(is_tax(Tribe__Events__Main::TAXONOMY) )
+
+		if( ( isset( $avia_config['currently_viewing'] ) && $avia_config['currently_viewing'] == 'events' ) || tribe_is_month() || get_post_type() === Tribe__Events__Main::POSTTYPE || is_tax( Tribe__Events__Main::TAXONOMY ) )
+		{
+			$events = __( 'Events', 'avia_framework' );
+			$events_link = '<a href="' . tribe_get_events_link() . '" title="' . $events . '">' . $events . '</a>';
+
+			if( is_tax( Tribe__Events__Main::TAXONOMY ) )
 			{
-				$last = array_pop($trail);
+				$last = array_pop( $trail );
 				$trail[] = $events_link;
 				$trail[] = $last;
 			}
-			else if(tribe_is_month() || (tribe_is_upcoming() && !is_singular())) 
+			else if( tribe_is_month() || ( tribe_is_upcoming() && ! is_singular() ) )
 			{
 				$trail[] = $events_link;
 			}
-			else if(tribe_is_event()) 
+			else if( tribe_is_event() )
 			{
-				$last = array_pop($trail);
+				$last = array_pop( $trail );
 				$trail[] = $events_link;
 				$trail[] = $last;
 			}
 
-			if(isset($avia_config['events_trail'] )) $trail = $avia_config['events_trail'] ;
+			if( isset( $avia_config['events_trail'] ) )
+			{
+				$trail = $avia_config['events_trail'] ;
+			}
 		}
-			
+
 		return $trail;
 	}
 
@@ -257,9 +380,9 @@ if(!function_exists('avia_events_breadcrumb'))
 
 
 /*additional markup*/
-if(!function_exists('avia_events_content_wrap'))
+if( ! function_exists( 'avia_events_content_wrap' ) )
 {
-	add_action( 'tribe_events_before_the_event_title', 'avia_events_content_wrap', 10);
+	add_action( 'tribe_events_before_the_event_title', 'avia_events_content_wrap', 10 );
 
 	function avia_events_content_wrap()
 	{
@@ -267,9 +390,9 @@ if(!function_exists('avia_events_content_wrap'))
 	}
 }
 
-if(!function_exists('avia_events_open_outer_wrap'))
+if( ! function_exists( 'avia_events_open_outer_wrap' ) )
 {
-	add_action( 'tribe_events_after_the_event_title', 'avia_events_open_outer_wrap', 10);
+	add_action( 'tribe_events_after_the_event_title', 'avia_events_open_outer_wrap', 10 );
 
 	function avia_events_open_outer_wrap()
 	{
@@ -277,9 +400,9 @@ if(!function_exists('avia_events_open_outer_wrap'))
 	}
 }
 
-if(!function_exists('avia_events_open_inner_wrap'))
+if( ! function_exists( 'avia_events_open_inner_wrap' ) )
 {
-	add_action( 'tribe_events_after_the_meta', 'avia_events_open_inner_wrap', 10);
+	add_action( 'tribe_events_after_the_meta', 'avia_events_open_inner_wrap', 10 );
 
 	function avia_events_open_inner_wrap()
 	{
@@ -288,28 +411,30 @@ if(!function_exists('avia_events_open_inner_wrap'))
 }
 
 
-if(!function_exists('avia_events_close_div'))
+if( ! function_exists( 'avia_events_close_div' ) )
 {
 	/*call 3 times, once for wrappper, outer and inner wrap*/
-	add_action( 'tribe_events_after_the_content', 'avia_events_close_div', 1000);
-	add_action( 'tribe_events_after_the_content', 'avia_events_close_div', 1001);
-	add_action( 'tribe_events_after_the_content', 'avia_events_close_div', 1003);
+	add_action( 'tribe_events_after_the_content', 'avia_events_close_div', 1000 );
+	add_action( 'tribe_events_after_the_content', 'avia_events_close_div', 1001 );
+	add_action( 'tribe_events_after_the_content', 'avia_events_close_div', 1003 );
 
 	function avia_events_close_div()
 	{
-		echo "</div>";
+		echo '</div>';
 	}
 }
 
 
-
-
-
 /*PRO PLUGIN*/
-if ( !class_exists( 'Tribe__Events__Pro__Main' ) ) return false;
+if ( ! class_exists( 'Tribe__Events__Pro__Main' ) )
+{
+	return false;
+}
 
 /*move related events*/
+
 $tec = Tribe__Events__Pro__Main::instance();
+
 remove_action( 'tribe_events_single_event_after_the_meta', array( $tec, 'register_related_events_view' ) );
 add_action( 'tribe_events_single_event_after_the_content', array( $tec, 'register_related_events_view' ) );
 
@@ -319,7 +444,7 @@ if( ! function_exists( 'avia_events_modify_recurring_event_query' ) )
 	/**
 	 * Selecting checkbox Recurring event instances in Events -> Settings -> General might might break our queries because of GROUP BY clause.
 	 * Reason is probably if multiple posttypes are part of the query.
-	 * 
+	 *
 	 * @added_by Günter
 	 * @since 4.2.4
 	 * @param array $query
@@ -338,7 +463,7 @@ if( ! function_exists( 'avia_events_reset_recurring_event_query' ) )
 {
 	/**
 	 * Add the previously removed filter again
-	 * 
+	 *
 	 * @added_by Günter
 	 * @since 4.2.4
 	 */
@@ -350,11 +475,7 @@ if( ! function_exists( 'avia_events_reset_recurring_event_query' ) )
 		}
 	}
 }
-	
+
 add_filter( 'avia_masonry_entries_query', 'avia_events_modify_recurring_event_query', 10, 2 );
 add_action( 'ava_after_masonry_entries_query', 'avia_events_reset_recurring_event_query', 10 );
-	
-
-
-
 

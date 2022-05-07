@@ -1,6 +1,6 @@
 <?php
-	if ( !defined('ABSPATH') ){ die(); }
-	
+	if( ! defined( 'ABSPATH' ) )  { die(); }
+
 	global $avia_config;
 
 	/*
@@ -10,7 +10,7 @@
 
 
  	 if( get_post_meta(get_the_ID(), 'header', true) != 'no') echo avia_title();
- 	 
+
  	 do_action( 'ava_after_main_title' );
 	 ?>
 
@@ -47,4 +47,5 @@
 
 
 
-<?php get_footer(); ?>
+<?php
+		get_footer();

@@ -18,7 +18,9 @@ ul.avia-timeline {
     text-decoration: none;
 }
 
-.av-milestone-content p:last-child{margin-bottom: 0;}
+.av-milestone-content p:last-child{
+	margin-bottom: 0;
+}
 
 .avia-timeline .milestone_icon{
     display: block;
@@ -39,11 +41,11 @@ ul.avia-timeline {
     padding: 2px;
 }
 
-.avia-timeline .milestone_icon.milestone-icon-hasborder .milestone_inner {
+.avia-timeline .milestone_icon.milestone-icon-hasborder .milestone_inner{
     line-height: 86px;
 }
 
-.avia-timeline-boxshadow .av-milestone-contentbox {
+.avia-timeline-boxshadow .av-milestone-contentbox{
     padding: 2em;
     background-color: #fff;
     position: relative;
@@ -64,7 +66,7 @@ ul.avia-timeline {
     z-index: -1;
 }
 
-.avia-timeline-boxshadow .av-milestone-contentbox:before {
+.avia-timeline-boxshadow .av-milestone-contentbox:before{
     content: "";
     position: absolute;
     width: 1em;
@@ -77,7 +79,7 @@ ul.avia-timeline {
     transform: rotate(45deg) translateY(-50%) translateX(-50%);
 }
 
-.avia-timeline-boxshadow .av-milestone-contentbox {
+.avia-timeline-boxshadow .av-milestone-contentbox{
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
 }
 
@@ -112,12 +114,12 @@ ul.avia-timeline {
 
 /*timeline orientation vertical */
 
-ul.avia-timeline-vertical {
+ul.avia-timeline-vertical{
     display: table;
     width: 100%;
 }
 
-ul.avia-timeline-vertical li {
+ul.avia-timeline-vertical li{
     display: table-row;
     margin: 0;
     padding: 0;
@@ -134,7 +136,7 @@ ul.avia-timeline-vertical li {
     text-align: right;
 }
 
-.avia-timeline-vertical .av-milestone-date span {
+.avia-timeline-vertical .av-milestone-date span{
     display: block;
     zoom: 1;
     position: absolute;
@@ -144,7 +146,7 @@ ul.avia-timeline-vertical li {
     top: 0.5em;
 }
 
-.avia-timeline-vertical .av-milestone-date span:before {
+.avia-timeline-vertical .av-milestone-date span:before{
     content: "";
     display: block;
     position: absolute;
@@ -164,11 +166,16 @@ ul.avia-timeline-vertical li {
     padding: 30px 0 30px 60px;
 }
 
+.avia-timeline-vertical .av-milestone-content-wrap .av-milestone-content ul li,
+.avia-timeline-vertical .av-milestone-content-wrap .av-milestone-content ol li{
+	display: list-item;
+}
+
 /* sigle milestone vertical align middle */
 
 .avia-timeline-vertical li.av-milestone-valign-middle .av-milestone-date,
 .avia-timeline-vertical li.av-milestone-valign-middle .av-milestone-icon-wrap,
-.avia-timeline-vertical li.av-milestone-valign-middle .av-milestone-content-wrap {
+.avia-timeline-vertical li.av-milestone-valign-middle .av-milestone-content-wrap{
     vertical-align: middle;
 }
 
@@ -194,6 +201,9 @@ ul.avia-timeline-vertical li {
     left: 50%;
     border-left-style: dashed;
     border-left-width: 1px;
+}
+
+.avia-timeline-vertical.avia-timeline-animate .av-milestone-icon-wrap:after{
     opacity: 0;
 }
 
@@ -218,24 +228,68 @@ ul.avia-timeline-vertical li.av-milestone-valign-middle:last-child .av-milestone
     height: 50%;
 }
 
-.avia-msie ul.avia-timeline-vertical li.av-milestone-valign-middle:last-child .av-milestone-icon-wrap:after {
+.avia-msie ul.avia-timeline-vertical li.av-milestone-valign-middle:last-child .av-milestone-icon-wrap:after{
     height: inherit;
 }
 
-.avia_transform .avia-timeline-vertical .milestone_icon{
+.avia_transform .avia-timeline-vertical.avia-timeline-animate .milestone_icon{
     opacity: 0.1;
     -webkit-transform: scale(0.5);
     -ms-transform: scale(0.5);
     transform: scale(0.5);
 }
 
-.avia_transform .avia-timeline-vertical .av-milestone-indicator{
+
+.avia_transform .avia-timeline-vertical .milestone_icon.milestone_bullet_arrow{
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 100px;
+    border-top-right-radius: 100px;
+    border-top-left-radius: 100px;
+    -webkit-transform: scale(0.5) rotate(45deg);
+    -ms-transform: scale(0.5) rotate(45deg);
+    transform: scale(0.5) rotate(45deg);
+}
+
+.avia-timeline-vertical .milestone_icon.milestone_bullet_arrow{
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 100px;
+    border-top-right-radius: 100px;
+    border-top-left-radius: 100px;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+
+.avia-timeline-vertical .milestone_icon.milestone_bullet_arrow .milestone_number{
+    display: block;
+    -webkit-transform: rotate(-45deg);
+    -ms-transform: rotate(-45deg);
+    transform: rotate(-45deg);
+}
+
+.avia_transform .avia-timeline-vertical.avia-timeline-animate .av-milestone-indicator{
     opacity: 0.1;
 }
 
+.avia_transform .avia-timeline-vertical .avia_start_animation .milestone_icon{
+    -webkit-animation: avia_appear 1s 1 cubic-bezier(0.175, 0.885, 0.320, 1); /* Safari 4+ */
+    animation:         avia_appear 1s 1 cubic-bezier(0.175, 0.885, 0.320, 1); /* IE 10+ */
+    -webkit-transform: scale(1);
+    -ms-transform: scale(1);
+    transform: scale(1);
+    opacity: 1;
+}
 
-.avia_transform .avia-timeline-vertical .avia_start_animation .milestone_icon,
-.avia_transform .avia-timeline-vertical .avia_start_animation .av-milestone-icon-wrap:after{
+.avia_transform .avia-timeline-vertical .avia_start_animation .milestone_icon.milestone_bullet_arrow{
+    -webkit-transform: scale(1) rotate(45deg);
+    -ms-transform: scale(1) rotate(45deg);
+    transform: scale(1) rotate(45deg);
+}
+
+
+.avia_transform .avia-timeline-vertical.avia-timeline-animate .avia_start_animation .milestone_icon,
+.avia_transform .avia-timeline-vertical.avia-timeline-animate .avia_start_animation .av-milestone-icon-wrap:after{
+
     -webkit-animation: avia_appear 1s 1 cubic-bezier(0.175, 0.885, 0.320, 1); /* Safari 4+ */
     animation:         avia_appear 1s 1 cubic-bezier(0.175, 0.885, 0.320, 1); /* IE 10+ */
     -webkit-transform: scale(1);
@@ -250,7 +304,7 @@ ul.avia-timeline-vertical li.av-milestone-valign-middle:last-child .av-milestone
     width: 90%;
 }
 
-.avia_transform .avia-timeline-vertical.av-milestone-placement-left .avia_start_animation .av-milestone-indicator{
+.avia_transform .avia-timeline-vertical.av-milestone-placement-left.avia-timeline-animate .avia_start_animation .av-milestone-indicator{
     -webkit-animation: caption-right 1s 1 cubic-bezier(0.175, 0.885, 0.320, 1); /* Safari 4+ */
     animation:         caption-right 1s 1 cubic-bezier(0.175, 0.885, 0.320, 1); /* IE 10+ */
     opacity: 1;
@@ -277,17 +331,17 @@ ul.avia-timeline-vertical li.av-milestone-valign-middle:last-child .av-milestone
     display: none;
 }
 
-.avia-timeline-vertical.av-milestone-placement-right .av-milestone-date span {
+.avia-timeline-vertical.av-milestone-placement-right .av-milestone-date span{
     left: -60px;
     right: auto;
 }
 
-.avia-timeline-vertical.av-milestone-placement-right .av-milestone-date span:before {
+.avia-timeline-vertical.av-milestone-placement-right .av-milestone-date span:before{
     right: 0;
     left: auto;
 }
 
-.avia_transform .avia-timeline-vertical.av-milestone-placement-right .avia_start_animation .av-milestone-indicator{
+.avia_transform .avia-timeline-vertical.av-milestone-placement-right.avia-timeline-animate .avia_start_animation .av-milestone-indicator{
     -webkit-animation: caption-left 1s 1 cubic-bezier(0.175, 0.885, 0.320, 1); /* Safari 4+ */
     animation:         caption-left 1s 1 cubic-bezier(0.175, 0.885, 0.320, 1); /* IE 10+ */
     opacity: 1;
@@ -314,10 +368,6 @@ ul.avia-timeline-vertical li.av-milestone-valign-middle:last-child .av-milestone
     width: 50%;
 }
 
-.avia-timeline-vertical.av-milestone-placement-alternate .av-milestone-icon{
-    display: inline-block;
-}
-
 .avia-timeline-vertical.av-milestone-placement-alternate li.av-milestone-even .av-milestone-icon-wrap,
 .avia-timeline-vertical.av-milestone-placement-alternate li.av-milestone-even .av-milestone-content-wrap{
     text-align: right;
@@ -336,23 +386,23 @@ ul.avia-timeline-vertical li.av-milestone-valign-middle:last-child .av-milestone
     display: none;
 }
 
-.avia-timeline-vertical.av-milestone-placement-alternate li.av-milestone-even .av-milestone-date span {
+.avia-timeline-vertical.av-milestone-placement-alternate li.av-milestone-even .av-milestone-date span{
     left: -60px;
     right: auto;
 }
 
-.avia-timeline-vertical.av-milestone-placement-alternate li.av-milestone-even .av-milestone-date span:before {
+.avia-timeline-vertical.av-milestone-placement-alternate li.av-milestone-even .av-milestone-date span:before{
     right: 0;
     left: auto;
 }
 
-.avia_transform .avia-timeline-vertical.av-milestone-placement-alternate li.av-milestone-even.avia_start_animation .av-milestone-indicator{
+.avia_transform .avia-timeline-vertical.av-milestone-placement-alternate.avia-timeline-animate li.av-milestone-even.avia_start_animation .av-milestone-indicator{
     -webkit-animation: caption-left 1s 1 cubic-bezier(0.175, 0.885, 0.320, 1); /* Safari 4+ */
     animation:         caption-left 1s 1 cubic-bezier(0.175, 0.885, 0.320, 1); /* IE 10+ */
     opacity: 1;
 }
 
-.avia_transform .avia-timeline-vertical.av-milestone-placement-alternate li.av-milestone-odd.avia_start_animation .av-milestone-indicator{
+.avia_transform .avia-timeline-vertical.av-milestone-placement-alternate.avia-timeline-animate li.av-milestone-odd.avia_start_animation .av-milestone-indicator{
     -webkit-animation: caption-right 1s 1 cubic-bezier(0.175, 0.885, 0.320, 1); /* Safari 4+ */
     animation:         caption-right 1s 1 cubic-bezier(0.175, 0.885, 0.320, 1); /* IE 10+ */
     opacity: 1;
@@ -368,7 +418,7 @@ ul.avia-timeline-vertical li.av-milestone-valign-middle:last-child .av-milestone
 /*timeline orientation horizontal */
 
 
-ul.avia-timeline-horizontal {
+ul.avia-timeline-horizontal{
     width: 100%;
     overflow: hidden;
     padding-bottom: 2px;
@@ -378,15 +428,23 @@ ul.avia-timeline-horizontal {
     display: block;
 }
 
-ul.avia-timeline-horizontal li {
+ul.avia-timeline-horizontal li.av-milestone{
     display: inline-block;
-    margin: 0;
+    margin: 0 0 0 -4px;
     padding: 0;
     vertical-align: top;
 }
 
+.av-milestone-content li{ 
+    margin-left: 0;
+}
+
+ul.avia-timeline-horizontal li:first-child{
+    margin-left: 0;
+}
+
 .avia-slideshow-carousel ul{
-    padding: 15px 0 15px 15px;
+    padding: 15px 0 15px 0;
 }
 
 #av-admin-preview ul.avia-timeline-horizontal li{
@@ -402,6 +460,24 @@ ul.avia-timeline-horizontal li {
     display: block;
 }
 
+.avia-timeline-horizontal .milestone_icon.milestone_bullet_arrow{
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 100px;
+    border-top-right-radius: 100px;
+    border-top-left-radius: 100px;
+    -webkit-transform: rotate(-45deg);
+    -ms-transform: rotate(-45deg);
+    transform: rotate(-45deg);
+}
+
+.avia-timeline-horizontal .milestone_icon.milestone_bullet_arrow .milestone_number{
+    display: block;
+    -webkit-transform: rotate(45deg);
+    -ms-transform: rotate(45deg);
+    transform: rotate(45deg);
+}
+
+
 .avia-timeline-horizontal .av-milestone-icon-wrap:after{
     content: "";
     height: 1px;
@@ -413,7 +489,7 @@ ul.avia-timeline-horizontal li {
     border-top-width: 1px;
 }
 
-.avia-timeline-horizontal .av-milestone-date span {
+.avia-timeline-horizontal .av-milestone-date span{
     display: block;
     zoom: 1;
     position: absolute;
@@ -423,7 +499,7 @@ ul.avia-timeline-horizontal li {
     top: 0.5em;
 }
 
-.avia-timeline-horizontal .av-milestone-date span:before {
+.avia-timeline-horizontal .av-milestone-date span:before{
     content: "";
     display: block;
     position: absolute;
@@ -435,7 +511,7 @@ ul.avia-timeline-horizontal li {
     margin-top: -2px;
 }
 
-.avia-timeline-horizontal .av-milestone-date span:after {
+.avia-timeline-horizontal .av-milestone-date span:after{
     content: "";
     display: block;
     position: absolute;
@@ -494,7 +570,7 @@ ul.avia-timeline-horizontal li {
     display: none;
 }
 
-.av-timeline-nav a{
+.av-timeline-nav a.av-nav-btn{
     display: inline-block;
     position: relative;
     font-size: 0px;
@@ -511,34 +587,26 @@ ul.avia-timeline-horizontal li {
     -o-transition: all 0.2s ease-in;
     transition: all 0.2s ease-in;
     background-color: #fff;
+	color: #fff;
 }
 
-.av-timeline-nav a span{
-    display: block;
-    width: 40px;
-    height: 40px;
-    line-height: 40px;
-    border-radius: 100%;
+.av-timeline-nav a.av-nav-btn:hover{
     color: #fff;
 }
 
-.av-timeline-nav a span:hover{
-    color: #fff;
-}
-
-.av-timeline-nav a span:before{
+.av-timeline-nav a:before{
     display: block;
     width: 100%;
     height: 100%;
     font-size: 18px;
 }
 
-.av-timeline-nav a span{
+.av-timeline-nav a{
     opacity: 0.5;
     transition: all 0.2s ease-in;
 }
 
-.av-timeline-nav a:hover span{
+.av-timeline-nav a:hover{
     opacity: 1;
 }
 
@@ -620,12 +688,12 @@ ul.avia-timeline-horizontal li {
     padding: 30px 30px 0 110px;
 }
 
-.avia-timeline-horizontal.av-milestone-placement-bottom .av-milestone-date span:before {
+.avia-timeline-horizontal.av-milestone-placement-bottom .av-milestone-date span:before{
     right: 0;
     margin-top: -2px;
 }
 
-.avia-timeline-horizontal.av-milestone-placement-bottom .av-milestone-date span:after {
+.avia-timeline-horizontal.av-milestone-placement-bottom .av-milestone-date span:after{
     top: auto;
     bottom: 0;
 }
@@ -677,7 +745,7 @@ ul.avia-timeline-horizontal li {
         display: block;
     }
 
-    .av-no-preview ul.avia-timeline-vertical li {
+    .av-no-preview ul.avia-timeline-vertical li{
         display: block;
         overflow: hidden;
         position: relative;
@@ -717,7 +785,7 @@ ul.avia-timeline-horizontal li {
         right: auto;
     }
 
-    .av-no-preview .avia-timeline-vertical .av-milestone-date span:before {
+    .av-no-preview .avia-timeline-vertical .av-milestone-date span:before{
         right: 0;
         left: auto;
     }
@@ -726,7 +794,7 @@ ul.avia-timeline-horizontal li {
         padding: 0 0 60px 50px;
     }
 
-    .av-no-preview .avia-timeline-vertical.avia-timeline-boxshadow .av-milestone-content-wrap {
+    .av-no-preview .avia-timeline-vertical.avia-timeline-boxshadow .av-milestone-content-wrap{
         padding: 0 15px 60px 50px;
     }
 
@@ -736,7 +804,7 @@ ul.avia-timeline-horizontal li {
         width: 100%;
     }
 
-    .av-no-preview .avia_transform .avia-timeline-vertical.av-milestone-placement-left .avia_start_animation .av-milestone-indicator{
+    .av-no-preview .avia_transform .avia-timeline-vertical.av-milestone-placement-left.avia-timeline-animate .avia_start_animation .av-milestone-indicator{
         -webkit-animation: caption-left 1s 1 cubic-bezier(0.175, 0.885, 0.320, 1); /* Safari 4+ */
         animation:         caption-left 1s 1 cubic-bezier(0.175, 0.885, 0.320, 1); /* IE 10+ */
     }
@@ -749,7 +817,7 @@ ul.avia-timeline-horizontal li {
         width: 100%;
     }
 
-    .av-no-preview .avia-timeline-vertical.av-milestone-placement-right.avia-timeline-boxshadow .av-milestone-content-wrap {
+    .av-no-preview .avia-timeline-vertical.av-milestone-placement-right.avia-timeline-boxshadow .av-milestone-content-wrap{
         padding: 0 15px 60px 50px;
     }
 
@@ -782,7 +850,7 @@ ul.avia-timeline-horizontal li {
         text-align: left;
     }
 
-    .av-no-preview .avia-timeline-vertical.av-milestone-placement-alternate.avia-timeline-boxshadow li.av-milestone-even .av-milestone-content-wrap {
+    .av-no-preview .avia-timeline-vertical.av-milestone-placement-alternate.avia-timeline-boxshadow li.av-milestone-even .av-milestone-content-wrap{
         padding: 0 15px 60px 50px;
     }
 
@@ -799,7 +867,7 @@ ul.avia-timeline-horizontal li {
         left: -50px;
     }
 
-    .av-no-preview .avia_transform .avia-timeline-vertical.av-milestone-placement-alternate li.av-milestone-odd.avia_start_animation .av-milestone-indicator{
+    .av-no-preview .avia_transform .avia-timeline-vertical.av-milestone-placement-alternate.avia-timeline-animate li.av-milestone-odd.avia_start_animation .av-milestone-indicator{
         -webkit-animation: caption-left 1s 1 cubic-bezier(0.175, 0.885, 0.320, 1); /* Safari 4+ */
         animation:         caption-left 1s 1 cubic-bezier(0.175, 0.885, 0.320, 1); /* IE 10+ */
     }
@@ -813,7 +881,7 @@ ul.avia-timeline-horizontal li {
         width: 64px;
         line-height: 64px;
     }
-    .av-no-preview .avia-timeline .milestone_icon.milestone-icon-hasborder .milestone_inner {
+    .av-no-preview .avia-timeline .milestone_icon.milestone-icon-hasborder .milestone_inner{
         line-height: 60px;
     }
 
@@ -872,7 +940,7 @@ ul.avia-timeline-horizontal li {
     }
 
     .av-no-preview .avia-timeline-horizontal.av-milestone-placement-top .av-milestone-content-wrap{
-        padding: 30px 0 10px 90px;
+        padding: 30px 10px 10px 90px;
     }
 
     .av-no-preview .avia-timeline-horizontal.av-milestone-placement-top.avia-timeline-boxshadow .av-milestone-content-wrap{
@@ -900,7 +968,7 @@ ul.avia-timeline-horizontal li {
         padding-top: 57px;
     }
 
-    .av-no-preview .avia-timeline-horizontal .av-milestone-date span {
+    .av-no-preview .avia-timeline-horizontal .av-milestone-date span{
         left: -58px;
     }
 
@@ -922,7 +990,7 @@ ul.avia-timeline-horizontal li {
         padding: 30px 0 0 90px;
     }
 
-    .av-no-preview .avia-timeline-horizontal.av-milestone-placement-alternate li.av-milestone-odd .av-milestone-date {
+    .av-no-preview .avia-timeline-horizontal.av-milestone-placement-alternate li.av-milestone-odd .av-milestone-date{
         padding: 0 0 30px 90px;
     }
 
@@ -941,6 +1009,5 @@ ul.avia-timeline-horizontal li {
     .av-no-preview .avia-timeline-horizontal.av-milestone-placement-alternate.avia-timeline-boxshadow li.av-milestone-even .av-milestone-content-wrap{
         padding: 0 10px 30px 10px;
     }
-
 
 }

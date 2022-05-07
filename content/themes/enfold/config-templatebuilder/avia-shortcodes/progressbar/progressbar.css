@@ -18,26 +18,41 @@ line-height: 21px;
 .progressbar-icon{float:left;margin-right:5px;}
 .icon-bar-no .progressbar-icon{display:none;}
 .progressbar-title{float:left;}
-.avia-progress-bar .progress{width:100%; height:30px; line-height: 30px; position: relative; border-radius: 3px; overflow: hidden;
-box-shadow: inset 0px 0px 15px 0px rgba(0, 0, 0, 0.07);
+
+.avia-progress-bar .progress{
+	width: 100%; 
+	height: 30px; 
+	line-height: 30px; 
+	position: relative; 
+	border-radius: 3px; 
+	overflow: hidden;
+	box-shadow: inset 0px 0px 15px 0px rgba(0, 0, 0, 0.07);
 }
 
-#top .avia-progress-bar div.progress .bar-outer, #top .avia-progress-bar div.progress .bar{height:100%; position: absolute; top:0; left:0; width:100%;
-background-size: 32px 32px; border-radius: 3px;
+#top .avia-progress-bar div.progress .bar-outer, 
+#top .avia-progress-bar div.progress .bar{
+	height: 100%; 
+	position: absolute; 
+	top: 0; 
+	left: 0; 
+	width: 100%;
+	background-size: 32px 32px;
+	border-radius: 3px;
 }
 
 .av-animated-bar .avia-progress-bar div.progress .bar{
--webkit-animation: avia-bg-move 1.2s linear infinite; /* Safari 4+ */
-animation:         avia-bg-move 1.2s linear infinite; /* IE 10+ */
-height: 100%;
+	-webkit-animation: avia-bg-move 1.2s linear infinite; /* Safari 4+ */
+	animation:         avia-bg-move 1.2s linear infinite; /* IE 10+ */
+	height: 100%;
 }
 
-.avia-progress-bar div.progress {
-clear: both;
+.avia-progress-bar div.progress{
+	clear: both;
 }
 
+.html-admin-preview #top div.progress .bar-outer,
 .avia_transform #top div.progress .bar-outer{
-width:0;
+	width:0;
 }
 
 
@@ -46,11 +61,11 @@ width:0;
 }
 
 .av-small-bar .avia-progress-bar:first-child{
-margin-top:0em;
+	margin-top:0em;
 }
 
 
-.av-small-bar .avia-progress-bar .progressbar-title-wrap {
+.av-small-bar .avia-progress-bar .progressbar-title-wrap{
 	position: relative;
     bottom: 0;
     left: 0;
@@ -64,7 +79,7 @@ margin-top:0em;
     letter-spacing: 0.5px;
 }
 
-.av-small-bar .avia-progress-bar .progress {
+.av-small-bar .avia-progress-bar .progress{
     height: 10px;
     line-height: 1em;
     border-radius: 0px;
@@ -77,12 +92,13 @@ margin-top:0em;
 
 
 
-#top .av-small-bar .avia-progress-bar div.progress .bar-outer, #top .av-small-bar .avia-progress-bar div.progress .bar{
+#top .av-small-bar .avia-progress-bar div.progress .bar-outer, 
+#top .av-small-bar .avia-progress-bar div.progress .bar{
 	border-radius: 0px;
 }
 
 
-
+.html-admin-preview #top .avia-progress-bar div.progress.avia_start_animation .bar-outer,
 .avia_transform #top .avia-progress-bar div.progress.avia_start_animation .bar-outer{
 -webkit-animation: avia_expand 1.5s cubic-bezier(0.165, 0.840, 0.440, 1.000);  /* Safari 4+ */
 animation:         avia_expand 1.5s cubic-bezier(0.165, 0.840, 0.440, 1.000);  /* IE 10+ */

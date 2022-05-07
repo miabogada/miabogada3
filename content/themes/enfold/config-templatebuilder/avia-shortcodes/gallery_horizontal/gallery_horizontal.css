@@ -142,7 +142,6 @@ Horizontal Gallery
 
 /* Mobile Landscape Size to Tablet Portrait (devices and browsers) */
 	@media only screen and (max-width: 767px) {
-		.responsive #top .avia-slideshow-controls a{display:none;}
 		.responsive #top .av-horizontal-gallery .avia-slideshow-controls a{display:block;}
 		.responsive .av-horizontal-gallery-inner{position: static; min-height:180px;}
 		.responsive .av-horizontal-gallery-enlarge-effect .av-horizontal-gallery-wrap.av-active-gal-item{

@@ -1,12 +1,12 @@
 <?php
 
-if ( ! defined( 'ABSPATH' ) ) {  exit;  }    // Exit if accessed directly
+if( ! defined( 'ABSPATH' ) ) {  exit;  }    // Exit if accessed directly
 
 
-/* 
+/*
  * Allow plugins to change menus - if they remove the theme location we have to return the correct location so
  * we can add the burger menu.
- * 
+ *
  * @since 4.1.3
  */
 
@@ -15,7 +15,7 @@ add_filter( 'avf_append_burger_menu_location', 'avia_filter_append_burger_menu_l
 if( ! function_exists( 'avia_filter_append_burger_menu_location' ) )
 {
 	/**
-	 * 
+	 *
 	 * @since 4.1.3
 	 * @param string $current_location
 	 * @param string $original_location
@@ -30,7 +30,7 @@ if( ! function_exists( 'avia_filter_append_burger_menu_location' ) )
 		{
 			$current_location = $original_location;
 		}
-		
+
 		return $current_location;
 	}
 }

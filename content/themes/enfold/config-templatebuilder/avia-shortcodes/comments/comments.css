@@ -254,6 +254,11 @@ top:0;
 font-weight: bold;
 }
 
+#commentform input[type='checkbox'] + label{
+left:2.5em;
+}
+
+
 #commentform div input{
 margin:0;
 }
@@ -345,4 +350,11 @@ clear:both;
 .template-blog .post-entry-last .post_delimiter{
 border:none;
 height:1px;
+}
+
+.av-buildercomment .av-buildercomment-unapproved{
+	padding: 30px 0 15px;
+	text-align: center;
+	font-size: 1.4em;
+	font-weight: 500;
 }

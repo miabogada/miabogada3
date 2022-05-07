@@ -1,4 +1,5 @@
 <?php
+if( ! defined( 'ABSPATH' ) ) {  exit;  }    // Exit if accessed directly
 
 /**
  *  These functions shows a number of posts related to the currently displayed post.
@@ -12,27 +13,27 @@ $rp = avia_get_option('single_post_related_entries');
 
 
 
-if(!isset($avia_config['related_posts_config']))
+if( ! isset( $avia_config['related_posts_config'] ) )
 {
 	$avia_config['related_posts_config'] = array(
-	
+
 	'columns' => 8,
 	'post_class' =>  "av_one_eighth no_margin ",
 	'image_size' => 'square',
 	'tooltip'	 => true,
 	'title_short'=> false
-	
+
 	);
-	
+
 	if($rp == "av-related-style-full")
 	{
 		$avia_config['related_posts_config'] = array(
-	
+
 		'columns' => 6,
 		'post_class' =>  "av_one_half no_margin ",
 		'image_size' => 'square',
-		'tooltip'	 => false,	
-		'title_short'=> true	
+		'tooltip'	 => false,
+		'title_short'=> true
 		);
 	}
 }
@@ -62,7 +63,7 @@ if (!empty($tags) && is_array($tags))
 {
      $tag_ids = array();
      foreach ($tags as $tag ) {
-	     
+
 	     if($tag->slug != "portrait" && $tag->slug != "landscape")
 	     {
 	     	$tag_ids[] = (int)$tag->term_id;
@@ -105,9 +106,10 @@ if (!empty($tags) && is_array($tags))
      			if($is_portfolio) $format = "portfolio";
      			if(!$format) $format = get_post_format($related_post->ID);
      			if(!$format) $format = 'standard';
-     			if(!empty($title_short)) $related_post->post_title = wp_trim_words($related_post->post_title, 17);
-     			
-     			
+				if( ! empty( $title_short ) )
+				{
+					$related_post->post_title = wp_trim_words( avia_wp_get_the_title( $related_post->ID ), 17 );
+				}
 
                 $post_thumbnail_id = get_post_thumbnail_id($related_post->ID);
 	 			$post_thumb = get_the_post_thumbnail($related_post->ID, $image_size, array('title' => esc_attr(get_the_title($post_thumbnail_id))));
@@ -115,15 +117,15 @@ if (!empty($tags) && is_array($tags))
      			$fake_image = $post_thumb ? $post_thumb : $fake_image;
      			$extra_class= $post_thumb ? "" : "related-format-visible";
      			$parity		= $slidecount % 2 ? 'Odd' : 'Even';
-				$insert_tooltip = $tooltip == true ? "data-avia-related-tooltip=\"". esc_attr($related_post->post_title)."\"" : "";
-				
+				$insert_tooltip = $tooltip == true ? "data-avia-related-tooltip=\"". esc_attr( avia_wp_get_the_title( $related_post->ID ) ) . "\"" : "";
+
      			$output .= "<div class='$post_class $extra relThumb relThumb{$count} relThumb{$parity} post-format-{$format} related_column'>\n";
-	 			$output .= "	<a href='".get_permalink($related_post->ID)."' class='relThumWrap noLightbox' title='".esc_attr($related_post->post_title)."'>\n";
+	 			$output .= "	<a href='".get_permalink($related_post->ID)."' class='relThumWrap noLightbox' title='".esc_attr( avia_wp_get_the_title( $related_post->ID ) )."'>\n";
      			$output .= "	<span class='related_image_wrap' {$insert_tooltip}>";
 	 			$output .= 		$image;
 	 			$output .= "	<span class='related-format-icon {$extra_class}'><span class='related-format-icon-inner' ".av_icon_string($format)."></span></span>";
 	 			$output .= "	</span>";
-	 			$output .= 		"<strong class='av-related-title'>".$related_post->post_title."</strong>";
+	 			$output .= 		"<strong class='av-related-title'>" . avia_wp_get_the_title( $related_post->ID ) . "</strong>";
 	 			$output .= 		apply_filters('avf_related_post_loop', "", $related_post);
 	 			$output .= "	</a>";
 	 			$output .= "</div>";

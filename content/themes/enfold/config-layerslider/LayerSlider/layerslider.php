@@ -1,148 +1,111 @@
 <?php
 
 /*
-Plugin Name: LayerSlider WP
-Plugin URI: https://codecanyon.net/item/layerslider-responsive-wordpress-slider-plugin-/1362246
-Description: LayerSlider is a premium multi-purpose content creation and animation platform. Easily create sliders, image galleries, slideshows with mind-blowing effects, popups, landing pages, animated page blocks, or even a full website. It empowers more than 1.5 million active websites on a daily basis with stunning visuals and eye-catching effects.
-Version: 6.7.1
-Author: Kreatura Media
-Author URI: https://layerslider.kreaturamedia.com
-Text Domain: LayerSlider
+        CHECK THE "QUICK START GUIDE.HTML" FILE LOCATED
+        IN THIS DIRECTORY FOR INSTALLATION INSTRUCTIONS
+        AND OTHER HELPFUL RESOURCES.
 */
 
 
-// Prevent direct file access.
-if( ! defined('ABSPATH') ) {
-	header('HTTP/1.0 403 Forbidden');
-	exit;
+
+/*
+        Plugin Name:  LayerSlider
+         Plugin URI:  https://layerslider.com/
+            Version:  7.1.3
+
+        Description:  LayerSlider is a premium multi-purpose content creation and animation platform. Easily create sliders, image galleries, slideshows with mind-blowing effects, popups, landing pages, animated page blocks, or even a full website. LayerSlider empowers millions of active websites on a daily basis with stunning visuals and eye-catching effects.
+
+             Author:  Kreatura Media
+         Author URI:  https://kreaturamedia.com
+
+            License:  Kreatura License
+        License URI:  https://layerslider.com/licensing/
+
+        Text Domain:  LayerSlider
+        Domain Path:  /assets/locales
+
+       Requires PHP:  5.4
+  Requires at least:  4.4
+
+*/
+
+
+// Prevent direct file access
+defined( 'ABSPATH' ) || exit;
+
+define( 'LS_LICENSE_ID', '');
+
+define( 'LS_MINIMUM_PHP_VERSION', '5.4' );
+define( 'LS_MINIMUM_WP_VERSION',  '4.4' );
+
+$php_version = phpversion();
+$wp_version  = get_bloginfo('version');
+
+
+// Detect duplicate versions of LayerSlider
+if( defined('LS_PLUGIN_VERSION') || isset( $GLOBALS['lsPluginPath'] ) ) {
+	add_action( 'admin_notices', 'ls_duplicate_version_notice' );
+
+// Check required PHP version
+} elseif( version_compare( $php_version, LS_MINIMUM_PHP_VERSION, '<' ) ) {
+	add_action( 'admin_notices', 'ls_server_requirements_notice' );
+
+// Check required WordPress version
+} elseif( version_compare( $wp_version, LS_MINIMUM_WP_VERSION, '<' ) ) {
+	add_action( 'admin_notices', 'ls_wordpress_requirements_notice' );
+
+// Initialize the plugin
+} else {
+
+	define( 'LS_ROOT_FILE', __FILE__ );
+
+	define( 'LS_PLUGIN_VERSION', '7.1.3' );
+	define( 'LS_DB_VERSION', '7.0.0' );
+
+	require __DIR__.'/assets/init.php';
 }
 
 
-// Attempting to detect duplicate versions of LayerSlider to offer
-// a more user-friendly error message explaining the situation.
-if( defined('LS_PLUGIN_VERSION') || isset($GLOBALS['lsPluginPath']) ) {
-	die('ERROR: It looks like you already have one instance of LayerSlider installed. WordPress cannot activate and handle two instanced at the same time, you need to remove the old version first.');
-}
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+if( ! function_exists( 'ls_duplicate_version_notice' ) ) {
+	function ls_duplicate_version_notice() { ?>
+		<div class="notice notice-error" style="text-align: justify;">
+			<h3>Action Required: Multiple LayerSlider instances detected</h3>
+			<p>It looks like you already had one copy of LayerSlider installed on your site. Having multiple copies installed simultaneously can cause serious issues, thus other copies are suppressed until this issue gets resolved. Here’s what you can do:</p>
+			<ul class="ul-square">
+				<li>Please check your <a href="<?php echo admin_url( 'plugins.php' ) ?>">Plugins screen</a> and disable the older copies of LayerSlider. <b>Remember, you should see at least two copies of LayerSlider and you should disable those beside the one you’ve just installed.</b> Look at their version number to easily identify them. You’ll likely want to disable the ones with a lower version number.</li>
+				<li>If the other copies aren’t listed there, it’s almost certain that your active WordPress theme loads LayerSlider as a bundled plugin. In such a case, please check your theme’s settings and find a way to uninstall or disable loading the bundled version of LayerSlider. The process is different for each theme, thus we recommend contacting the appropriate theme author if you experience difficulties.</li>
+			</ul>
+			<p><small style="font-size: 13px; color: #666;">This message will automatically be dismissed once the issue has been resolved. You can also disable all copies of LayerSlider under the Plugins screen to hide this message. However, we strongly discourage choosing that since you might be stuck with an old and potentially outdated version of LayerSlider or no access to any version at all.</small></p>
+		</div>
+
+<?php } }
 
 
-// Basic configuration
-define('LS_DB_TABLE', 'layerslider');
-define('LS_DB_VERSION', '6.5.5');
-define('LS_PLUGIN_VERSION', '6.7.1');
+if( ! function_exists( 'ls_server_requirements_notice' ) ) {
+	function ls_server_requirements_notice() { ?>
+		<div class="notice notice-error" style="text-align: justify;">
+			<h3>Action Required: LayerSlider cannot run on your server with its current settings</h3>
+			<p><b>LayerSlider requires PHP <?php echo LS_MINIMUM_PHP_VERSION ?> or greater. Please contact your hosting provider and ask them to upgrade the PHP on your server. WordPress itself has much higher <a target="_blank" href="https://wordpress.org/about/requirements/">requirements</a> with its current releases. Upgrading is necessary to be compatible with the latest releases of WordPress and the overwhelming majority of its themes and plugins. It’s also crucial for security and performance, so be pushy if your host is hesitant. <a href="https://wordpress.org/support/update-php/" target="_blank">Learn more about updating PHP</a></b></p>
+
+			<p><b>Alternatively, if you’ve previously purchased LayerSlider, you can log in to <a href="https://account.kreaturamedia.com/" target="_blank">Your Account</a> and download & install an older release that supported this version of PHP. However, we strongly recommend to use this only as a temporary measure.</b></p>
+
+			<p><small style="font-size: 13px; color: #666;">This message will automatically be dismissed once the issue has been resolved. After that, look for the <b>LayerSlider</b> sidebar menu item to get started using the plugin. You can also disable LayerSlider under the Plugins screen to hide this message. However, we strongly discourage choosing to look away as your site will remain in a vulnerable state and you will experience more and more issues with themes and plugins if you don’t take the necessary steps.</small></p>
+		</div>
+
+<?php } }
 
 
-// Path info
-// v6.2.0: LS_ROOT_URL is now set in the after_setup_theme action
-// hook to provide a way for theme authors to override its value
-define('LS_ROOT_FILE', __FILE__);
-define('LS_ROOT_PATH', dirname(__FILE__));
+if( ! function_exists( 'ls_wordpress_requirements_notice' ) ) {
+	function ls_wordpress_requirements_notice() { ?>
+		<div class="notice notice-error" style="text-align: justify;">
+			<h3>Action Required: LayerSlider cannot run on this version of WordPress</h3>
+			<p><b>LayerSlider requires WordPress <?php echo LS_MINIMUM_WP_VERSION ?> or greater. Please visit <a href="<?php echo admin_url( 'update-core.php' ) ?>">Dashboard → Updates</a> and try to run the updater. If you run into troubles, contact your server hosting provider and ask them to make any changes that may be necessary. Your current WordPress version is reached its End-of-Life, meaning it doesn’t even receive security updates. Updating is strongly recommended.</b></p>
 
+			<p><b>Alternatively, if you’ve previously purchased LayerSlider, you can log in to <a href="https://account.kreaturamedia.com/" target="_blank">Your Account</a> and download & install an older release that supported this version of WordPress. However, we strongly recommend to use this only as a temporary measure.</b></p>
 
-// Other constants
-define('LS_WP_ADMIN', true);
-define('LS_PLUGIN_SLUG', basename(dirname(__FILE__)));
-define('LS_PLUGIN_BASE', plugin_basename(__FILE__));
-define('LS_MARKETPLACE_ID', '1362246');
-define('LS_TEXTDOMAIN', 'LayerSlider');
-define('LS_REPO_BASE_URL', 'https://repository.kreaturamedia.com/v4/');
+			<p><small style="font-size: 13px; color: #666;">This message will automatically be dismissed once the issue has been resolved. After that, look for the <b>LayerSlider</b> sidebar menu item to get started using the plugin. You can also disable LayerSlider under the Plugins screen to hide this message. However, we strongly discourage choosing to look away as your site will remain in a vulnerable state and you will experience more and more issues with themes and plugins if you don’t take the necessary steps.</small></p>
+		</div>
 
-
-if( ! defined('NL')  ) { define('NL', "\r\n"); }
-if( ! defined('TAB') ) { define('TAB', "\t");  }
-
-
-// Load & initialize plugin config class
-include LS_ROOT_PATH.'/classes/class.ls.config.php';
-LS_Config::init();
-
-// Shared
-include LS_ROOT_PATH.'/wp/scripts.php';
-include LS_ROOT_PATH.'/wp/menus.php';
-include LS_ROOT_PATH.'/wp/hooks.php';
-include LS_ROOT_PATH.'/wp/widgets.php';
-include LS_ROOT_PATH.'/wp/shortcodes.php';
-include LS_ROOT_PATH.'/wp/compatibility.php';
-include LS_ROOT_PATH.'/includes/slider_utils.php';
-include LS_ROOT_PATH.'/classes/class.ls.posts.php';
-include LS_ROOT_PATH.'/classes/class.ls.sliders.php';
-include LS_ROOT_PATH.'/classes/class.ls.sources.php';
-include LS_ROOT_PATH.'/classes/class.ls.popups.php';
-
-// Back-end only
-if( is_admin() ) {
-
-	include LS_ROOT_PATH.'/wp/actions.php';
-	include LS_ROOT_PATH.'/wp/activation.php';
-	include LS_ROOT_PATH.'/wp/tinymce.php';
-	include LS_ROOT_PATH.'/wp/notices.php';
-	include LS_ROOT_PATH.'/classes/class.ls.revisions.php';
-
-	LS_Revisions::init();
-}
-
-if( ! class_exists('KM_PluginUpdatesV3') ) {
-	require_once LS_ROOT_PATH.'/classes/class.km.autoupdate.plugins.v3.php';
-}
-
-// Register [layerslider] shortcode
-LS_Shortcode::registerShortcode();
-
-
-// Add default skins.
-// Reads all sub-directories (individual skins) from the given path.
-LS_Sources::addSkins(LS_ROOT_PATH.'/static/layerslider/skins/');
-
-// Popup
-LS_Popups::init();
-
-
-// Setup auto updates. This class also has additional features for
-// non-activated sites such as fetching update info.
-$GLOBALS['LS_AutoUpdate'] = new KM_PluginUpdatesV3( array(
-	'name' 			=> 'LayerSlider WP',
-	'repoUrl' 		=> LS_REPO_BASE_URL,
-	'root' 			=> LS_ROOT_FILE,
-	'version' 		=> LS_PLUGIN_VERSION,
-	'itemID' 		=> LS_MARKETPLACE_ID,
-	'codeKey' 		=> 'layerslider-purchase-code',
-	'authKey' 		=> 'layerslider-authorized-site',
-	'channelKey' 	=> 'layerslider-release-channel'
-));
-
-
-// Load locales
-add_action('plugins_loaded', 'layerslider_plugins_loaded');
-function layerslider_plugins_loaded() {
-	load_plugin_textdomain('LayerSlider', false, LS_PLUGIN_SLUG . '/locales/' );
-}
-
-
-// Offering a way for authors to override LayerSlider resources by
-// triggering filter and action hooks after the theme has loaded.
-add_action('after_setup_theme', 'layerslider_after_setup_theme');
-function layerslider_after_setup_theme() {
-
-	// Set the LS_ROOT_URL constant
-	$url = apply_filters('layerslider_root_url', plugins_url('', __FILE__));
-	define('LS_ROOT_URL', $url);
-
-	// Trigger the layerslider_ready action hook
-	layerslider_loaded();
-
-	// Backwards compatibility for theme authors
-	LS_Config::checkCompatibility();
-}
-
-
-
-// Sets up LayerSlider as theme-bundled version by
-// disabling certain features and hiding premium notices.
-function layerslider_set_as_theme() {
-
-	LS_Config::setAsTheme();
-}
-
-
-function layerslider_hide_promotions() {
-	LS_Config::set('promotions', false);
-}
+<?php } }

@@ -6,7 +6,7 @@
 	width: 100%;
 	position: fixed;
 	background-color: rgba(0,0,0,0.85);
-	z-index: 9999;
+	z-index: 999;
 	color: rgba(255,255,255,0.9);
 	padding: 1.1em;
 	text-align: center;
@@ -23,7 +23,7 @@
 
 .avia-cookie-consent a.avia_cookie_infolink,
 .avia-cookie-consent p,
-.avia-cookie-consent #avia_cookie_consent{
+.avia-cookie-consent .avia-cookie-consent-button{
 	display: inline-block;
 	vertical-align: middle;
 	font-size: 12px;
@@ -43,10 +43,12 @@
 	margin-right: 0.5em;
 }
 
-#avia_cookie_consent{
+.avia-cookie-consent .avia-cookie-consent-button,
+.avia-popup .avia-cookie-consent-button{
 	cursor: pointer;
 	display: inline-block;
 	background-color: #fff;
+	border:2px solid transparent;
 	color: #000;
 	padding: 1.1em;
 	min-width: 80px;
@@ -55,12 +57,34 @@
 	transition: all 0.3s ease-in;
 	line-height: 1;
 	white-space: nowrap;
-	margin:0;
-	border:none;
+	margin:0 0 0 6px;
 }
 
-a#avia_cookie_consent:hover{
+
+.avia-cookie-consent .avia-cookie-consent-button.av-extra-cookie-btn,
+.avia-popup .avia-cookie-consent-button.av-extra-cookie-btn{
+	color: #fff;
+	background-color: transparent;
+	border-color: #fff;
+}
+
+.avia-cookie-consent .avia-cookie-consent-button.avia-cookie-hide-notification,
+.avia-popup .avia-cookie-consent-button.avia-cookie-hide-notification{
+	background-color: #fff;
+	color: #FF75B5;
+}
+
+.avia-cookie-consent .avia-cookie-consent-button.hidden{
+	display: none;
+}
+
+
+a.avia-cookie-consent-button:hover{
 	opacity: 0.9;
+}
+
+#av-consent-extra-info .av-hidden-escential-sc{
+	display: none;
 }
 
 .avia-cookiemessage-bottom{
@@ -92,10 +116,10 @@ a#avia_cookie_consent:hover{
 	margin-right: 0;
 }
 
-.avia-cookiemessage-top-left #avia_cookie_consent,
-.avia-cookiemessage-bottom-left #avia_cookie_consent,
-.avia-cookiemessage-top-right #avia_cookie_consent,
-.avia-cookiemessage-bottom-right #avia_cookie_consent{
+.avia-cookiemessage-top-left .avia-cookie-consent-button,
+.avia-cookiemessage-bottom-left .avia-cookie-consent-button,
+.avia-cookiemessage-top-right .avia-cookie-consent-button,
+.avia-cookiemessage-bottom-right .avia-cookie-consent-button{
 	margin: 0.5em;
 }
 
@@ -120,6 +144,11 @@ a#avia_cookie_consent:hover{
 }
 
 .avia-cookie-consent.cookiebar-hidden{
+	opacity: 0;
+	visibility: hidden;
+}
+
+.avia-cookie-consent.cookiebar-hidden-permanent{
 	opacity: 0;
 	visibility: hidden;
 }
@@ -152,6 +181,87 @@ body.admin-bar .avia-cookiemessage-top-left
 {
 	margin-top: 32px;
 }
+
+.av-inline-modal {
+    padding: 20px;
+    border-radius: 4px;
+    min-width: 250px;
+    max-width: 800px;
+    margin: 0 auto;
+    position: relative;
+    display: none;
+    -webkit-transition: opacity 0.2s ease-in-out;
+	transition: 		opacity 0.2s ease-in-out;
+	opacity: 0;
+}
+
+.av-inline-modal{
+	max-height: 80vh;
+	overflow: auto;
+}
+
+.av-inline-modal .avia-cookie-consent-modal-buttons-wrap{
+	padding-bottom: 10px;
+}
+
+.avia-popup .av-inline-modal{
+	display:block;
+	opacity: 1;
+}
+
+.avia-popup.mfp-removing .av-inline-modal{
+	opacity: 0;
+}
+
+.avia-popup .av-inline-modal .mfp-close{
+	right: 18px;
+	top:18px;
+}
+
+.avia-popup .av-inline-modal .mfp-close:hover{
+    border: 2px solid #e1e0e0;
+}
+
+.avia-popup .av-inline-modal .tabcontainer{
+	min-height: 320px;
+}
+
+.responsive.avia-safari.avia_mobile .avia-popup .av-inline-modal .tabcontainer.sidebar_tab{
+	overflow: scroll;
+}
+
+.avia-popup .av-inline-modal .tab{
+	padding: 20px 16px;
+	font-size: 14px;
+	font-weight: bold;
+}
+
+.avia-popup .av-inline-modal > .av-special-heading{padding-right:40px;}
+
+.avia-popup .av-inline-modal.avia-hide-popup-close .mfp-close{
+	display: none;
+}
+
+#av-cookie-consent-badge:hover{
+	cursor:pointer;
+}
+
+#av-cookie-consent-badge.av-consent-badge-left-bottom{
+	display: block;
+	bottom: 50px;
+	left: 0px;
+}
+
+#av-cookie-consent-badge.av-consent-badge-right-bottom{
+	display: block;
+	bottom: 50px;
+	right: 0px;
+}
+
+.av-cookies-consent-hide-message-bar #av-cookie-consent-badge{
+	display: none;
+}
+
 /*
 @media only screen and (max-width: 989px){
 
@@ -166,7 +276,7 @@ body.admin-bar .avia-cookiemessage-top-left
 		margin-right: 0;
 	}
 
-	#avia_cookie_consent{
+	.avia-cookie-consent-button{
 		margin: 0.5em;
 	}
 
@@ -222,3 +332,33 @@ body.admin-bar .avia-cookiemessage-top-left
 	}
 }
 */
+
+.avia-privacy-reload-tooltip-link-container{
+	display: none;
+}
+
+#top .avia-privacy-reload-tooltip-link-container.av-display-tooltip {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 400px;
+    opacity: 1;
+    z-index: 10000;
+    padding: 20px;
+    display: block;
+    border-radius: 3px;
+    background-color: #fff;
+    margin-left: -200px;
+    text-align: center;
+    line-height: 1.4em;
+    box-shadow: 0px 0px 19px 0px rgba(0,0,0,0.2);
+}
+
+#top .avia-privacy-reload-tooltip-link-container.av-display-tooltip a{
+	color:#333;
+    text-decoration: none;
+}
+
+.avia-privacy-reload-tooltip span.avia-arrow{
+	display: none;
+}

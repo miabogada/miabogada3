@@ -1,6 +1,6 @@
-<?php 
-	if ( !defined('ABSPATH') ){ die(); }
-	
+<?php
+	if( ! defined( 'ABSPATH' ) ){ die(); }
+
 	global $avia_config;
 
 	/*
@@ -10,17 +10,17 @@
 
 
 	 echo avia_title(array('title' => __('Error 404 - page not found', 'avia_framework')));
-	 
+
 	 do_action( 'ava_after_main_title' );
 	?>
 
 
 		<div class='container_wrap container_wrap_first main_color <?php avia_layout_class( 'main' ); ?>'>
-			
-			<?php 
+
+			<?php
 				do_action('avia_404_extra'); // allows user to hook into 404 page fr extra functionallity. eg: send mail that page is missing, output additional information
 			?>
-			
+
 			<div class='container'>
 
 				<main class='template-page content <?php avia_layout_class( 'content' ); ?> units' <?php avia_markup_helper(array('context' => 'content'));?>>
@@ -52,4 +52,5 @@
 
 
 
-<?php get_footer(); ?>
+<?php
+		get_footer();

@@ -1,8 +1,10 @@
 <?php
 /*
-ATTENTION: Changes to this file will only be visible in your frontend after you have re-saved your Themes Styling Page
-*/
-
+ * ATTENTION: Changes to this file will only be visible in your frontend after you have re-saved your Themes Styling Page
+ * ==========
+ *
+ */
+if( ! defined( 'ABSPATH' ) ) {  exit;  }    // Exit if accessed directly
 
 
 /*
@@ -28,14 +30,22 @@ $default_font_size  => empty or a px size
 
 
 global 	$avia_config;
-$output = "";
-$body_color = "";
 
-extract($color_set);
-if ($main_color !== NULL) { extract($main_color); }
-extract($styles);
+$output = '';
+$body_color = '';
 
-unset($background_image);
+//	variables are in scope of includes\admin\register-dynamic-styles.php
+extract( $color_set );
+
+if( $main_color !== null )
+{
+	extract( $main_color );
+}
+
+extract( $styles );
+
+unset( $background_image );
+
 ######################################################################
 # CREATE THE CSS DYNAMIC CSS RULES
 ######################################################################
@@ -63,20 +73,23 @@ html.html_boxed {background: $body_background;}
 
 ";
 
-if($default_font_size)
+//	responsive typography
+if( ! empty( $typos ) )
 {
-	$output .= "body, body .avia-tooltip {font-size: $default_font_size; }";
+	$output .= \enfold\styling\Responsive_Typo()->create_css_rules( $typos );
 }
 
 /*color sets*/
-foreach ($color_set as $key => $colors) // iterates over the color sets: usually $key is either: header_color, main_color, footer_color, socket_color
+foreach( $color_set as $key => $colors ) // iterates over the color sets: usually $key is either: header_color, main_color, footer_color, socket_color
 {
-	$key = ".".$key;
-	extract($colors);
-	$constant_font 	= avia_backend_calc_preceived_brightness($primary, 230) ?  '#ffffff' : $bg;
-	$button_border  = avia_backend_calculate_similar_color($primary, 'darker', 2);
-	$button_border2 = avia_backend_calculate_similar_color($secondary, 'darker', 2);
-	
+	$key = '.' . $key;
+
+	extract( $colors );
+
+	$constant_font = avia_backend_calc_preceived_brightness( $primary, 230 ) ? '#ffffff' : $bg;
+	$button_border = avia_backend_calculate_similar_color( $primary, 'darker', 2 );
+	$button_border2 = avia_backend_calculate_similar_color( $secondary, 'darker', 2 );
+
 	/*general styles*/
 	$output.= "
 $key, $key div, $key header, $key main, $key aside, $key footer, $key article, $key nav, $key section, $key  span, $key  applet, $key object, $key iframe, $key h1, $key h2, $key h3, $key h4, $key h5, $key h6, $key p, $key blockquote, $key pre, $key a, $key abbr, $key acronym, $key address, $key big, $key cite, $key code, $key del, $key dfn, $key em, $key img, $key ins, $key kbd, $key q, $key s, $key samp, $key small, $key strike, $key strong, $key sub, $key sup, $key tt, $key var, $key b, $key u, $key i, $key center, $key dl, $key dt, $key dd, $key ol, $key ul, $key li, $key fieldset, $key form, $key label, $key legend, $key table, $key caption, $key tbody, $key tfoot, $key thead, $key tr, $key th, $key td, $key article, $key aside, $key canvas, $key details, $key embed, $key figure, $key fieldset, $key figcaption, $key footer, $key header, $key hgroup, $key menu, $key nav, $key output, $key ruby, $key section, $key summary, $key time, $key mark, $key audio, $key video, #top $key .pullquote_boxed, .responsive #top $key .avia-testimonial, .responsive #top.avia-blank #main $key.container_wrap:first-child, #top $key.fullsize .template-blog .post_delimiter, $key .related_posts.av-related-style-full a{
@@ -152,19 +165,22 @@ color:$bg;
 border-color:$button_border2;
 }
 
-$key .ajax_controlls a:hover{
-border-color:$secondary;
-}
+$key .avia-toc-style-elegant a.avia-toc-level-0:last-child:after, $key .avia-toc-style-elegant a:first-child:after, $key .avia-toc-style-elegant a.avia-toc-level-0:after {background-color:$bg; border-color: $secondary }
+$key .avia-toc-style-elegant a:first-child span:after, $key .avia-toc-style-elegant a.avia-toc-level-0 span:after {background-color:$bg;}
+$key .avia-toc-style-elegant a:first-child:hover span:after, $key .avia-toc-style-elegant a.avia-toc-level-0:hover span:after {border-color: $secondary}
+
+$key .avia-toc-style-elegant a:before{border-color: $border}
+$key .avia-toc-style-elegant a:first-child:after, $key .avia-toc-style-elegant a.avia-toc-level-0:after {border-color: $secondary; background-color: $bg;}
+$key .avia-toc-style-elegant a:last-child:after{ background-color:$border;}
 
 $key .timeline-bullet{
 background-color:$border;
 border-color: $bg;
 }
 
-$key table, $key .widget_nav_menu ul:first-child>.current-menu-item, $key .widget_nav_menu ul:first-child>.current_page_item, $key .widget_nav_menu ul:first-child>.current-menu-ancestor, $key .pagination .current, $key .pagination a, $key.iconbox_top .iconbox_content, $key .av_promobox, $key .toggle_content, $key .toggler:hover, #top $key .av-minimal-toggle .toggler, $key .related_posts_default_image, $key .search-result-counter, $key .container_wrap_meta, $key .avia-content-slider .slide-image, $key .avia-slider-testimonials .avia-testimonial-content, $key .avia-testimonial-arrow-wrap .avia-arrow, $key .news-thumb, $key .portfolio-preview-content, $key .portfolio-preview-content .avia-arrow, $key .av-magazine .av-magazine-entry-icon, $key .related_posts.av-related-style-full a, $key .aviaccordion-slide, $key.avia-fullwidth-portfolio .pagination, $key .isotope-item.special_av_fullwidth .av_table_col.portfolio-grid-image, $key .av-catalogue-list li:hover, $key .wp-playlist, $key .avia-slideshow-fixed-height > li, $key .avia-form-success, $key .av-boxed-grid-style .avia-testimonial{
+$key table, $key .widget_nav_menu ul:first-child>.current-menu-item, $key .widget_nav_menu ul:first-child>.current_page_item, $key .widget_nav_menu ul:first-child>.current-menu-ancestor, $key .pagination .current, $key .pagination a, $key.iconbox_top .iconbox_content, $key .av_promobox, $key .toggle_content, $key .toggler:hover, #top $key .av-minimal-toggle .toggler, $key .related_posts_default_image, $key .search-result-counter, $key .container_wrap_meta, $key .avia-content-slider .slide-image, $key .avia-slider-testimonials .avia-testimonial-content, $key .avia-testimonial-arrow-wrap .avia-arrow, $key .news-thumb, $key .portfolio-preview-content, $key .portfolio-preview-content .avia-arrow, $key .av-magazine .av-magazine-entry-icon, $key .related_posts.av-related-style-full a, $key .aviaccordion-slide, $key.avia-fullwidth-portfolio .pagination, $key .isotope-item.special_av_fullwidth .av_table_col.portfolio-grid-image, $key .av-catalogue-list li:hover, $key .wp-playlist, $key .avia-slideshow-fixed-height > li, $key .avia-form-success, $key .avia-form-error, $key .av-boxed-grid-style .avia-testimonial{
 background: $bg2;
 }
-
 
 
 #top $key .post_timeline li:hover .timeline-bullet{
@@ -219,7 +235,10 @@ background-color:$bg;
 color: $meta;
 }
 
-$key .main_menu .menu ul li a:hover, $key .av-subnav-menu ul a:hover{
+$key .main_menu .menu ul li a:hover,
+$key .main_menu .menu ul li a:focus,
+$key .av-subnav-menu ul a:hover,
+$key .av-subnav-menu ul a:focus{
 background-color:$bg2;
 }
 
@@ -227,12 +246,15 @@ $key .sub_menu>ul>li>a, $key .sub_menu>div>ul>li>a, $key .main_menu ul:first-chi
 color:$meta;
 }
 
-#top $key .main_menu .menu ul li>a:hover{
+#top $key .main_menu .menu ul li > a:hover,
+#top $key .main_menu .menu ul li > a:focus{
 color:$color;
 }
 
 $key .av-subnav-menu a:hover,
+$key .av-subnav-menu a:focus,
 $key .main_menu ul:first-child > li a:hover,
+$key .main_menu ul:first-child > li a:focus,
 $key .main_menu ul:first-child > li.current-menu-item > a,
 $key .main_menu ul:first-child > li.current_page_item > a,
 $key .main_menu ul:first-child > li.active-parent-item > a{
@@ -243,32 +265,53 @@ color:$color;
 color:$primary;
 }
 
-$key .sub_menu>ul>li>a:hover, $key .sub_menu>div>ul>li>a:hover{
+$key .sub_menu > ul > li > a:hover,
+$key .sub_menu > ul > li > a:focus,
+$key .sub_menu > div > ul > li > a:hover,
+$key .sub_menu > div > ul > li > a:focus{
 color:$color;
 }
 
 #top $key .sub_menu ul li a:hover,
+#top $key .sub_menu ul li a:focus,
 $key .sub_menu ul:first-child > li.current-menu-item > a,
 $key .sub_menu ul:first-child > li.current_page_item > a,
 $key .sub_menu ul:first-child > li.active-parent-item > a{
 color:$color;
 }
 
-$key .sub_menu li ul a, $key #payment, $key .sub_menu ul li, $key .sub_menu ul, #top $key .sub_menu li li a:hover{
+$key .sub_menu li ul a, $key #payment, $key .sub_menu ul li, $key .sub_menu ul,
+#top $key .sub_menu li li a:hover,
+#top $key .sub_menu li li a:focus{
 background-color: $bg;
 }
 
 $key#header .avia_mega_div > .sub-menu.avia_mega_hr, .html_bottom_nav_header.html_logo_center #top #menu-item-search>a{
-border-color:$border;
+border-color: $border;
 }
 
-@media only screen and (max-width: 767px) { 
-
-#top #wrap_all .av_header_transparency{
-	background-color:$bg;
-	color: $color;
-	border-color: $border;
+#top $key .widget_pages ul li a:focus,
+#top $key .widget_nav_menu ul li a:focus{
+color: $secondary;
 }
+
+@media only screen and (max-width: 767px) {
+
+	#top #wrap_all .av_header_transparency{
+		background-color:$bg;
+		color: $color;
+		border-color: $border;
+	}
+
+}
+
+@media only screen and (max-width: 989px) {
+
+	.html_mobile_menu_tablet #top #wrap_all .av_header_transparency{
+		background-color:$bg;
+		color: $color;
+		border-color: $border;
+	}
 
 }
 
@@ -276,9 +319,8 @@ border-color:$border;
 
 
 
-
 //apply background image if available
-if(isset($background_image))
+if( isset( $background_image ) )
 {
 	$output .= "$key .header_bg { background: $background_image; }
 	";
@@ -299,7 +341,7 @@ background-color: $bg;
 color: $meta;
 }
 
-$key .ajax_search_image{
+$key .av_ajax_search_image{
 background-color: $primary;
 color:$bg;
 }
@@ -308,7 +350,7 @@ $key .ajax_search_excerpt{
 color: $meta;
 }
 
-$key .ajax_search_title{
+$key .av_ajax_search_title{
 color: $heading;
 }
 
@@ -316,14 +358,14 @@ $key .ajax_load{
 background-color:$primary;
 }
 
-$key .searchsubmit_wrapper{
+$key .av_searchsubmit_wrapper{
 background-color:$primary;
 }
 
 ";
 
 //button
-$button_font = avia_backend_calc_preceived_brightness($primary, 230) ?  '#ffffff' : $bg;
+$button_font = avia_backend_calc_preceived_brightness( $primary, 230 ) ? '#ffffff' : $bg;
 
 $output.= "
 #top $key .avia-color-theme-color{
@@ -349,11 +391,31 @@ background-color: $secondary;
 }
 
 
+
+#top $key .avia-font-color-theme-color,
+#top $key .avia-font-color-theme-color-hover:hover{
+color: $button_font;
+}
+
+$key .avia-font-color-theme-color-subtle{
+color: $color;
+}
+
+$key .avia-font-color-theme-color-subtle-hover:hover{
+color: $heading;
+}
+
+#top $key .avia-font-color-theme-color-highlight,
+#top $key .avia-font-color-theme-color-highlight-hover:hover{
+color: $button_font;
+}
+
 ";
 
 //icon list
 
-$iconlist = avia_backend_calculate_similar_color($border, 'darker', 1);
+$iconlist = avia_backend_calculate_similar_color( $border, 'darker', 1 );
+
 $output.= "
 $key .avia-icon-list .iconlist_icon{
 background-color:$iconlist;
@@ -371,8 +433,8 @@ color:$meta;
 
 // timeline
 
-$timeline = avia_backend_calculate_similar_color($border, 'darker', 1);
-$timeline_date = avia_backend_calculate_similar_color($border, 'darker', 4);
+$timeline = avia_backend_calculate_similar_color( $border, 'darker', 1 );
+$timeline_date = avia_backend_calculate_similar_color( $border, 'darker', 4 );
 
 $output.= "
 $key .avia-timeline .milestone_icon{
@@ -403,7 +465,7 @@ $key .avia-timeline-horizontal .av-milestone-content-wrap footer{
 background-color:$timeline;
 }
 
-$key .av-timeline-nav a span{
+$key .av-timeline-nav a{
 background-color:$timeline;
 }
 
@@ -434,7 +496,7 @@ color:$primary;
 
 
 // masonry
-$masonry = avia_backend_calculate_similar_color($bg2, 'darker', 1);
+$masonry = avia_backend_calculate_similar_color( $bg2, 'darker', 1 );
 $output.= "
 
 $key .av-masonry{
@@ -526,8 +588,8 @@ background-color: $meta;
 
 
 //pricing table
-$stripe  = avia_backend_calculate_similar_color($primary, 'lighter', 2);
-$stripe2 = avia_backend_calculate_similar_color($primary, 'lighter', 1);
+$stripe  = avia_backend_calculate_similar_color( $primary, 'lighter', 2 );
+$stripe2 = avia_backend_calculate_similar_color( $primary, 'lighter', 1 );
 
 $output.= "
 $key tr:nth-child(even), $key .avia-data-table .avia-heading-row .avia-desc-col, $key .avia-data-table .avia-highlight-col, $key .pricing-table>li:nth-child(even), body $key .pricing-table.avia-desc-col li, #top $key  .avia-data-table.avia_pricing_minimal th{
@@ -566,7 +628,7 @@ border-color:$border;
 
 //media player + progress bar shortcode
 
-$stripe = avia_backend_calculate_similar_color($primary, 'lighter', 2);
+$stripe = avia_backend_calculate_similar_color( $primary, 'lighter', 2 );
 
 $output.= "
 $key .theme-color-bar .bar{
@@ -598,30 +660,29 @@ background-color:$bg2;
 
 
 // ajax search shortcode
-$meta_info_color = avia_backend_calculate_similar_color($primary, 'lighter', 4);
 
 $output.= "
-$key .searchform_element_results .ajax_search_entry,
-$key .searchform_element_results .ajax_search_title,
-$key.searchform_element_results .ajax_search_entry,
-$key.searchform_element_results .ajax_search_title{
+$key .av_searchform_element_results .av_ajax_search_entry,
+$key .av_searchform_element_results .av_ajax_search_title,
+$key.av_searchform_element_results .av_ajax_search_entry,
+$key.av_searchform_element_results .av_ajax_search_title{
 color: $primary;
 }
 
-$key .searchform_element_results .ajax_search_excerpt,
-$key.searchform_element_results .ajax_search_excerpt{
-color: $meta_info_color;
+$key .av_searchform_element_results .ajax_search_excerpt,
+$key.av_searchform_element_results .ajax_search_excerpt{
+color: $meta;
 }
 
-$key .searchform_element_results .ajax_search_image,
-$key.searchform_element_results .ajax_search_image{
-color: $meta_info_color;
+$key .av_searchform_element_results .av_ajax_search_image,
+$key.av_searchform_element_results .av_ajax_search_image{
+color: $meta;
 }
 ";
 
 /*contact form send button*/
 
-$stripe2nd = avia_backend_calculate_similar_color($secondary, 'lighter', 1);
+$stripe2nd = avia_backend_calculate_similar_color( $secondary, 'lighter', 1 );
 $output.= " $key .button.av-sending-button{
 background: $secondary;
 background-image:	-webkit-linear-gradient(-45deg, $secondary 25%, $stripe2nd 25%, $stripe2nd 50%, $secondary 50%, $secondary 75%, $stripe2nd 75%, $stripe2nd);
@@ -659,7 +720,7 @@ color:$border;
 }
 
 $key #bbpress-forums li.bbp-body ul.forum, $key #bbpress-forums li.bbp-body ul.topic,
-.avia_transform $key .bbp-replies .bbp-reply-author:before, 
+.avia_transform $key .bbp-replies .bbp-reply-author:before,
 .avia_transform .forum-search $key .bbp-reply-author:before,
 .avia_transform .forum-search $key .bbp-topic-author:before{
 background-color:$bg;
@@ -679,14 +740,14 @@ background-color:$bg2;
 
 
 	//apply background image if available
-	if(isset($background_image))
+	if( isset( $background_image ) )
 	{
 		$output .= "$key { background: $background_image; }
 		";
 	}
 
 	//button and dropcap color white unless primary color is very very light
-	if(avia_backend_calc_preceived_brightness($primary, 220))
+	if( avia_backend_calc_preceived_brightness( $primary, 220 ) )
 	{
 		$output .= "
 
@@ -700,67 +761,67 @@ background-color:$bg2;
 
 
 	//only for certain areas
-	switch($key)
+	switch( $key )
 	{
 		case '.header_color':
 
-		$constant_font = avia_backend_calc_preceived_brightness($primary, 230) ?  '#ffffff' : $bg;
+		$constant_font = avia_backend_calc_preceived_brightness( $primary, 230 ) ? '#ffffff' : $bg;
 		$output .= "
 
 			#main, .avia-msie-8 .av_header_sticky_disabled#header{
 			background-color:$bg;
 			}
-			
+
 			.html_header_sidebar #header .av-main-nav > li > a .avia-menu-text{color:$heading;}
 			.html_header_sidebar #header .av-main-nav > li > a .avia-menu-subtext{color:$meta;}
-			.html_header_sidebar #header .av-main-nav > li:hover > a .avia-menu-text, 
+			.html_header_sidebar #header .av-main-nav > li:hover > a .avia-menu-text,
 			.html_header_sidebar #header .av-main-nav > li.current-menu-ancestor > a .avia-menu-text,
 			.html_header_sidebar #header .av-main-nav li.current-menu-item > a .avia-menu-text
 			{color:$primary;}
-			
+
 			#top #wrap_all .av_seperator_big_border#header .av-menu-button-colored > a{background-color: $primary; }
 			#top #wrap_all .av_seperator_big_border#header .av-menu-button-bordered > a{background-color: $bg2; }
-			
-			
+
+
 			html.html_header_sidebar #wrap_all{
 			background-color:$bg;
 			}
-			
+
 			$key .av-hamburger-inner, $key .av-hamburger-inner::before, $key .av-hamburger-inner::after{
 				background-color:$meta;
 			}
-			
-			
+
+
 			.html_av-overlay-side #top .av-burger-overlay-scroll{background:$bg}
-			
+
 			.html_av-overlay-side #top #wrap_all div .av-burger-overlay-scroll #av-burger-menu-ul a:hover{background-color:$bg2;}
-			
-			
+
+
 			.html_av-overlay-side-classic #top #wrap_all .av-burger-overlay #av-burger-menu-ul li a{ border-color: $border; }
-			
+
 			.html_av-overlay-side #top #wrap_all .av-burger-overlay-scroll #av-burger-menu-ul a{color:$color}
-			
+
 			.html_av-overlay-side.av-burger-overlay-active #top #wrap_all #header .menu-item-search-dropdown a{ color:$color }
 			.html_av-overlay-side-classic #top .av-burger-overlay li li .avia-bullet,
-			.html_av-overlay-side.av-burger-overlay-active #top .av-hamburger-inner, 
-			.html_av-overlay-side.av-burger-overlay-active #top .av-hamburger-inner::before, 
+			.html_av-overlay-side.av-burger-overlay-active #top .av-hamburger-inner,
+			.html_av-overlay-side.av-burger-overlay-active #top .av-hamburger-inner::before,
 			.html_av-overlay-side.av-burger-overlay-active #top .av-hamburger-inner::after{
 				background-color:$color;
 			}
-			
-			
-			
-			
+
+
+
+
 			";
-		
-		if(!empty($avia_config['backend_colors']['burger_color']))
+
+		if( ! empty( $avia_config['backend_colors']['burger_color'] ) )
 		{
 			$output .= "
 			$key .av-hamburger-inner, $key .av-hamburger-inner::before, $key .av-hamburger-inner::after{
 				background-color:".$avia_config['backend_colors']['burger_color'].";
 			}
 			";
-			
+
 			$output .= " @media only screen and (max-width: 767px) {
 				#top $key .av-hamburger-inner, #top $key .av-hamburger-inner::before, #top $key .av-hamburger-inner::after{
 					background-color:".$avia_config['backend_colors']['burger_color'].";
@@ -768,63 +829,112 @@ background-color:$bg2;
 			}
 			";
 		}
-		
-			
-		if(!empty($avia_config['backend_colors']['menu_transparent']))
+
+
+		if( ! empty( $avia_config['backend_colors']['menu_transparent'] ) )
 		{
 			$output .= "
 			#top #wrap_all .av_header_transparency .main_menu ul:first-child > li > a, #top #wrap_all .av_header_transparency .sub_menu > ul > li > a, #top .av_header_transparency #header_main_alternate, .av_header_transparency #header_main .social_bookmarks li a{ color:inherit; border-color: transparent; background: transparent;}
 
-			
+
 			#top #wrap_all {$key}.av_header_transparency, #top #wrap_all {$key}.av_header_transparency .phone-info.with_nav span,
 			#top #header{$key}.av_header_transparency .av-main-nav > li > a .avia-menu-text, #top #header{$key}.av_header_transparency .av-main-nav > li > a .avia-menu-subtext{
-				color: ".$avia_config['backend_colors']['menu_transparent']."
+				color: {$avia_config['backend_colors']['menu_transparent']};
 			}
-			
-			#top {$key}.av_header_transparency .avia-menu-fx, 
-			.av_header_transparency div .av-hamburger-inner, .av_header_transparency div .av-hamburger-inner::before, .av_header_transparency div .av-hamburger-inner::after{background:".$avia_config['backend_colors']['menu_transparent'].";}
+
+			#top {$key}.av_header_transparency .avia-menu-fx,
+			.av_header_transparency div .av-hamburger-inner, .av_header_transparency div .av-hamburger-inner::before, .av_header_transparency div .av-hamburger-inner::after{background:{$avia_config['backend_colors']['menu_transparent']};}
 			";
-			
+
+			if( ! empty( $avia_config['backend_colors']['menu_transparent_hover'] ) )
+			{
+				$output .= "
+					#top #header{$key}.av_header_transparency .av-main-nav > li > a:hover,
+					#top #header{$key}.av_header_transparency .av-main-nav > li > a:focus,
+					#top #header{$key}.av_header_transparency .av-main-nav > li > a:hover .avia-menu-text,
+					#top #header{$key}.av_header_transparency .av-main-nav > li > a:focus .avia-menu-text,
+					#top #header{$key}.av_header_transparency .av-main-nav > li > a:hover .avia-menu-subtext,
+					#top #header{$key}.av_header_transparency .av-main-nav > li > a:focus .avia-menu-subtext{
+						color: {$avia_config['backend_colors']['menu_transparent_hover']};
+						opacity: 1;
+						-webkit-transition: color 0.4s ease-in-out;
+						transition: color 0.4s ease-in-out;
+					}
+
+					#top #header{$key}.av_header_transparency .av-main-nav > li > a:hover .av-hamburger-inner,
+					#top #header{$key}.av_header_transparency .av-main-nav > li > a:focus .av-hamburger-inner,
+					#top #header{$key}.av_header_transparency .av-main-nav > li > a:hover .av-hamburger-inner::before,
+					#top #header{$key}.av_header_transparency .av-main-nav > li > a:focus .av-hamburger-inner::before,
+					#top #header{$key}.av_header_transparency .av-main-nav > li > a:hover .av-hamburger-inner::after,
+					#top #header{$key}.av_header_transparency .av-main-nav > li > a:focus .av-hamburger-inner::after{
+						background: {$avia_config['backend_colors']['menu_transparent_hover']};
+						opacity: 1;
+					}
+				";
+			}
+
 			$output .= " @media only screen and (max-width: 767px) {
 				#top #wrap_all {$key}.av_header_transparency, #top #wrap_all {$key}.av_header_transparency .phone-info.with_nav span,
 				#top #header{$key}.av_header_transparency .av-main-nav > li > a .avia-menu-text, #top #header{$key}.av_header_transparency .av-main-nav > li > a .avia-menu-subtex{ color: $meta }
-				
+
 				$key div .av-hamburger-inner, $key div .av-hamburger-inner::before, $key div .av-hamburger-inner::after{
 					background-color:$meta;
 				}
-				
+
 				#top .av_header_with_border.av_header_transparency .avia-menu.av_menu_icon_beside{
 					border-color:$border;
 				}
 			}
 			";
+
+			$output .= " @media only screen and (max-width: 989px) {
+				.html_mobile_menu_tablet #top #wrap_all {$key}.av_header_transparency, .html_mobile_menu_tablet #top #wrap_all {$key}.av_header_transparency .phone-info.with_nav span,
+				.html_mobile_menu_tablet #top #header{$key}.av_header_transparency .av-main-nav > li > a .avia-menu-text, .html_mobile_menu_tablet #top #header{$key}.av_header_transparency .av-main-nav > li > a .avia-menu-subtex{ color: $meta }
+
+				.html_mobile_menu_tablet $key div .av-hamburger-inner, .html_mobile_menu_tablet $key div .av-hamburger-inner::before, .html_mobile_menu_tablet $key div .av-hamburger-inner::after{
+					background-color:$meta;
+				}
+
+				.html_mobile_menu_tablet #top .av_header_with_border.av_header_transparency .avia-menu.av_menu_icon_beside{
+					border-color:$border;
+				}
+			}
+			";
+
+
+
+
+
+
 		}
-		
-		if(!empty($avia_config['backend_colors']['burger_flyout_width']))
+
+		if( ! empty( $avia_config['backend_colors']['burger_flyout_width'] ) )
 		{
 			$output .= "
-			
-			.html_av-overlay-side .av-burger-overlay-scroll{width:".$avia_config['backend_colors']['burger_flyout_width']."; 
-			 -webkit-transform: translateX(".$avia_config['backend_colors']['burger_flyout_width']."); transform: translateX(".$avia_config['backend_colors']['burger_flyout_width']."); 
+
+			.html_av-overlay-side .av-burger-overlay-scroll{width:".$avia_config['backend_colors']['burger_flyout_width'].";
+			 -webkit-transform: translateX(".$avia_config['backend_colors']['burger_flyout_width']."); transform: translateX(".$avia_config['backend_colors']['burger_flyout_width'].");
 			}
-			
-			
-			
+
+
+
 			";
 		}
-		
-		
+
+
 
 		break;
 
 		case '.main_color':
 
-			$constant_font = avia_backend_calc_preceived_brightness($primary, 230) ?  '#ffffff' : $bg;
+			$constant_font = avia_backend_calc_preceived_brightness( $primary, 230 ) ? '#ffffff' : $bg;
 			$output .= "
-			
+
 			#main{ border-color: $border;  }
+
+			#scroll-top-link:hover, #av-cookie-consent-badge:hover{ background-color: $bg2; color: $primary; border:1px solid $border; }
 			
-			#scroll-top-link:hover{ background-color: $bg2; color: $primary; border:1px solid $border; }
+			.html_stretched #wrap_all{background-color:$bg;}
 
 			";
 
@@ -839,7 +949,7 @@ background-color:$bg2;
 			#top .avia-datepicker-div .ui-datepicker-buttonpane button{ background-color: $primary; color: $constant_font; border-color: $primary; }
 
 			";
-			
+
 			/*site loader*/
 			$output .= "
 			#top .av-siteloader{ border-color: $border; border-left-color:$primary; }
@@ -848,16 +958,17 @@ background-color:$bg2;
 			#top .av-siteloader-wrap{background-color: $bg; }
 			.av-preloader-reactive #top .av-siteloader:before{ background-color: $border;  }
 			";
-			
+
 			/*tab section*/
-			
+
 			$output .= "
 			.av-tab-section-tab-title-container{background-color: $bg2; }
 			#top .av-section-tab-title{color:$meta;}
 			#top a.av-active-tab-title{color:$primary;}
 			#top .av-tab-arrow-container span{background-color: $bg;}
 			";
-		break;
+
+            break;
 
 
 
@@ -865,7 +976,7 @@ background-color:$bg2;
 
 			$output .= "
 
-			
+
 
 			";
 
@@ -876,12 +987,9 @@ background-color:$bg2;
 
 			$output .= "
 
-			html, #scroll-top-link{ background-color: $bg; }
-			#scroll-top-link{ color: $color; border:1px solid $border; }
-			
-			.html_stretched #wrap_all{
-			background-color:$bg;
-			}
+			html, #scroll-top-link, #av-cookie-consent-badge{ background-color: $bg; }
+			#scroll-top-link, #av-cookie-consent-badge{ color: $color; border:1px solid $border; }
+
 			";
 
 
@@ -891,18 +999,27 @@ background-color:$bg2;
 
 
 	//unset all vars with the help of variable vars :)
-	foreach($colors as $key=>$val){ unset($$key); }
-
+	foreach( $colors as $key=>$val )
+	{
+		unset( $$key );
+	}
 
 }
 
-//filter to plug in, in case a plugin/extension/config file wants to make use of it
-$output = apply_filters('avia_dynamic_css_output', $output, $color_set);
+/**
+ * filter to plug in, in case a plugin/extension/config file wants to make use of it
+ *
+ * @used_by		enfold\config-events-calendar\event-mod-css-dynamic.php			10
+ * @used_by		enfold\config-woocommerce\woocommerce-mod-css-dynamic.php		10
+ * @used_by		Avia_WC_Block_Editor											10
+ *
+ */
+$output = apply_filters( 'avia_dynamic_css_output', $output, $color_set );
 
 
 
 ######################################################################
-# DYNAMIC ICONFONT CHARACTERS 
+# DYNAMIC ICONFONT CHARACTERS
 ######################################################################
 
 //forum topic icons
@@ -933,8 +1050,8 @@ $output .= "
 
 //lightbox next/prev icons
 $output .= "
-div.avia-popup button.mfp-arrow:before		{ ".av_icon_css_string('next_big')." }
-div.avia-popup button.mfp-arrow-left:before { ".av_icon_css_string('prev_big')."}
+div.avia-popup button.mfp-arrow:before		{ " . av_icon_css_string('next_big') . " }
+div.avia-popup button.mfp-arrow-left:before { " . av_icon_css_string('prev_big') . "}
 ";
 
 
@@ -945,43 +1062,58 @@ div.avia-popup button.mfp-arrow-left:before { ".av_icon_css_string('prev_big')."
 ######################################################################
 
 //compress output
-$output = preg_replace('/\r|\n|\t/', '', $output);
+if( ! defined( 'WP_DEBUG' ) || WP_DEBUG !== true )
+{
+	$output = preg_replace( '/\r|\n|\t/', '', $output );
+}
 
 //todo: if the style are generated for the wordpress header call the generating script, otherwise create a simple css file and link to that file
-
 
 $avia_config['style'] = array(
 
 		array(
-		'key'	=>	'direct_input',
-		'value'		=> $output
+			'key'	=> 'direct_input',
+			'value'	=> $output
 		),
 
 		array(
-		'key'	=>	'direct_input',
-		'value'	=> ".html_header_transparency #top .avia-builder-el-0 .container, .html_header_transparency #top .avia-builder-el-0 .slideshow_caption{padding-top:".avia_get_header_scroll_offset()."px;}"
-		),
-
-		//google webfonts
-		array(
-		'elements'	=> 'h1, h2, h3, h4, h5, h6, #top .title_container .main-title, tr.pricing-row td, #top .portfolio-title, .callout .content-area, .avia-big-box .avia-innerbox, .av-special-font, .av-current-sort-title, .html_elegant-blog #top .minor-meta, #av-burger-menu-ul li',
-		'key'	=>	'google_webfont',
-		'value'		=> avia_get_option('google_webfont')
+			'key'	=> 'direct_input',
+			'value'	=> '.html_header_transparency #top .avia-builder-el-0 .container, .html_header_transparency #top .avia-builder-el-0 .slideshow_caption{padding-top:' . avia_get_header_scroll_offset() . 'px;}'
 		),
 
 		//google webfonts
 		array(
-		'elements'	=> 'body',
-		'key'	=>	'google_webfont',
-		'value'		=> avia_get_option('default_font')
+			'elements'			=> 'h1, h2, h3, h4, h5, h6, #top .title_container .main-title, tr.pricing-row td, #top .portfolio-title, .callout .content-area, .avia-big-box .avia-innerbox, .av-special-font, .av-current-sort-title, .html_elegant-blog #top .minor-meta, #av-burger-menu-ul li',
+			'key'				=> 'google_webfont',
+			'value'				=> avia_get_option( 'google_webfont' ),
+			'font_source'		=> 'google_webfont',
+			'add_font_class'	=> false
 		),
-		
+
+		//google webfonts
 		array(
-		'key'	=>	'direct_input',
-		'value'		=> avia_get_option('quick_css')
+			'elements'			=> 'body',
+			'key'				=> 'google_webfont',
+			'value'				=> avia_get_option( 'default_font' ),
+			'font_source'		=> 'default_font',
+			'add_font_class'	=> true
 		),
 );
 
+$quick_css = avia_get_option( 'quick_css' );
+if( ! empty( $quick_css ) )
+{
+	$avia_config['style'][] =
+			array(
+					'key'	=> 'direct_input',
+					'value'	=> avia_get_option( 'quick_css' )
+				);
+}
 
-do_action('ava_generate_styles', $options, $color_set, $styles);
+
+/**
+ * @used_by		functions-enfold.php	avia_generate_grid_dimension()
+ * @used_by		functions-enfold.php	avia_framed_layout()
+ */
+do_action( 'ava_generate_styles', $options, $color_set, $styles );
 

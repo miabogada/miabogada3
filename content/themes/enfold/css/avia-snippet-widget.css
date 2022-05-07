@@ -33,8 +33,8 @@ padding-bottom:24px;
 
 #top .widget_nav_menu li{
 position: relative;
--webkit-box-sizing: content-box; 
--moz-box-sizing: content-box; 
+-webkit-box-sizing: content-box;
+-moz-box-sizing: content-box;
 box-sizing: content-box;
 clear:both;
 font-size:13px;
@@ -49,8 +49,14 @@ top:5px;
 }
 
 #top .sidebar_left .widget_nav_menu ul ul li:before {
-right: -10px;
+    right: -10px;
 }
+
+#top .sidebar_left.sidebar_align_left .widget_nav_menu ul ul li:before {
+    right: auto;
+    left: 0;
+}
+
 
 #top .widget_nav_menu ul ul li a{
 padding:6px 0px 7px 12px;
@@ -87,7 +93,12 @@ display:none;
 #top .widget_nav_menu .current_page_ancestor > ul,
 #top .widget_nav_menu .current-menu-ancestor > ul{
 display:block;
-padding:0 0 0 13px;
+/*padding:0 0 0 13px;*/
+}
+
+#top .widget_nav_menu .sub-menu > li{
+	display: block;
+	padding: 0 0 0 13px;
 }
 
 #top .sidebar_left .widget_nav_menu .current-menu-item > ul,
@@ -97,8 +108,21 @@ padding:0 0 0 13px;
 padding:0 13px 0 0 ;
 }
 
+#top .sidebar_left.sidebar_align_left .widget_nav_menu .current-menu-item > ul,
+#top .sidebar_left.sidebar_align_left .widget_nav_menu .current_page_item > ul,
+#top .sidebar_left.sidebar_align_left .widget_nav_menu .current_page_ancestor > ul,
+#top .sidebar_left.sidebar_align_left .widget_nav_menu .current-menu-ancestor > ul{
+    padding:0 0 0 13px ;
+}
+
+
 #top .sidebar_left .widget_nav_menu .sub-menu{
 padding-right: 13px;
+}
+
+#top .sidebar_left.sidebar_align_left .widget_nav_menu .sub-menu{
+    padding-left: 13px;
+    padding-right: 0;
 }
 
 
@@ -129,7 +153,7 @@ padding-bottom:30px;
 }
 
 #top .content .flex_column .widget_nav_menu li a:hover,
-#top .content .flex_column .widget_nav_menu ul:first-child>.current-menu-item, 
+#top .content .flex_column .widget_nav_menu ul:first-child>.current-menu-item,
 #top .content .flex_column .widget_nav_menu ul:first-child>.current_page_item{
   background-color: rgba(255,255,255,0.4);
 }
@@ -163,6 +187,7 @@ padding-bottom:30px;
 
 .av-instagram-follow{width:100%; text-align: center; display: block; margin-top:3px;}
 
+.avia-instagram-feed .av-instagram-errors-msg.av-instagram-admin{ color: #cc0033; }
 
 /*mailchimp*/
 #top .av-mailchimp-widget fieldset, #top .av-mailchimp-widget form{margin:0;}
@@ -187,9 +212,8 @@ overflow: hidden;
 }
 
 /*combo widget*/
-#top .widget_tab_tags{ display:none; }
 .js_active .avia_combo_widget .tab_titles{border-bottom-width: 1px; border-bottom-style: solid;}
-.js_active #top .avia_combo_widget .active_tab{ border-bottom-style: solid; border-bottom-width: 2px;}
+.js_active #top .avia_combo_widget .active_tab{ border-bottom-style: solid; border-bottom-width: 2px; border-bottom-color: initial;}
 .js_active #top .avia_combo_widget .tab_content {
 padding:0;
 background: transparent;
@@ -199,9 +223,10 @@ border: none;
 .js_active .avia_combo_widget .top_tab .tab{
 border: none;
 background: transparent;
-padding:5px 0;
-width: 33%;
-text-align: center;
+padding:5px 10px;
+border-bottom-style: solid;
+border-bottom-width: 2px;
+border-bottom-color: transparent;
 }
 
 /*likebox*/
@@ -219,7 +244,189 @@ top: -4px;
 position: relative;
 }
 
+.avia_fb_likebox .av_facebook_widget_page_title{
+	font-size: 1.2em;
+	font-weight: 700;
+	margin: 12px 0;
+}
 
+
+.widget .av_widget_img_text_confirm .av_img_text_confirm_link{
+	display: inline-block;
+	position: relative;
+	width: 100%;
+}
+
+.widget .av_widget_img_text_confirm .av_img_text_confirm_link img{
+	width: 100%;
+}
+
+.widget .av_widget_img_text_confirm .av_img_text_confirm_link:hover{
+	text-decoration: none;
+}
+
+.widget .av_widget_img_text_confirm .av_img_text_confirm_text{
+	font-size: 1.5em;
+	position: absolute;
+	padding: 25px;
+	text-align: center;
+	top: 0;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	opacity: 0;
+	width: 100%;
+}
+
+.widget .av_widget_img_text_confirm .av_img_text_confirm_text span{
+	width: 100%;
+}
+
+.widget .av_widget_img_text_confirm .av_img_text_confirm_text:hover{
+	opacity: 1;
+}
+
+
+.avia_fb_likebox .av_facebook_widget_main_wrap{
+	background-attachment: scroll;
+	background-size: cover;
+	background-position: center center;
+	width:100%;
+	min-width:180px;
+	min-height:214px;
+	position: relative;
+	font-family: Helvetica, Arial, sans-serif;
+}
+
+.avia_fb_likebox .av_facebook_widget_main_wrap_shadow{
+	position: absolute;
+	top:0;
+	left:0;right:0;
+	height:90px;
+	background: linear-gradient(to bottom, rgba(0, 0, 0, .7) 0%, rgba(0, 0, 0, 0) 100%);
+	z-index: 0;
+}
+
+.avia_fb_likebox .av_facebook_widget_logo_image{
+	position: absolute;
+	height:54px;
+	width:54px;
+	top:8px;
+	left:8px;
+	background:#fff;
+	box-shadow: 0 1px 6px rgba(0, 0, 0, .5);
+	border: 2px solid #fff;
+	z-index: 2;
+}
+
+.avia_fb_likebox .av_facebook_widget_logo_image img{
+	max-width: 50px;
+	max-height:50px;
+	text-align: center;
+	display: inline-block;
+}
+
+.avia_fb_likebox  .av_facebook_widget_page_title_container{
+	color:#fff;
+	margin: 0px 18px 0 68px;
+	position: relative;
+	z-index: 2;
+	font-size: 18px;
+    font-weight: 500;
+    line-height: 1.358;
+    margin-bottom: -5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, .9);
+    top:8px;
+	min-height: 95px;
+}
+
+#top .avia_fb_likebox  .av_facebook_widget_page_title_container a{
+	color:#fff;
+}
+
+.avia_fb_likebox  .av_facebook_widget_page_title_container .av_facebook_widget_content{
+	font-size: 12px;
+}
+
+
+
+.avia_fb_likebox  .av_facebook_widget_page_title_container span{
+	display: block;
+}
+
+
+.avia_fb_likebox .av_facebook_widget_add_info{
+	width:100%;
+	min-height: 83px;
+	background: #f6f7f9;
+    border: 1px solid #e9ebee;
+    border-top: 0;
+	font-size: 12px;
+    line-height: 16px;
+    color: #4b4f56;
+    padding:8px;
+}
+
+.avia_fb_likebox .av_facebook_widget_add_info_inner{
+	background: #fff;
+    border-color: #e9ebee #dfe0e4 #d0d1d5;
+    border-radius: 2px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .12);
+    position: relative;
+    min-height: 66px;
+    padding:8px;
+}
+
+.avia_fb_likebox .av_facebook_widget_imagebar{
+	height:32px;
+	background-repeat: repeat;
+	background-size: auto 100%;
+	background-image:url("../images/layout/fake_facebook.jpg");
+}
+
+.avia_fb_likebox .av_facebook_widget_add_info_inner_wrap{
+	min-height: 15px;
+	padding-bottom: 4px;
+	display: block;
+}
+
+.avia_fb_likebox .av_facebook_widget_button{
+	background-color: #f6f7f9;
+    border-color: #ced0d4;
+    color: #4b4f56;
+    line-height: 22px;
+    border: 1px solid rgba(0, 0, 0, .12);
+    font-size: 12px;
+    padding: 0 5px;
+    display: inline-block;
+    margin:8px;
+}
+
+.avia_fb_likebox .av_facebook_widget_icon {
+    display: inline-block;
+    margin-right: 5px;
+    background: #3a5797;
+    height: 16px;
+    width: 16px;
+    color: #fff;
+    text-align: center;
+    border-radius: 2px;
+    font-size: 11px;
+    line-height: 18px;
+}
+
+
+
+.avia_fb_likebox .ajax_load{
+	display: none;
+}
+
+.avia_fb_likebox.ajax_loading_now .ajax_load{
+	display: block;
+}
 
 
 /*social media count widget*/
@@ -416,14 +623,19 @@ text-align: center;
 left:0;
 }
 
-/*maps*/
+/*Google Maps*/
 
-.avia_google_maps_container{
+.widget .avia-google-map-container{
 height:230px;
 width:100%;
 }
 
-.content .avia_google_maps_container{
+.widget .avia-google-map-container{
+	background: no-repeat center;
+	background-size: cover;
+}
+
+.widget .content .avia-google-map-container{
 height:230px;
 }
 
@@ -431,14 +643,55 @@ height:230px;
 margin: 0 0px 3px 0;
 }
 
-.avia_google_maps_container img, .avia_google_maps_container  a img{
+.widget .avia-google-map-container img,
+.widget .avia-google-map-container a img{
 max-width: none;
 }
 
-.avia_google_maps_container div, .avia_google_maps_container img, .avia_google_maps_container a{
+.widget .avia-google-map-container div,
+.widget .avia-google-map-container img,
+.widget .avia-google-map-container a{
 -webkit-box-sizing: content-box; -moz-box-sizing: content-box; box-sizing: content-box;
 }
 
+.widget .avia-google-map-container .av_text_confirm_link{
+    padding: 25px;
+    text-align: center;
+    opacity: 0;
+    position: absolute;
+    width: 150px;
+    left: 50%;
+    top: 50%;
+    margin-left: -100px;
+    margin-top: -50px;
+    background: rgba(0,0,0,0.7);
+    border-radius: 3px;
+    color: #fff;
+    font-size: 1em;
+    line-height: 1.3em;
+    -webkit-transition: all 0.3s ease-in-out;
+	transition: 		all 0.3s ease-in-out;
+}
+
+.widget .avia-google-map-container .av_text_confirm_link:hover{
+	color: #fff;
+    background: rgba(0,0,0,0.9);
+}
+
+.widget .avia-google-map-container.av_gmaps_show_delayed.av-no-fallback-img .av_text_confirm_link,
+.widget .avia-google-map-container.av_gmaps_show_page_only.av-no-fallback-img .av_text_confirm_link{
+	height: auto;
+	opacity: 1;
+}
+
+.widget .avia-google-map-container .av_text_confirm_link span{
+	width: 100%;
+}
+
+.widget .avia-google-map-container:hover .av_text_confirm_link{
+	opacity: 1;
+	text-decoration: none;
+}
 
 /*news widget*/
 
@@ -639,4 +892,198 @@ top:1px;
 #top .widget_twitter .intent-meta{ display: block; font-size: 11px; margin-top:8px;}
 #top .widget_twitter .intent-meta a{ text-decoration: none; margin-right: 4px;  }
 #top .widget_twitter .intent-meta a:hover{text-decoration: underline;}
+
+/* user defined text alignmnt for sidebars */
+.sidebar_left.sidebar_align_left.sidebar{text-align: left;}
+.sidebar_left.sidebar_align_left .news-thumb{float:left; margin: 4px 9px 0 0}
+.sidebar_left.sidebar_align_left .widget_nav_menu ul:first-child>.current-menu-item,
+.sidebar_left.sidebar_align_left .widget_nav_menu ul:first-child>.current_page_item,
+.sidebar_left.sidebar_align_left .widget_nav_menu ul:first-child>.current-menu-ancestor{
+    padding-left: 52px;
+    padding-right:0;
+    left: 0;
+    right: auto;
+    top:1px;
+}
+
+
+/* Table of Contents */
+
+.avia-toc-container{
+    position: relative;
+}
+
+.avia-toc-container a {
+    display: block;
+    position: relative;
+    line-height: 1.4em;
+}
+
+.avia-toc-container a:hover {
+    text-decoration: none;
+}
+
+/* simple style */
+.avia-toc-style-simple a{
+    overflow-x: hidden;
+    margin-bottom: 1em;
+    min-height: 25px;
+}
+
+.avia-toc-style-simple a span{
+    background-color: #fff;
+    position: relative;
+    padding-right: 5px;
+    z-index: 2;
+}
+
+
+.avia-toc-style-simple a:after {
+    float: left;
+    width: 0;
+    color: rgba(0,0,0,0.25);
+    font-size: 9px;
+    font-weight: normal;
+    white-space: nowrap;
+    content:
+            ". . . . . . . . . . . . . . . . . . . . "
+            ". . . . . . . . . . . . . . . . . . . . "
+            ". . . . . . . . . . . . . . . . . . . . "
+            ". . . . . . . . . . . . . . . . . . . . "
+}
+
+.avia-toc-style-simple .avia-toc-level-0:after {line-height: 3;}
+.avia-toc-style-simple .avia-toc-level-1:after {line-height: 3;}
+.avia-toc-style-simple .avia-toc-level-2:after {line-height: 2.9;}
+.avia-toc-style-simple .avia-toc-level-3:after {line-height: 2.7;}
+.avia-toc-style-simple .avia-toc-level-4:after {line-height: 2.5;}
+.avia-toc-style-simple .avia-toc-level-5:after {line-height: 2.4;}
+
+
+.avia-toc-style-simple .avia-toc-level-0 {font-weight: bold; font-size: 1em;}
+.avia-toc-style-simple .avia-toc-level-2 {font-weight: normal; font-size: 0.9375em;}
+.avia-toc-style-simple .avia-toc-level-3 {font-weight: normal; font-size: 0.875em;}
+.avia-toc-style-simple .avia-toc-level-4 {font-weight: normal; font-size: 0.8125em;}
+.avia-toc-style-simple .avia-toc-level-5 {font-weight: normal; font-size: 0.8125em; font-style: italic;}
+
+/* indentation */
+
+.avia-toc-style-simple.avia-toc-indent .avia-toc-level-1 {margin-left: 0.625em}
+.avia-toc-style-simple.avia-toc-indent .avia-toc-level-2 {margin-left: 1em}
+.avia-toc-style-simple.avia-toc-indent .avia-toc-level-3 {margin-left: 1.428em}
+.avia-toc-style-simple.avia-toc-indent .avia-toc-level-4 {margin-left: 2.307em}
+.avia-toc-style-simple.avia-toc-indent .avia-toc-level-5 {margin-left: 2.692em}
+
+
+/* elegant style */
+.avia-toc-style-elegant{
+    padding-left: 30px;
+}
+
+.avia-toc-style-elegant a {
+    text-transform: uppercase;
+    padding-bottom: 1.5em;
+}
+
+.avia-toc-style-elegant .avia-toc-level-0{
+	font-weight: bold;
+	font-size: 0.875em;
+}
+
+.avia-toc-style-elegant .avia-toc-level-1{
+	font-weight: normal;
+	font-size: 0.875em;
+}
+
+.avia-toc-style-elegant .avia-toc-level-2{
+	font-weight: normal;
+	font-size: 0.8125em;
+}
+
+.avia-toc-style-elegant .avia-toc-level-3{
+	font-weight: bold;
+	font-size: 0.8125em;
+}
+
+.avia-toc-style-elegant .avia-toc-level-4{
+	font-weight: normal;
+	font-size: 0.75em
+}
+
+.avia-toc-style-elegant .avia-toc-level-5{
+	font-weight: normal;
+	font-size: 0.75em;
+	font-style: italic;
+}
+
+
+.avia-toc-style-elegant a:before{
+    content: '';
+    position: absolute;
+    height: calc(100% + 0.3em);
+    left: -20px;
+    top: 0.15em;
+    border-left-width: 2px;
+    border-left-style: solid;
+    border-left-color: rgba(0,0,0,0.08);
+}
+
+.avia-toc-style-elegant a.avia-toc-level-0:last-child:after,
+.avia-toc-style-elegant a:first-child:after,
+.avia-toc-style-elegant a.avia-toc-level-0:after,
+.avia-toc-style-elegant a:first-child span:after,
+.avia-toc-style-elegant a.avia-toc-level-0 span:after{
+    content: '';
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    border-width: 3px;
+    border-style: solid;
+    border-radius: 9px;
+    left: -26px;
+    top: 0.15em;
+    z-index: 2;
+}
+
+.avia-toc-style-elegant a:first-child span:after,
+.avia-toc-style-elegant a.avia-toc-level-0 span:after{
+    border-color: transparent;
+    z-index: 1;
+}
+
+.avia-toc-style-elegant a:first-child:hover span:after,
+.avia-toc-style-elegant a.avia-toc-level-0:hover span:after{
+    animation: sonarEffect 2s ease-out infinite;
+}
+
+.avia-toc-style-elegant a:last-child:before{
+    display: none;
+}
+
+.avia-toc-style-elegant a:last-child:after{
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    left: -23px;
+    top: 0.4em;
+    border-radius: 8px;
+}
+
+/* indentation */
+.avia-toc-style-elegant.avia-toc-indent .avia-toc-level-1{
+	padding-left: 0.625em
+}
+.avia-toc-style-elegant.avia-toc-indent .avia-toc-level-2{
+	padding-left: 1em
+}
+.avia-toc-style-elegant.avia-toc-indent .avia-toc-level-3{
+	padding-left: 1.428em
+}
+.avia-toc-style-elegant.avia-toc-indent .avia-toc-level-4{
+	padding-left: 2.307em
+}
+.avia-toc-style-elegant.avia-toc-indent .avia-toc-level-5{
+	padding-left: 2.692em
+}
 

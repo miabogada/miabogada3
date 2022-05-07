@@ -1,4 +1,4 @@
-<?php  if ( ! defined('AVIA_FW')) exit('No direct script access allowed');
+<?php
 /**
  * This file holds various classes and methods necessary to hijack the wordpress menu and improve it with mega menu capabilities
  *
@@ -10,13 +10,10 @@
  * @since		Version 1.0
  * @package 	AviaFramework
  */
-
-/**
- *
- */
+if( ! defined( 'AVIA_FW' ) )  {  exit( 'No direct script access allowed' );  }
 
 
-if( !class_exists( 'avia_megamenu' ) )
+if( ! class_exists( 'avia_megamenu' ) )
 {
 
 	/**
@@ -34,7 +31,7 @@ if( !class_exists( 'avia_megamenu' ) )
 		 */
 		function __construct()
 		{
-			
+
 			//adds stylesheet and javascript to the menu page
 			add_action('admin_menu', array(&$this,'avia_menu_header'));
 
@@ -282,6 +279,9 @@ if( !class_exists( 'avia_walker' ) )
 				$attributes .= ! empty( $item->xfn )        ? ' rel="'    . esc_attr( $item->xfn        ) .'"' : '';
 				$attributes .= ! empty( $item->url )        ? ' href="'   . esc_attr( $item->url        ) .'"' : '';
 
+				// @since 4.8.6.5    accessibility rules
+				$attributes .= ' role="menuitem" tabindex="0"';
+
 				$item_output .= $args->before;
 				$item_output .= '<a'. $attributes .'>';
 				$item_output .= $args->link_before . apply_filters( 'the_title', $item->title, $item->ID ) . $args->link_after;
@@ -358,13 +358,13 @@ if( !class_exists( 'avia_backend_walker' ) )
 		 * @see Walker::start_el()
 		 * @since 3.0.0
 		 *
-		 * @param string $output Passed by reference. Used to append additional content.
-		 * @param object $item Menu item data object.
-		 * @param int $depth Depth of menu item. Used for padding.
-		 * @param int $current_page Menu item ID.
+		 * @param string $output	Passed by reference. Used to append additional content.
+		 * @param object $item		Menu item data object.
+		 * @param int $depth		Depth of menu item. Used for padding.
 		 * @param object $args
+		 * @param int $current_object_id	Menu item ID.
 		 */
-		function start_el(&$output, $item, $depth = 0, $args = array(), $current_object_id = 0 ) {
+		function start_el( &$output, $item, $depth = 0, $args = array(), $current_object_id = 0 ) {
 			global $_wp_nav_menu_max_depth;
 		$_wp_nav_menu_max_depth = $depth > $_wp_nav_menu_max_depth ? $depth : $_wp_nav_menu_max_depth;
 
@@ -418,7 +418,7 @@ if( !class_exists( 'avia_backend_walker' ) )
 		if ( 0 == $depth )
 			$submenu_text = 'style="display: none;"';
 
-		
+
 			/*avia edit*/
 			$itemValue = "";
 			if($depth == 0)
@@ -427,7 +427,7 @@ if( !class_exists( 'avia_backend_walker' ) )
 				if($itemValue != "") $itemValue = 'avia_mega_active ';
 			}
 			/*end edit*/
-			
+
 			?>
 
 			<li id="menu-item-<?php echo $item_id; ?>" class="<?php echo $itemValue; echo implode(' ', $classes ); ?>">
@@ -525,20 +525,20 @@ if( !class_exists( 'avia_backend_walker' ) )
 							<textarea id="edit-menu-item-description-<?php echo $item_id; ?>" class="widefat edit-menu-item-description" rows="3" cols="20" name="menu-item-description[<?php echo $item_id; ?>]"><?php echo esc_html( $item->post_content ); ?></textarea>
 						</label>
 					</p>
-					
-					<?php 
-					
+
+					<?php
+
 					//this hook should provide compatibility with a lot of wordpress plugins altering the walker like http://wordpress.org/plugins/nav-menu-roles/
 					//learn more here: http://shazdeh.me/2014/06/25/custom-fields-nav-menu-items/
-					
-					do_action( 'wp_nav_menu_item_custom_fields', $item_id, $item, $depth, $args ); 
-					
+
+					do_action( 'wp_nav_menu_item_custom_fields', $item_id, $item, $depth, $args, $current_object_id );
+
 					?>
-					
+
 					<div class='avia_mega_menu_options'>
 					<!-- ################# avia custom code here ################# -->
 						<?php
-							
+
 						$title = 'Use as Mega Menu';
 						$key = "menu-item-avia-megamenu";
 						$value = get_post_meta( $item->ID, '_'.$key, true);
@@ -593,15 +593,15 @@ if( !class_exists( 'avia_backend_walker' ) )
 					<?php do_action('avia_mega_menu_option_fields', $output, $item, $depth, $args); ?>
 
 					<!-- ################# end avia custom code here ################# -->
-					
-					
+
+
 					<div class="menu-item-actions description-wide submitbox">
 						<?php if( 'custom' != $item->type ) : ?>
 							<p class="link-to-original">
 								<?php printf( __('Original: %s'), '<a href="' . esc_attr( $item->url ) . '">' . esc_html( $original_title ) . '</a>' ); ?>
 							</p>
 						<?php endif; ?>
-						<a class="item-delete submitdelete deletion" id="delete-<?php echo $item_id; ?>" href="<?php 
+						<a class="item-delete submitdelete deletion" id="delete-<?php echo $item_id; ?>" href="<?php
 						echo wp_nonce_url(
 							add_query_arg(
 								array(
@@ -614,10 +614,10 @@ if( !class_exists( 'avia_backend_walker' ) )
 						); ?>"><?php _e('Remove'); ?></a> <span class="meta-sep"> | </span> <a class="item-cancel submitcancel" id="cancel-<?php echo $item_id; ?>" href="<?php	echo add_query_arg( array('edit-menu-item' => $item_id, 'cancel' => time()), remove_query_arg( $removed_args, admin_url( 'nav-menus.php' ) ) );
 							?>#menu-item-settings-<?php echo $item_id; ?>">Cancel</a>
 					</div>
-					
-					
-					
-					
+
+
+
+
 
 					<input class="menu-item-data-db-id" type="hidden" name="menu-item-db-id[<?php echo $item_id; ?>]" value="<?php echo $item_id; ?>" />
 					<input class="menu-item-data-object-id" type="hidden" name="menu-item-object-id[<?php echo $item_id; ?>]" value="<?php echo esc_attr( $item->object_id ); ?>" />
@@ -655,7 +655,7 @@ if( !function_exists( 'avia_fallback_menu' ) )
 			//	apply class to allow burger menu CSS to hide menu
 		$page_list = wp_list_pages('echo=0&title_li=&sort_column=menu_order'.$exclude);
 		$page_list = str_replace( 'page_item', 'page_item menu-item', $page_list );
-		
+
 		$output .=	"<div class='avia-menu fallback_menu av-main-nav-wrap'>";
 		$output .=		"<ul id='avia-menu' class='menu avia_mega av-main-nav'>";
 		$output .=			"<li class='menu-item{$current}'><a href='".get_bloginfo('url')."'>".__('Home','avia_framework')."</a></li>";
@@ -663,7 +663,7 @@ if( !function_exists( 'avia_fallback_menu' ) )
 		$output .=			apply_filters('avf_fallback_menu_items', "", 'fallback_menu');
 		$output .=		"</ul>";
 		$output .=	"</div>";
-		
+
 		if($params['echo'])
 		{
 			echo $output;

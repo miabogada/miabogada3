@@ -38,9 +38,15 @@ Post Slider
 
 /* new; */
 -webkit-transform-style: flat;
--webkit-perspective: 1000px;
 -webkit-backface-visibility: hidden;
+
+/* removed due to blurry text in win, chrome
+-webkit-perspective: 1000px;
+ */
+
 }
+
+
 
 
 /*audio*/

@@ -28,12 +28,22 @@ Countdown
 
 @media only screen and (max-width: 989px)
 {
-	.responsive .av-countdown-cell-inner{padding:10px 10px; }
+	.responsive .av-countdown-cell-inner{
+		padding: 10px 10px;
+	}
 }
 
 @media only screen and (max-width: 767px)
 {
-	.responsive .av-countdown-cell-inner{padding:12px 7px;}
-	.responsive .av-countdown-time{font-size:30px !important;}
-	.av-countdown-time-label{text-transform: none;}
+	.responsive .av-countdown-cell-inner{
+		padding: 12px 7px;
+	}
+
+	.responsive .av-countdown-time{
+		font-size: 30px;
+	}
+
+	.av-countdown-time-label{
+		text-transform: none;
+	}
 }

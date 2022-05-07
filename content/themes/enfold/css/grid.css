@@ -84,7 +84,7 @@ body .unit.alpha, body .units.alpha {
 /* Note: Design for a width of 768px, Gutter: 30px, Unit: 32px */
 @media only screen and (min-width: 768px) and (max-width: 989px) {
   .responsive #top { overflow-x: hidden; }
-  .responsive .boxed#top , 
+  .responsive .boxed#top ,
   .responsive.html_boxed.html_header_sticky #header{ width: 782px;}
   .responsive .container{ max-width: 782px; }
   .responsive.html_mobile_menu_tablet .boxed #wrap_all { overflow: hidden; /*needed for mobile menu scrolling */ }
@@ -95,16 +95,39 @@ body .unit.alpha, body .units.alpha {
 /* All Tablets and smaller */
 @media only screen and (max-width: 989px) {
 
-.responsive #top #wrap_all .flex_column.av-break-at-tablet, .responsive #top #wrap_all .av-break-at-tablet .flex_cell {
-    margin: 0;
-    margin-bottom: 20px;
-    width: 100%;
-    display: block;
-  }
-  
-.responsive #top #wrap_all .av-break-at-tablet-flextable, .responsive .av-layout-grid-container.av-break-at-tablet {
-	display: block;	
-  }
+	.responsive #top #wrap_all .flex_column.av-break-at-tablet,
+	.responsive #top #wrap_all .av-break-at-tablet .flex_cell {
+		margin: 0;
+		margin-bottom: 20px;
+		width: 100%;
+		display: block;
+	}
+
+	.responsive #top #wrap_all .av-break-at-tablet-flextable,
+	.responsive .av-layout-grid-container.av-break-at-tablet {
+		display: block;
+	}
+
+	.responsive #top #wrap_all .av-break-at-tablet-flextable.av-mobile-columns-flex{
+		display: flex;
+		flex-direction: column;
+	}
+
+	.responsive #top #wrap_all .av-break-at-tablet-flexwrapper.av-column-wrapper-individual.av-mobile-columns-flex{
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+	}
+
+	.responsive #top #wrap_all .av-break-at-tablet-flextable.av-mobile-columns-flex.av-columns-reverse,
+	.responsive #top #wrap_all .av-break-at-tablet-flexwrapper.av-column-wrapper-individual.av-mobile-columns-flex.av-columns-reverse{
+		flex-direction: column-reverse;
+	}
+
+	.responsive #top #wrap_all .av-flex-cells .no_margin{
+		height:auto !important;
+		overflow: hidden;
+	}
 
 }
 
@@ -113,33 +136,43 @@ body .unit.alpha, body .units.alpha {
 ================================================== */
 
 @media only screen and (max-width: 767px) {
-	
-  .responsive .boxed #wrap_all { overflow: hidden; /*needed for mobile menu scrolling */ }
-  .responsive #top { overflow-x: hidden; }
-  .responsive .boxed#top, .responsive #top.boxed .stretch_full , 
-  .responsive.html_boxed.html_header_sticky #header,
-  .responsive.html_boxed.html_header_transparency div #header{ width: 100%; max-width: 100%; }
-  .responsive #top .flex_column_table_cell{display: block;}
-  .responsive #top .flex_column_table{display:block;}
-  
-  .responsive #top #wrap_all .container {
-    width: 85%;
-    max-width: 85%;
-    margin: 0 auto;
-    padding-left:0;
-    padding-right:0;
-    float:none;
-  }
+
+	.responsive .boxed #wrap_all { overflow: hidden; /*needed for mobile menu scrolling */ }
+	.responsive #top { overflow-x: hidden; }
+	.responsive .boxed#top, .responsive #top.boxed .stretch_full ,
+	.responsive.html_boxed.html_header_sticky #header,
+	.responsive.html_boxed.html_header_transparency div #header{ width: 100%; max-width: 100%; }
+	.responsive #top .flex_column_table_cell{display: block;}
+	.responsive #top .flex_column_table{display:block;}
+
+	.responsive #top #wrap_all .av-mobile-columns-flex{
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+	}
+
+	.responsive #top #wrap_all .av-mobile-columns-flex.av-columns-reverse{
+		flex-direction: column-reverse;
+	}
+
+	.responsive #top #wrap_all .container {
+		width: 85%;
+		max-width: 85%;
+		margin: 0 auto;
+		padding-left:0;
+		padding-right:0;
+		float:none;
+	}
   .responsive .units, .responsive .unit {
     margin: 0;
   }
-  
+
   .responsive #top .container .av-content-small, .responsive #top #wrap_all .flex_column, .responsive #top #wrap_all .av-flex-cells .no_margin {
     margin: 0;
     margin-bottom: 20px;
     width: 100%;
   }
-  
+
   .responsive #top #wrap_all .av-flex-cells .no_margin{
 	  display: block;
 	  margin: 0;
@@ -148,18 +181,18 @@ body .unit.alpha, body .units.alpha {
 	  padding-left:8% !important;
 	  padding-right:8% !important;
   }
-  
+
   .responsive #top #wrap_all .av-flex-cells .no_margin .flex_cell_inner{
 	    width: 100%;
 		max-width: 100%;
-		margin: 0 auto;  
+		margin: 0 auto;
   }
-  
+
   .responsive #top #wrap_all .av-flex-cells .no_margin.av-zero-padding{
 	  padding-left:0% !important;
 	  padding-right:0% !important;
   }
-  
+
   .responsive #top #wrap_all .flex_column:empty{margin:0;}
 }
 /* #Mobile (Landscape)
@@ -336,11 +369,16 @@ div .av_one_tenth {
 #top .flex_column_table{
 	display: table;
 	table-layout: fixed;
-	width:100%;
+	width: 100%;
+	float: left;	/* added 4.7.4.1 to fix equal height after individual height columns  */
+}
+
+#top .flex_column_table.av-equal-height-column-flextable:not(:first-child){
+	margin-top: 50px;  /* added 4.7.5.1 to fix inconsistent layout equal height after individual height columns but remove when first entry  */
 }
 
 #top .flex_column_table_cell{
-	float:none;
+	float: none;
 	display: table-cell;
 }
 
@@ -355,33 +393,42 @@ div .av_one_tenth {
 
 /*breaking point logic for the common  1/4 element in ipads. makes sure that it converts to a 1/2 element in most cases*/
 @media only screen and (min-width: 768px) and (max-width: 989px) {
-  .responsive .av_one_fourth.first.el_before_av_one_fourth.flex_column_div,
-  .responsive .av_one_fourth.first + .av_one_fourth.flex_column_div,
-  .responsive .av_one_fourth.first + .av_one_fourth + .av_one_fourth.flex_column_div,
-  .responsive .av_one_fourth.first + .av_one_fourth + .av_one_fourth + .av_one_fourth.flex_column_div,
-  .responsive .av_one_half.first + .av_one_fourth.el_before_av_one_fourth.flex_column_div,
-  .responsive .av_one_half.first + .av_one_fourth.el_before_av_one_fourth + .av_one_fourth.flex_column_div,
-  .responsive .avia-content-slider-inner .av_one_fourth.flex_column_div {
-    margin-left: 4%;
-    width: 48%;
-  }
-  .responsive .av_one_fourth.first.el_before_av_one_fourth.flex_column_div,
-  .responsive .av_one_fourth.first + .av_one_fourth + .av_one_fourth.flex_column_div,
-  .responsive .av_one_half.first + .av_one_fourth.el_before_av_one_fourth.flex_column_div,
-  .responsive .av_one_fourth.first + .av_one_fourth + .av_one_half.flex_column_div,
-  .responsive .avia-content-slider-inner .av_one_fourth.first.flex_column_div {
-    margin-left: 0%;
-    clear: both;
-  }
-  .responsive .av_one_half.first.el_before_av_one_fourth.flex_column_div,
-  .responsive .av_one_fourth.first + .av_one_fourth + .av_one_half.flex_column_div {
-    width: 100%;
-  }
-  .responsive .av_one_half.first + .av_one_fourth.flex_column_div,
-  .responsive .av_one_half.first + .av_one_fourth + .av_one_fourth.flex_column_div,
-  .responsive .av_one_fourth.first + .av_one_fourth + .av_one_fourth.flex_column_div,
-  .responsive .av_one_fourth.first + .av_one_fourth + .av_one_fourth + .av_one_fourth.flex_column_div,
-  .responsive .av_one_fourth.first + .av_one_fourth + .av_one_half.flex_column_div {
-    margin-top: 30px;
-  }
+	.responsive .av_one_fourth.first.el_before_av_one_fourth.flex_column_div,
+	.responsive .av_one_fourth.first + .av_one_fourth.flex_column_div,
+	.responsive .av_one_fourth.first + .av_one_fourth + .av_one_fourth.flex_column_div,
+	.responsive .av_one_fourth.first + .av_one_fourth + .av_one_fourth + .av_one_fourth.flex_column_div,
+	.responsive .av_one_half.first + .av_one_fourth.el_before_av_one_fourth.flex_column_div,
+	.responsive .av_one_half.first + .av_one_fourth.el_before_av_one_fourth + .av_one_fourth.flex_column_div,
+	.responsive .avia-content-slider-inner .av_one_fourth.flex_column_div{
+		margin-left: 4%;
+		width: 48%;
+	}
+
+	/* added 4.8.9.1  broken layout with 25% width  https://kriesi.at/support/topic/4-column-layout-issues-on-ipad/  */
+	.responsive #top .no_margin.av_one_fourth{
+		margin-left: 0;
+		width: 50%;
+	}
+
+	.responsive .av_one_fourth.first.el_before_av_one_fourth.flex_column_div,
+	.responsive .av_one_fourth.first + .av_one_fourth + .av_one_fourth.flex_column_div,
+	.responsive .av_one_half.first + .av_one_fourth.el_before_av_one_fourth.flex_column_div,
+	.responsive .av_one_fourth.first + .av_one_fourth + .av_one_half.flex_column_div,
+	.responsive .avia-content-slider-inner .av_one_fourth.first.flex_column_div{
+		margin-left: 0%;
+		clear: both;
+	}
+
+	.responsive .av_one_half.first.el_before_av_one_fourth.flex_column_div,
+	.responsive .av_one_fourth.first + .av_one_fourth + .av_one_half.flex_column_div{
+		width: 100%;
+	}
+
+	.responsive .av_one_half.first + .av_one_fourth.flex_column_div,
+	.responsive .av_one_half.first + .av_one_fourth + .av_one_fourth.flex_column_div,
+	.responsive .av_one_fourth.first + .av_one_fourth + .av_one_fourth.flex_column_div,
+	.responsive .av_one_fourth.first + .av_one_fourth + .av_one_fourth + .av_one_fourth.flex_column_div,
+	.responsive .av_one_fourth.first + .av_one_fourth + .av_one_half.flex_column_div{
+		margin-top: 30px;
+	}
 }

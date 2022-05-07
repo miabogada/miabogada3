@@ -22,6 +22,15 @@ padding:20px;
 .avia-testimonial-name{display:block;}
 .avia-testimonial-arrow-wrap{display:none;}
 
+.avia-testimonial-meta-mini .avia-testimonial-subtitle-sep{
+	padding: 0 5px;
+}
+
+.avia-testimonial-meta-mini > *{
+	line-height: 1.3em;
+}
+
+
 .avia-testimonial-wrapper{display:table; margin: 30px 0; clear:both; width: 100%; table-layout: fixed; }
 .avia-testimonial-row{display: table-row;}
 body div .avia-testimonial{display: table-cell; float:none;}
@@ -49,7 +58,7 @@ transform:scale(1);
 .av-boxed-grid-style.avia-testimonial-wrapper{ border-spacing: 3px; border-collapse: separate;}
 .av-boxed-grid-style .avia-testimonial{border:none; padding:0px;}
 .av-boxed-grid-style .avia-testimonial_inner{padding:40px;}
-    
+
 
 .avia-testimonial.avia-first-testimonial{padding-left:0;}
 .avia-testimonial.avia-last-testimonial{padding-right:0;}
@@ -100,6 +109,5 @@ transform:scale(1);
 /* Mobile Portrait Size to Mobile Landscape Size (devices and browsers) */
 	@media only screen and (max-width: 479px) {
 
-		.responsive .avia-testimonial-image{margin:0; width:100%; float:none; text-align: center; margin-bottom: 15px; height: auto;}
 		.responsive .avia-grid-testimonials .avia-testimonial-meta{margin-left:0;}
 	}

@@ -64,13 +64,25 @@
 ================================================== */
 
 	/*font-stacks*/
-	.lucida-sans-websave{	font-family:"Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", Helvetica, Arial, sans-serif ;	}
-	.georgia-websave{		font-family:"Georgia", "Times New Roman", Times, serif;	}
-	.arial-websave{			font-family: Arial, Helvetica, Verdana, sans-serif;	}
-	.verdana-websave{		font-family: Verdana, Arial, Helvetica, sans-serif;	}
+	.arial-websave{			font-family: Arial, Helvetica, Helvetica Neue, HelveticaNeue, Verdana, sans-serif;	}
+	.arial-black-websave{	font-family: Arial Black, Arial Bold, Gadget, sans-serif;	}
+	.arial-narrow-websave{	font-family: Arial Narrow, Arial, sans-serif;  }
 	.helvetica-websave{		font-family: Helvetica, "HelveticaNeue", "Helvetica Neue", Arial, Verdana, sans-serif;	}
 	.helvetica-neue-websave{font-family: "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, Verdana, sans-serif;	}
-
+	.lucida-sans-websave{	font-family:"Lucida Sans", "Lucida Grande", "Lucida Sans Unicode", Helvetica, Helvetica Neue, HelveticaNeue, Arial, sans-serif;  }
+	.tahoma-websave{		font-family: Tahoma, Verdana, Segoe, sans-serif;  }
+	.trebuchet-ms-websave{	font-family: Trebuchet MS, Lucida Grande, Lucida Sans Unicode, Lucida Sans, Tahoma, sans-serif;  }
+	.verdana-websave{		font-family: Verdana, Arial, Helvetica, Geneva, sans-serif;	}	
+	.georgia-websave{		font-family:"Georgia", "Times New Roman", Times, serif;	}
+	.lucida-bright-websave{ font-family: Lucida Bright, Georgia, serif; }
+	.palatino-websave{		font-family: Palatino, Palatino Linotype, Palatino LT STD, Book Antiqua, Georgia, serif; }
+	.times-new-roman-websave{	font-family: TimesNewRoman, Times New Roman, Times, Baskerville, Georgia, serif;  }
+	.courier-new-websave{	font-family: Courier New, Courier, Lucida Sans Typewriter, Lucida Typewriter, monospace; }
+	.lucida-sans-typewriter-websave{	font-family: Lucida Sans Typewriter, Lucida Console, monaco, Bitstream Vera Sans Mono, monospace; }
+	.copperplate-websave{	font-family: Copperplate, Copperplate Gothic Light, fantasy; }
+	.papyrus-websave{		font-family: Papyrus, fantasy;  }
+	.brush-script-mt-websave{	font-family: Brush Script MT, cursive;  }
+	
 	/*default*/
 	h1, h2, h3, h4, h5, h6 {
 	/*	font-family: "Georgia", "Times New Roman", Helvetica, Arial, sans-serif; */
@@ -154,7 +166,6 @@
 		display:inline-block;
 		max-width: 100%;
 		height:auto;
-		image-rendering: optimizeQuality;
 	}
 	
 	/* Hide Image Copyright everywhere by default  */
@@ -182,7 +193,7 @@
  -moz-osx-font-smoothing: grayscale;
   font-weight: normal;
   content: attr(data-av_icon);
-  speak: none;
+  speak: never;
 }
 
 
@@ -540,7 +551,7 @@ a{text-decoration:underline}
 .fixed_header #header,.html_header_top.html_header_sticky #header{position:relative;top:0}
 .fixed_header #main{padding-top:0}
 #header_main{border-bottom:0}
-nav,#footer,#scroll-top-link,.image-overlay,#top #main .sidebar,#commentform,.comment_container .miniheading,.comment_container .minitext,#top .avia-post-nav{display:none}
+nav,#footer,#scroll-top-link,#av-cookie-consent-badge,.image-overlay,#top #main .sidebar,#commentform,.comment_container .miniheading,.comment_container .minitext,#top .avia-post-nav{display:none}
 .avia-shadow{box-shadow:inset 0 0 0 rgba(0,0,0,0)}
 .grid-entry .inner-entry{margin-right:0;box-shadow:0 0 0 0 rgba(0,0,0,0);box-shadow:0 0 0 0 rgba(0,0,0,0)}
 .content{border:0}

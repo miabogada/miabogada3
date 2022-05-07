@@ -10,8 +10,10 @@ Text Domain: wordpress-importer
 License: GPL version 2 or later - http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 */
 
-if ( ! defined( 'WP_LOAD_IMPORTERS' ) )
+if( ! defined( 'WP_LOAD_IMPORTERS' ) )
+{
 	return;
+}
 
 /** Display verbose errors */
 define( 'IMPORT_DEBUG', false );
@@ -19,7 +21,8 @@ define( 'IMPORT_DEBUG', false );
 // Load Importer API
 require_once ABSPATH . 'wp-admin/includes/import.php';
 
-if ( ! class_exists( 'WP_Importer' ) ) {
+if ( ! class_exists( 'WP_Importer' ) )
+{
 	$class_wp_importer = ABSPATH . 'wp-admin/includes/class-wp-importer.php';
 	if ( file_exists( $class_wp_importer ) )
 		require $class_wp_importer;
@@ -906,12 +909,12 @@ class WP_Import extends WP_Importer {
 		/**
 		 * see https://developer.wordpress.org/reference/classes/wp_http/get/
 		 * see https://developer.wordpress.org/reference/classes/wp_http/request/
-		 * 
+		 *
 		 * In addition the returned structure $headers also changed
 		 */
 		$http = new WP_Http();
 		$headers = $http->get( $url, array( 'filename' => $upload['file'], 'stream' => true ) );
-		
+
 		// request failed
 		if ( $headers instanceof WP_Error ) {
 			@unlink( $upload['file'] );

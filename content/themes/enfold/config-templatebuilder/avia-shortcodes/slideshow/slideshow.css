@@ -149,8 +149,7 @@ span.mejs-offscreen { display: none!important; }
 .av-video-slide.slide-1 .mejs-mediaelement{opacity: 0;}
 .av-video-slide .mejs-mediaelement{height:100%;}
 #top .av-video-slide .mejs-overlay-button{display: none;}
-#top .av-video-slide .avia-slide-wrap{ background: #000 url("../images/layout/preload-dark-grey-big.gif") no-repeat center center; } 
-#top .av-video-slide.av-video-service-youtube .avia-slide-wrap{ background: #000 }
+#top .av-video-slide .avia-slide-wrap, #top .av-video-slide iframe{ background: #000; }
 
 
 #top .av-video-slide.av-video-4-3-stretch iframe, #top .av-video-slide.av-video-4-3-stretch embed, #top .av-video-slide.av-video-4-3-stretch object, #top .av-video-slide.av-video-4-3-stretch video {
@@ -160,7 +159,7 @@ height: 270%;
 
 
 /*blocks the option to click the video. play/pause events get attached to the av click overlay instead*/
-#top .av-section-with-video-bg .av-section-video-bg:after, .av-click-overlay{ 
+#top .av-section-with-video-bg .av-section-video-bg:after, .av-click-overlay{
 content: ".";
 position: absolute;
 text-indent: -200px;
@@ -221,7 +220,7 @@ font-size: 40px;
 .avia_transform .avia_playpause_icon.av-play, .avia_transform .avia_playpause_icon.av-pause{
 -webkit-animation: avia_appear_short 1.7s 1 cubic-bezier(0.175, 0.885, 0.320, 1.275); /* Safari 4+ */
 animation:         avia_appear_short 1.7s 1 cubic-bezier(0.175, 0.885, 0.320, 1.275); /* IE 10+ */
-opacity: 0;							 
+opacity: 0;
 }
 
 .avia_playpause_icon.av-pause{
@@ -274,7 +273,7 @@ position: relative;
 .caption_framed .slideshow_caption .avia-caption-content p, .caption_framed .slideshow_caption .avia-caption-title,
 .avia-caption .avia-caption-content p, .avia-caption .avia-caption-title{
 background: #000;
-filter: alpha(opacity = 80);
+filter: alpha(opacity=80);
 background: rgba(0, 0, 0, 0.5);
 display:inline-block;
 margin:0 0 1px 0;
@@ -327,6 +326,33 @@ display: block;
 
 
 
+/*afterload video*/
+#top .av-video-slide .avia-slide-wrap{
+	background-position: center center;
+	background-size: cover;
+}
 
+#top .av-video-lazyload .av-click-to-play-overlay{
+	position: absolute;
+	left:0;
+	top:0;
+	width:100%;
+	height:100%;
+	cursor: pointer;
+	z-index: 1000;
+}
 
+#top .av-video-lazyload .av-click-to-play-overlay .avia_playpause_icon{
+	display: block;
+	-webkit-transition: opacity 0.4s ease-out;
+	transition: 		opacity 0.4s ease-out;
+}
 
+#top .av-video-lazyload .av-click-to-play-overlay:hover .avia_playpause_icon{
+	opacity: 0.7;
+}
+
+/* Accessibility rules */
+#top.av-accessibility-aaa .avia-caption-content{
+	line-height: 1.5em;
+}

@@ -4,7 +4,22 @@ ICONLIST
 .avia-icon-list-container{margin:30px 0; clear: both;}
 .avia-icon-list{margin:0; padding:0;}
 .avia-icon-list li{margin:0; padding:0 0 30px 0; list-style-type: none; list-style-position: outside; clear:both;  position: relative; min-height:60px;}
-.avia-icon-list .iconlist_icon{height:64px; width:64px; line-height: 64px; font-size: 30px; text-align: center; border-radius: 500px; position: relative; float:left; margin-right:30px; margin-left:2px; z-index: 5; color:#fff;}
+
+.avia-icon-list .iconlist_icon{
+	height:64px; 
+	width:64px; 
+	line-height: 64px; 
+	font-size: 30px; 
+	text-align: center; 
+	border-radius: 500px; 
+	position: relative; 
+	float:left; 
+	margin-right:30px; 
+	margin-left:2px; 
+	z-index: 5; 
+	color:#fff;
+}
+
 .avia-icon-list a.iconlist_icon:hover{color:#fff; text-decoration: none;}
 .avia-icon-list .iconlist_title{text-transform: uppercase; top: 4px; margin-bottom:0; position: relative;}
 #top .avia-icon-list .iconlist_title a:hover{text-decoration: underline;}
@@ -67,18 +82,18 @@ list-style: disc outside;
 .avia-icon-list-right .iconlist-timeline{left: auto; right: 32px;}
 
 /*iconlist animation*/
-.avia_transform .avia-icon-list.av-iconlist-big .iconlist_icon{
+.avia_transform .avia-icon-list.av-iconlist-big.avia-iconlist-animate .iconlist_icon{
 opacity: 0.1;
 -webkit-transform:scale(0.5);
 -ms-transform:scale(0.5);
 transform:scale(0.5);
 }
 
-.avia_transform .iconlist-timeline{
+.avia_transform .avia-iconlist-animate .iconlist-timeline{
 height: 0%;
 }
 
-.avia_transform .avia-icon-list.av-iconlist-big .avia_start_animation .iconlist_icon{
+.avia_transform .avia-icon-list.av-iconlist-big.avia-iconlist-animate .avia_start_animation .iconlist_icon{
 -webkit-animation: avia_appear 1s 1 cubic-bezier(0.175, 0.885, 0.320, 1.275); /* Safari 4+ */
 animation:         avia_appear 1s 1 cubic-bezier(0.175, 0.885, 0.320, 1.275); /* IE 10+ */
 opacity: 1;
@@ -87,8 +102,31 @@ opacity: 1;
 transform:scale(1);
 }
 
-.avia_transform .avia-icon-list.av-iconlist-big .avia_start_animation .iconlist-timeline{
+.avia_transform .avia-icon-list.av-iconlist-big.avia-iconlist-animate .avia_start_animation .iconlist-timeline{
 -webkit-animation: avia_slide_down 1s 1 cubic-bezier(0.175, 0.885, 0.320, 1.275); /* Safari 4+ */
 animation:         avia_slide_down 1s 1 cubic-bezier(0.175, 0.885, 0.320, 1.275); /* IE 10+ */
 height: 100%;
+}
+
+/*	Sonar effect	*/
+.avia-icon-list.avia-sonar-shadow .iconlist_icon:after{
+	content: '';
+	pointer-events: none;
+	position: absolute;
+	top: 0;
+	left: 0;
+	padding: 0;
+	width: 100%;
+	height: 100%;
+	opacity: 0;
+	z-index: -1;
+	border-radius: 500px;
+	box-sizing: content-box;
+	-webkit-box-sizing: content-box; 
+	-moz-box-sizing: content-box;
+	box-shadow: 0 0 0 2px rgba(255,255,255,0.1);
+	transform: scale(0.9);
+	-webkit-transform: scale(0.9);
+	-ms-transform: scale(0.9);
+	-webkit-transform-style: preserve-3d;
 }

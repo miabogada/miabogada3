@@ -141,11 +141,10 @@ top: 1px;
 .compat-item .compat-field-av-custom-link{display:none;}
 .av-show-image-custom-link .compat-field-av-custom-link{display:block;}
 
-
-
-
-
-
+/*	Image select button for hotspot		*/
+.avia-form-element-container.av-hotspot-container .avia-builder-image-insert{
+	left: 20px;
+}
 
 
 /*preview images*/

@@ -94,10 +94,10 @@
 
 #top .gform_fields>li{margin-left:0;}
 
-#top .gform_wrapper .gfield_time_hour input, 
-#top .gform_wrapper .gfield_time_minute input, 
-#top .gform_wrapper .gfield_date_month input, 
-#top .gform_wrapper .gfield_date_day input, 
+#top .gform_wrapper .gfield_time_hour input,
+#top .gform_wrapper .gfield_time_minute input,
+#top .gform_wrapper .gfield_date_month input,
+#top .gform_wrapper .gfield_date_day input,
 #top .gform_wrapper .gfield_date_year input {
 width: 70% !important;
 margin: 0 !important;

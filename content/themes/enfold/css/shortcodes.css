@@ -32,13 +32,74 @@ body .av-align-center{text-align: center;}
 SCREEN READER see https://webaim.org/techniques/css/invisiblecontent/#techniques
 ====================================================================================================================================================== */
 .av-screen-reader-only {
-	position:absolute;
-	left:-10000px;
-	top:auto;
-	width:1px;
-	height:1px;
-	overflow:hidden;
+	position: absolute;
+	left: -10000px;
+	top: auto;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
 }
+
+/*	=====================================================================================
+Loading icon e.g. masonry, portfolio     (moved from portfolio.css)
+========================================================================================== */
+.avia_loading_icon{
+	background: rgba(0,0,0,0.7);
+	width: 100%;
+	height: 100%;
+	position: fixed;
+	top: 0;
+	left: 0;
+	margin: 0;
+	display: none;
+	z-index: 10000;
+}
+
+.avia-msie-8 .avia_loading_icon{
+	background: #000;
+	filter: alpha(opacity=70) !important;
+}
+
+#top .avia_loading_icon .av-siteloader{
+	border-top-color: #fff;
+	border-right-color: #fff;
+	border-bottom-color: #fff;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin: -20px 0 0 -20px;
+}
+
+/*	=============================================================================================
+Tooltip for social share buttons     (moved from blog.css - breaks layout if blog disabled )
+================================================================================================= */
+.avia-related-tooltip{
+	position: absolute;
+	z-index: 9999999;
+	padding: 0;
+	width: 200px;
+	border-radius: 2px;
+	box-shadow: 0px 3px 13px 0px rgba(0, 0, 0, 0.1);
+	border-width: 1px;
+	border-style: solid;
+	padding: 15px;
+	margin-top: -10px;
+}
+
+
+.avia-related-tooltip .avia-arrow-wrap{
+	top: auto;
+	bottom: 0;
+	position: absolute;
+	left: 50%
+}
+
+.avia-related-tooltip .avia-arrow-wrap .avia-arrow{
+	border-top: none;
+	border-left: none;
+	top: -4px;
+}
+
 
 /* ======================================================================================================================================================
 TEXT BLOCK
@@ -48,7 +109,13 @@ clear: both;
 line-height: 1.65em;
 }
 
-.flex_column + .avia_textblock{padding-top:50px;}
+.avia_textblock.av_multi_colums > p:first-child{
+	margin-top: 0;
+}
+
+.flex_column + .avia_textblock{
+	padding-top: 50px;
+}
 
 /* ======================================================================================================================================================
 Columns
@@ -96,7 +163,7 @@ position: static; /*fixes a glitch with bg image not displaying below video slid
 }
 
 .avia-section.avia-section-small{
-min-height:0;	
+min-height:0;
 }
 
 .js_active .av-minimum-height .container{
@@ -108,7 +175,7 @@ transition: 		opacity 0.6s ease-in;
 
 .js_active.av-preloader-enabled .av-minimum-height .container{
 -webkit-transition: opacity 1.2s ease-in;
-transition: 		opacity 1.2s ease-in;	
+transition: 		opacity 1.2s ease-in;
 }
 
 
@@ -184,6 +251,10 @@ margin: 0;
 z-index: 1;
 }
 
+#top .av-section-video-bg .av-click-to-play-overlay{
+	display: none;
+}
+
 
 #top .av-section-video-bg .avia-slideshow-inner{
 height:100% !important;
@@ -235,7 +306,7 @@ left:0;
 /*prevent img pos flickering*/
 .js_active .av-parallax{opacity: 0;}
 .js_active .av-parallax.enabled-parallax{opacity: 1}
-.js_active .av-parallax.active-parallax{opacity: 1; 
+.js_active .av-parallax.active-parallax{opacity: 1;
 -webkit-transition: opacity 0.3s ease-in-out;
 transition: 		opacity 0.3s ease-in-out;}
 
@@ -320,7 +391,7 @@ div .av-section-color-overlay{z-index: 1;}
 div .av-video-service-html5 .av-section-color-overlay{z-index: 8;}
 
 .html_minimal_header #main > .avia-builder-el-0,
-.av_minimal_header + #main .container_wrap_first { border-top: none; }
+.av_minimal_header + #main .container_wrap_first:first-child { border-top: none; }
 
 
 /* ======================================================================================================================================================
@@ -364,10 +435,7 @@ background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAANCAYA
  border-radius: 2px;
 }
 
-#top select[multiple], #top .avia_ajax_form .select[multiple]{background-image:none;} 
-
-/*remove bg on firefox*/
-.avia-mozilla #top select, .avia-mozilla #top .avia_ajax_form .select, .avia-mozilla #top .entry-content-wrapper select{ background-image:none; }
+#top select[multiple], #top .avia_ajax_form .select[multiple]{background-image:none;}
 
 #top select[multiple] { background-image:none; }
 
@@ -433,6 +501,81 @@ div .mejs-controls{padding:0;}
 
 
 /* ======================================================================================================================================================
+Privacy toggles frontend
+====================================================================================================================================================== */
+
+#top .av-toggle-switch{display: block; margin-bottom: 10px; margin-top:10px;
+opacity: 0;
+text-align: left;
+}
+
+
+#top .av-toggle-switch.active{
+-webkit-animation: avia-fadein 1s 1 ease-in; /* Safari 4+ */
+animation:         avia-fadein 1s 1 ease-in; /* IE 10+ */
+opacity: 1;
+}
+
+#top .av-toggle-switch input[type="checkbox"] {display:none}
+#top .av-toggle-switch label {cursor:pointer;
+-webkit-touch-callout: none;
+-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;}
+#top .av-toggle-switch label .toggle-track {
+  display:block; height:27px; width:54px;background:rgba(0, 0, 0, 0.08); border-radius:100px;
+  position:relative;
+  margin-right:15px;border:1px solid rgba(0, 0, 0, 0.15);
+  clear:both;
+  vertical-align: bottom;
+  float: left;
+  transition:all .1s ease-in;
+}
+
+#top .av-toggle-switch .toggle-track:before{
+  content:'';
+  display:inline;height:25px;width:25px;background:#fff;
+  border-radius:100px;
+  position:absolute;
+  top:0;
+  right:0;
+  transition:right .1s ease-in;
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 1px 1px 1px;
+}
+
+#top .av-toggle-switch.av-cookie-sc-disabled .toggle-track{
+	opacity: 0.2;
+}
+
+
+#top .av-toggle-switch input[type="checkbox"]:checked +  .toggle-track:before{
+  right:27px;
+}
+
+#top .av-toggle-switch input[type="checkbox"]:checked +  .toggle-track{
+  background:#5dceba;
+}
+
+
+
+
+#top .av-toggle-switch .toggle-label-content{
+	color: inherit;
+	font-weight: bold;
+	display: block;
+	overflow: hidden;
+	font-size: inherit;
+}
+
+#top .avia-cookie-consent-modal-buttons-wrap{
+	text-align: center;
+}
+
+
+
+/* ======================================================================================================================================================
 Tooltips
 ====================================================================================================================================================== */
 
@@ -458,7 +601,7 @@ line-height: 1.65em;
 #top .avia-tooltip.transparent_dark, #top .avia-tooltip.transparent_dark .avia-arrow{
 background: #000;
 background: rgba(0, 0, 0, 0.8);
-color:#fff;	
+color:#fff;
 border:none;
 }
 
@@ -902,4 +1045,78 @@ opacity: 1;
 	0% {opacity: 0.3;}
 	40% {opacity: 0.5;box-shadow: 0 0 0 2px rgba(255,255,255,0.1), 0 0 10px 10px #fff, 0 0 0 10px rgba(255,255,255,0.5);}
 	100% {box-shadow: 0 0 0 2px rgba(255,255,255,0.1), 0 0 10px 10px #fff, 0 0 0 10px rgba(255,255,255,0.5);transform: scale(1.5);opacity: 0;}
+}
+
+/*	=============================
+	Shape SVG Dividers
+	=============================
+*/
+.avia-divider-svg{
+	overflow: hidden;
+	position: absolute;
+	left: 0;
+	width: 100%;
+	line-height: 0;
+	direction: ltr;
+	pointer-events: none;
+}
+
+.avia-divider-svg-top{
+    top: 0px;
+}
+
+/* fix a small gap on different screen sizes - rotate(180deg) seems not calculate correctly  */
+.avia-divider-svg-bottom{
+	bottom: -2px;
+}
+
+/*	Temporary fixes for Chrome 85 issue. Can be removed in a future version of Chrome.	*/
+.avia-divider-svg-top:not(.avia-svg-original) svg,
+.avia-divider-svg-bottom:not(.avia-svg-negative) svg{
+	z-index: -1;
+}
+
+.avia-divider-svg.avia-divider-svg-bottom.avia-svg-original,
+.avia-divider-svg.avia-divider-svg-top.avia-svg-negative{
+	-webkit-transform: rotate(180deg);
+	-ms-transform: rotate(180deg);
+	transform: rotate(180deg);
+}
+
+.avia-divider-svg svg{
+	fill: #fff;
+	display: block;
+	width: calc(100% + 1.3px);
+	position: relative;
+	left: 50%;
+	-webkit-transform: translateX(-50%);
+	-ms-transform: translateX(-50%);
+	transform: translateX(-50%);
+}
+
+.avia-divider-svg path{
+	-webkit-transform-origin: center;
+	-ms-transform-origin: center;
+	transform-origin: center;
+	-webkit-transform: rotateY(0deg);
+	transform: rotateY(0deg);
+}
+
+.avia-divider-svg.avia-flipped-svg svg{
+	-webkit-transform: translateX(-50%) rotateY(180deg);
+	-ms-transform: translateX(-50%) rotateY(180deg);
+	transform: translateX(-50%) rotateY(180deg);
+}
+
+.avia-divider-svg.avia-to-front{
+	z-index: 100;
+}
+
+
+/*	special case for paralax with overlay hiding svg */
+.av-parallax-section.av-section-color-overlay-active .avia-divider-svg{
+	z-index: 1;
+}
+.av-parallax-section.av-section-color-overlay-active .avia-divider-svg.avia-to-front{
+	z-index: 100;
 }

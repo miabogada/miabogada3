@@ -4,7 +4,8 @@ Accordion/Toggle
 
 
 /*toggle*/
-.js_active .toggle_wrap{
+.js_active .toggle_wrap,
+.avia-admin-preview-container .toggle_wrap{
 visibility: hidden;
 position: absolute;
 z-index: 0;
@@ -15,13 +16,14 @@ left: 120%;
 .active_tc.toggle_wrap{
 position: static;
 visibility: visible;
-left:0;
-width:auto;
+left: 0;
+width: auto;
 z-index: 1;
 display: none;
 }
 
-.js_active .toggler {
+.js_active .toggler,
+.avia-admin-preview-container .toggler{
 cursor: pointer;
 display: block;
 margin:0;
@@ -45,7 +47,8 @@ position: relative;
 clear: both;
 }
 
-.togglecontainer .single_toggle:first-child .toggler, .togglecontainer .taglist + .single_toggle .toggler{
+.togglecontainer .single_toggle:first-child .toggler,
+.togglecontainer .taglist + .single_toggle .toggler{
 border-top-left-radius:  2px;
 border-top-right-radius: 2px;
 }
@@ -59,7 +62,7 @@ border-bottom-right-radius: 2px;
 border-radius: 0;
 }
 
-.toggle_content {
+.toggle_content{
 padding: 12px 30px 11px 30px;
 margin: 0px 0 5px 0;
 border-style:solid;
@@ -103,6 +106,12 @@ width:11px;
 border:none;
 }
 
+
+.hasCurrentStyle .toggle_icon,
+.hasCurrentStyle .toggle_icon > span{
+    border-color: inherit !important;
+}
+
 /* removed, otherwise opening animation does not work
 .active_tc.toggle_wrap{
 display:block;
@@ -111,6 +120,14 @@ display:block;
 #top .av_toggle_section .av-inherit-border-color *{border-color: inherit;}
 #top .av_toggle_section .av-inherit-font-color *{color: inherit;}
 
+.toggler .toggle_icon,
+.toggler:hover .toggle_icon *{
+	transition: all 0.4s ease-in-out;
+	-webkit-transition: all 0.4s ease-in-out;
+	-moz-transition: all 0.4s ease-in-out;
+	-ms-transition: all 0.4s ease-in-out;
+	-o-transition: all 0.4s ease-in-out;
+}
 
 /*sorting*/
 .taglist {margin-bottom:5px;}
@@ -127,3 +144,68 @@ display:block;
 .av-minimal-toggle .activeTitle.toggler:hover { opacity: 1; }
 
 
+/* elegant toggle */
+.av-elegant-toggle.togglecontainer .single_toggle:first-child .toggler,
+.av-elegant-toggle.togglecontainer .taglist + .single_toggle .toggler{
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.av-elegant-toggle.togglecontainer .av_toggle_section:first-of-type .toggler{
+    border-top-width: 1px;
+    border-top-style: solid;
+}
+
+.js_active .av-elegant-toggle .toggler,
+.avia-admin-preview-container .av-elegant-toggle .toggler{
+    padding: 35px 55px 30px 35px;
+    font-size: 17px;
+    top: 0;
+    border-top-width: 0;
+    border-left-width: 0;
+    border-right-width: 0;
+}
+
+.av-elegant-toggle .toggle_icon{
+    width: 32px;
+    height: 32px;
+    border-radius: 40px;
+    left: auto;
+    right: 20px;
+    margin-top: -16px;
+    border-width: 2px;
+    opacity: 0.4;
+    /*transition: all 0.2s ease-in;   removed 4.8.6.1 - replaced for all icons*/
+}
+
+.av-elegant-toggle .activeTitle .toggle_icon,
+.av-elegant-toggle .single_toggle:hover .toggle_icon {
+    opacity: 1;
+}
+
+.av-elegant-toggle .toggle_icon .hor_icon,
+.av-elegant-toggle .toggle_icon .vert_icon{
+    border-width: 2px;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+}
+
+.av-elegant-toggle .toggle_content{
+    margin-bottom: 0;
+    font-size: 15px;
+    line-height: 1.4;
+    padding: 20px 35px 30px 35px;
+    border-top-width: 0;
+    border-left-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 1px;
+    border-radius: 0;
+}
+
+.av-elegant-toggle .single_toggle{
+    border-width: 0;
+    margin: 0;
+    padding: 0;
+    float: none;
+}

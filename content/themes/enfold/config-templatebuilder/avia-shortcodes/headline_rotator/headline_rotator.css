@@ -56,3 +56,8 @@ Text Rotator
   from, to { opacity: 0 }
   50% { opacity: 1; }
 }
+
+/* Accessibility rules */ 
+#top.av-accessibility-aaa .av-rotator-container-inner {
+	line-height: 1.5em;
+}

@@ -1,6 +1,6 @@
 <?php
 
-if ( ! defined( 'ABSPATH' ) ) {  exit;  }    // Exit if accessed directly
+if( ! defined( 'ABSPATH' ) ) {  exit;  }    // Exit if accessed directly
 
 
 /**
@@ -8,50 +8,70 @@ if ( ! defined( 'ABSPATH' ) ) {  exit;  }    // Exit if accessed directly
  *
  * WordPress import should work - however, it fails to import custom product attribute taxonomies.
  * This code grabs the file before it is imported and ensures the taxonomies are created.
-
+ *
  */
- 
-function avia_woocommerce_import_start() {
-	
-	global $wpdb;
-	
-	if(isset($_POST['import_id'])) $id = (int) $_POST['import_id'];
-	if(isset($id)) $file = get_attached_file( $id );
-	
-	if(empty($file)) $file = get_template_directory() ."/includes/admin/dummy.xml";
-	
+
+function avia_woocommerce_import_start()
+{
+	global $wpdb, $avia_config;
+
+	$file = '';
+
+	if( isset( $_POST['import_id'] ) )
+	{
+		$id = (int) $_POST['import_id'];
+	}
+
+	if( isset( $id ) )
+	{
+		$file = get_attached_file( $id );
+	}
+
+	if( empty( $file ) )
+	{
+		$file = get_template_directory() . '/includes/admin/demo_files/default.xml';
+		if( ! empty ( $avia_config['demo_import']['current_import_filepath'] ) )
+		{
+			$check = $avia_config['demo_import']['current_import_filepath'] . '.xml';
+			if( file_exists( $check ) )
+			{
+				$file = $check;
+			}
+		}
+	}
+
 	$parser = new WXR_Parser();
 	$import_data = $parser->parse( $file );
 
 	if (isset($import_data['posts'])) :
 		$posts = $import_data['posts'];
-		
+
 		if ($posts && sizeof($posts)>0) foreach ($posts as $post) :
-			
+
 			if ($post['post_type']=='product') :
-				
+
 				if ($post['terms'] && sizeof($post['terms'])>0) :
-					
+
 					foreach ($post['terms'] as $term) :
-						
+
 						$domain = $term['domain'];
-						
+
 						if (strstr($domain, 'pa_')) :
-							
+
 							// Make sure it exists!
 							if (!taxonomy_exists( $domain )) :
-								
+
 								$nicename = strtolower(sanitize_title(str_replace('pa_', '', $domain)));
-								
+
 								$exists_in_db = $wpdb->get_var("SELECT attribute_id FROM ".$wpdb->prefix . "woocommerce_attribute_taxonomies WHERE attribute_name = '".$nicename."';");
-								
+
 								if (!$exists_in_db) :
-								
+
 									// Create the taxonomy
 									$wpdb->insert( $wpdb->prefix . "woocommerce_attribute_taxonomies", array( 'attribute_name' => $nicename, 'attribute_type' => 'select' ), array( '%s', '%s' ) );
-									
+
 								endif;
-								
+
 								// Register the taxonomy now so that the import works!
 								register_taxonomy( $domain,
 							        array('product'),
@@ -74,19 +94,19 @@ function avia_woocommerce_import_start() {
 							            'rewrite' => array( 'slug' => strtolower(sanitize_title($nicename)), 'with_front' => false, 'hierarchical' => true ),
 							        )
 							    );
-								
+
 							endif;
-							
+
 						endif;
-						
+
 					endforeach;
-					
+
 				endif;
-				
+
 			endif;
-			
+
 		endforeach;
-		
+
 	endif;
 
 }
@@ -107,9 +127,9 @@ function avia_temp_products()
 {
 		if(post_type_exists( 'product' )) return false;
 		$product_base = $base_slug = $category_base = "";
-		
-		
-		
+
+
+
 		register_taxonomy( 'product_cat',
         array('product'),
         array(
@@ -133,7 +153,7 @@ function avia_temp_products()
             'rewrite' => array( 'slug' => $category_base . _x('product-category', 'slug', 'woothemes'), 'with_front' => false ),
         )
     );
-    
+
     register_taxonomy( 'product_tag',
         array('product'),
         array(
@@ -156,8 +176,8 @@ function avia_temp_products()
             'rewrite' => array( 'slug' => $category_base . _x('product-tag', 'slug', 'woothemes'), 'with_front' => false ),
         )
     );
-    
-    
+
+
 		register_post_type( "product",
 		array(
 			'labels' => array(
@@ -183,13 +203,13 @@ function avia_temp_products()
 			'exclude_from_search' => false,
 			'hierarchical' => true,
 			'rewrite' => array( 'slug' => $product_base, 'with_front' => false ),
-			'query_var' => true,			
+			'query_var' => true,
 			'supports' => array( 'title', 'editor', 'excerpt', 'thumbnail', 'comments'/*, 'page-attributes'*/ ),
 			'has_archive' => $base_slug,
 			'show_in_nav_menus' => false,
 		)
 	);
-	
+
 	register_post_type( "product_variation",
 		array(
 			'labels' => array(
@@ -214,13 +234,13 @@ function avia_temp_products()
 			'exclude_from_search' => true,
 			'hierarchical' => true,
 			'rewrite' => false,
-			'query_var' => true,			
+			'query_var' => true,
 			'supports' => array( 'title', 'editor', 'custom-fields', 'page-attributes', 'thumbnail' ),
 			'show_in_nav_menus' => false,
 			//'show_in_menu' => 'edit.php?post_type=product'
 		)
 	);
-	
+
 	  register_taxonomy( 'product_type',
         array('product'),
         array(
@@ -230,7 +250,7 @@ function avia_temp_products()
             'show_in_nav_menus' => false,
         )
     );
-    
+
     register_post_type( "shop_order",
 		array(
 			'labels' => array(
@@ -258,12 +278,12 @@ function avia_temp_products()
 			'hierarchical' => false,
 			'show_in_nav_menus' => false,
 			'rewrite' => false,
-			'query_var' => true,			
+			'query_var' => true,
 			'supports' => array( 'title', 'comments', 'custom-fields' ),
 			'has_archive' => false
 		)
 	);
-	
+
     register_taxonomy( 'shop_order_status',
         array('shop_order'),
         array(
@@ -287,7 +307,7 @@ function avia_temp_products()
             'rewrite' => false,
         )
     );
-    
+
     register_post_type( "shop_coupon",
 		array(
 			'labels' => array(
@@ -314,17 +334,17 @@ function avia_temp_products()
 			'show_in_menu' => 'woocommerce',
 			'hierarchical' => false,
 			'rewrite' => false,
-			'query_var' => false,			
+			'query_var' => false,
 			'supports' => array( 'title' ),
 			'show_in_nav_menus' => false,
 		)
 	);
-	
+
 		if (!taxonomy_exists('product_type')) :
 		register_taxonomy( 'product_type', array('post'));
 		register_taxonomy( 'shop_order_status', array('post'));
 	endif;
-	
+
 	$product_types = array(
 		'simple',
 		'grouped',
@@ -332,13 +352,13 @@ function avia_temp_products()
 		'downloadable',
 		'virtual'
 	);
-	
+
 	foreach($product_types as $type) {
 		if (!get_term_by( 'slug', sanitize_title($type), 'product_type')) {
 			wp_insert_term($type, 'product_type');
 		}
 	}
-	
+
 	$order_status = array(
 		'pending',
 		'failed',
@@ -348,7 +368,7 @@ function avia_temp_products()
 		'refunded',
 		'cancelled'
 	);
-	
+
 	foreach($order_status as $status) {
 		if (!get_term_by( 'slug', sanitize_title($status), 'shop_order_status')) {
 			wp_insert_term($status, 'shop_order_status');

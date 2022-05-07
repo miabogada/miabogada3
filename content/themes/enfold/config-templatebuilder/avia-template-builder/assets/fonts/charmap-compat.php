@@ -249,6 +249,7 @@ $chars['entypo-fontello'][] = 'ue915';
 $chars['entypo-fontello'][] = 'ue916';
 $chars['entypo-fontello'][] = 'ue917';
 $chars['entypo-fontello'][] = 'ue918';
+$chars['entypo-fontello'][] = 'uf16a';
 
 
 

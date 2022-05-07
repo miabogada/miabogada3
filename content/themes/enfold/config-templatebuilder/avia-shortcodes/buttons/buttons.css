@@ -6,7 +6,7 @@ Button
 .avia-button-wrap{display:inline-block;}
 
 .avia-button{
-color:#777;
+color: #777;
 border-color: #e1e1e1;
 background-color: #f8f8f8;
 }
@@ -27,7 +27,12 @@ text-align: center;
 max-width: 100%;
 }
 
-.avia-button:hover{opacity: 0.9;}
+.avia-button:hover{
+	opacity: 0.9;
+	-webkit-transition: all 0.4s ease-in-out; 
+	transition: all 0.4s ease-in-out; 
+}
+
 .avia-button:active{border-bottom-width: 0px; border-top-width: 1px; border-top-style: solid;}
 .avia-button.avia-color-theme-color-subtle{background-image: none;}
 .avia-button.avia-color-theme-color-subtle:hover{}
@@ -48,6 +53,62 @@ max-width: 100%;
 .avia-button.avia-color-purple, .avia-button.avia-color-purple:hover{background-color: #745f7e; 	border-color: #514358; 	color: #fff; }
 .avia-button.avia-color-pink, 	.avia-button.avia-color-pink:hover	{background-color: #d65799;		border-color: #BB4B85; 	color: #fff; }
 .avia-button.avia-color-silver, .avia-button.avia-color-silver:hover{background-color: #DADADA; 	border-color: #B4B4B4; 	color: #555; }
+
+
+#top a.avia-button.avia-font-color-grey,
+.avia-button.avia-font-color-grey-hover:hover{
+	color: #333333; 
+}
+
+#top a.avia-button.avia-font-color-black,
+.avia-button.avia-font-color-black-hover:hover{
+	color: #000; 
+}
+
+#top a.avia-button.avia-font-color-red,
+.avia-button.avia-font-color-red-hover:hover{
+	color: #8B2121;
+}
+
+#top a.avia-button.avia-font-color-orange, 
+.avia-button.avia-font-color-orange-hover:hover{
+	color: #CA9336;
+}
+
+#top a.avia-button.avia-font-color-green,
+.avia-button.avia-font-color-green-hover:hover{
+	color: #6F8F3B; 
+}
+
+#top a.avia-button.avia-font-color-blue,
+.avia-button.avia-font-color-blue-hover:hover{
+	color: #6693C2;
+}
+
+#top a.avia-button.avia-font-color-aqua,
+.avia-button.avia-font-color-aqua-hover:hover{
+	color: #3EAAA3;
+}
+
+#top a.avia-button.avia-font-color-teal,
+.avia-button.avia-font-color-teal-hover:hover{
+	color: #3F5E5F;
+}
+
+#top a.avia-button.avia-font-color-purple,
+.avia-button.avia-font-color-purple-hover:hover{
+	color: #514358;
+}
+
+#top a.avia-button.avia-font-color-pink,
+.avia-button.avia-font-color-pink-hover:hover{
+	color: #BB4B85;
+}
+
+#top a.avia-button.avia-font-color-silver,
+.avia-button.avia-font-color-silver-hover:hover{
+	color: #B4B4B4; 
+}
 
 
 #top .avia-button.avia-color-light{color:#fff; border:3px solid #fff; background: transparent;}
@@ -101,3 +162,47 @@ box-sizing: content-box;
 .av-button-label-on-hover.avia-button.avia-size-medium{padding:0; line-height: 36px; width: 38px;}
 .av-button-label-on-hover.avia-button.avia-size-large{padding:0; line-height: 42px; width: 44px;}
 .av-button-label-on-hover.avia-button.avia-size-x-large{padding:0; line-height: 66px; width: 68px;}
+
+#top .avia-button .avia_button_background{
+	opacity: 0; 
+	position: absolute; 
+	top: -3px; 
+	left: 0; 
+	bottom: -6px; 
+	right: 0; 
+	-webkit-transition: all 0.4s ease-in-out; 
+	transition: all 0.4s ease-in-out; 
+}
+
+#top .avia-button:hover .avia_button_background{
+	opacity: 0.9;
+}
+
+#top .avia-button .avia_button_icon,
+#top .avia-button .avia_iconbox_title{ 
+	position: relative; 
+	z-index: 3;
+}
+
+/*	Sonar effect	*/
+.avia-button.avia-sonar-shadow:after{
+	content: '';
+	pointer-events: none;
+	position: absolute;
+	top: 0;
+	left: 0;
+	padding: 0;
+	width: 100%;
+	height: 100%;
+	opacity: 0;
+	z-index: -1;
+	/*border-radius: 10px;*/
+	box-sizing: content-box;
+	-webkit-box-sizing: content-box; 
+	-moz-box-sizing: content-box;
+	box-shadow: 0 0 0 2px rgba(255,255,255,0.1);
+	transform: scale(0.9);
+	-webkit-transform: scale(0.9);
+	-ms-transform: scale(0.9);
+	-webkit-transform-style: preserve-3d;
+}

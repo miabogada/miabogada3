@@ -1,11 +1,12 @@
 /* ======================================================================================================================================================
 Tab SECTION
 ====================================================================================================================================================== */
-.av-inner-tab-title, .av-tab-section-icon, .av-tab-arrow-container, .av-tab-section-image{
-	width:90px;
+.av-inner-tab-title,
+.av-tab-section-icon,
+.av-tab-arrow-container,
+.av-tab-section-image{
+	width: 90px;
 }
-
-
 
 .av-tab-section-container{
 	width: 100%;
@@ -22,6 +23,10 @@ Tab SECTION
 	display: table;
 	position: relative;
 	left:0%;
+
+	/* Safari pixel gap fix */
+	margin-left: -1px;
+	margin-right: -1px;
 }
 
 .av-tab-slide-transition .av-tab-section-inner-container{
@@ -30,12 +35,12 @@ Tab SECTION
 }
 
 .av-layout-tab{
-	width:100vw;
+	width: 100vw;
 	display: block;
 	vertical-align: middle;
 	padding: 50px 0;
-	border-top-style:solid;
-	border-top-width:1px;
+	border-top-style: solid;
+	border-top-width: 1px;
 }
 
 .js_active .av-layout-tab{
@@ -63,6 +68,12 @@ Tab SECTION
 	text-decoration: none;
 }
 
+.av-section-tab-title,
+.av-section-tab-title:hover{
+	-webkit-transition: all 0.4s ease-in-out;
+	transition: 		all 0.4s ease-in-out;
+}
+
 .av-outer-tab-title{
 	display: block;
 }
@@ -81,7 +92,7 @@ Tab SECTION
 .av-tab-with-image .av-inner-tab-title{
 	display: table-cell;
 	vertical-align: middle;
-	height:40px;
+	height: 40px;
 }
 
 .av-tab-section-icon{
@@ -92,22 +103,22 @@ Tab SECTION
 
 .av-tab-arrow-container{
 	display: block;
-	height:15px;
+	height: 15px;
 	overflow: hidden;
 	position: relative;
 	top: 8px;
 }
 
 .avia_transform .av-tab-arrow-container span{
-position: absolute;
-left: 50%;
-width: 50px;
-height: 50px;
--webkit-transform: translateX(-50%) rotate(45deg);
-transform: translateX(-50%) rotate(45deg);
+	position: absolute;
+	left: 50%;
+	width: 50px;
+	height: 50px;
+	-webkit-transform: translateX(-50%) rotate(45deg);
+	transform: translateX(-50%) rotate(45deg);
 	-webkit-transition: all 0.4s ease-in-out;
 	transition: 		all 0.4s ease-in-out;
-top: 40px;
+	top: 40px;
 }
 
 .avia_transform .av-active-tab-title .av-tab-arrow-container span{
@@ -120,6 +131,8 @@ top: 10px;
 	opacity: 0.65;
 	filter: grayscale(1);
 	background-size: contain;
+	background-repeat: no-repeat;
+	background-position: center;
 	height:90px;
 }
 
@@ -143,49 +156,136 @@ top: 10px;
 .av_tab_navigation{position: absolute;}
 
 
-.avia-section-small .av-layout-tab{ padding-top: 20px; padding-bottom: 20px;}
-.avia-section-large .av-layout-tab{ padding-top: 70px; padding-bottom: 70px;}
-.avia-section-huge .av-layout-tab{ 	padding-top: 130px; padding-bottom: 130px;}
-.avia-section-no-padding .av-layout-tab{padding-top:0; padding-bottom:0;}
+.avia-section-small .av-layout-tab{
+	padding-top: 20px;
+	padding-bottom: 20px;
+}
 
-#top .av-custom-tab-color a{color: inherit;}
+.avia-section-large .av-layout-tab{
+	padding-top: 70px;
+	padding-bottom: 70px;
+}
+
+.avia-section-huge .av-layout-tab{
+	padding-top: 130px;
+	padding-bottom: 130px;
+}
+
+.avia-section-no-padding .av-layout-tab{
+	padding-top: 0;
+	padding-bottom: 0;
+}
+
+#top .av-custom-tab-color a{
+	color: inherit;
+}
 
 .av-tab-no-icon.av-tab-no-image .av-inner-tab-title{
-margin-bottom: 15px;
+	margin-bottom: 15px;
 }
 
 .avia-tab-title-padding-none .av-outer-tab-title{
-	padding:0 0;
+	padding: 0 0;
     position: relative;
     top: -6px;
 }
 
-.avia-tab-title-padding-small .av-outer-tab-title{ padding:0 0; }
-.avia-tab-title-padding-default .av-outer-tab-title{ padding:10px 0;}
-.avia-tab-title-padding-large .av-outer-tab-title{ padding:20px 0; }
+.avia-tab-title-padding-small .av-outer-tab-title{
+	padding: 0 0;
+}
 
+.avia-tab-title-padding-default .av-outer-tab-title{
+	padding: 10px 0;
+}
 
-.av-tab-with-icon .av-outer-tab-title{ margin-bottom: 10px; padding:0 0;}
+.avia-tab-title-padding-large .av-outer-tab-title{
+	padding: 20px 0;
+}
 
-.av-tab-without-text .av-outer-tab-title{display: none;}
-#top .av-tab-without-text.av-section-tab-title{padding-top:0;}
-#top .av-tab-below-content .av-tab-without-text.av-section-tab-title{padding-bottom:10px;}
+.av-tab-with-icon .av-outer-tab-title{
+	margin-bottom: 10px;
+	padding: 0 0;
+}
 
-.av-tab-below-content .av-tab-arrow-container{position: absolute; top:0;}
-.avia_transform .av-tab-below-content .av-tab-arrow-container span{ top: -65px;}
-.avia_transform .av-tab-below-content .av-active-tab-title .av-tab-arrow-container span{ top: -45px;}
-#top .av-tab-below-content .av-section-tab-title{ padding: 5px 20px 0px 20px;}
-.av-tab-below-content .av-tab-section-tab-title-container{ padding: 30px 0px 20px 0px;}
+.av-tab-without-text .av-outer-tab-title{
+	display: none;
+}
 
+#top .av-tab-without-text.av-section-tab-title{
+	padding-top: 0;
+}
 
+#top .av-tab-below-content .av-tab-without-text.av-section-tab-title{
+	padding-bottom: 10px;
+}
+
+.av-tab-below-content .av-tab-arrow-container{
+	position: absolute;
+	top: 0;
+}
+
+.avia_transform .av-tab-below-content .av-tab-arrow-container span{
+	top: -65px;
+}
+
+.avia_transform .av-tab-below-content .av-active-tab-title .av-tab-arrow-container span{
+	top: -45px;
+}
+
+#top .av-tab-below-content .av-section-tab-title{
+	padding: 5px 20px 0px 20px;
+}
+
+.av-tab-below-content .av-tab-section-tab-title-container{
+	padding: 30px 0px 20px 0px;
+}
 
 .boxed .av-layout-tab-inner .container,
-.av-framed-box .av-layout-tab-inner .container,
 .html_header_sidebar .av-layout-tab-inner .container{
 	margin:0;
 }
 
 .av-tab-content-auto .av-layout-tab-inner{
   	-webkit-transition: height 0.4s ease-in-out;
-	transition: 		height 0.4s ease-in-out;  
+	transition: 		height 0.4s ease-in-out;
+}
+
+/* Arrows for tab header  */
+.av-tab-above-content .av-tabsection-arrow{
+	position: absolute;
+	width: 100%;
+	top: 30px;
+	left: 0;
+}
+
+.av-tab-below-content .av-tabsection-arrow{
+	position: absolute;
+	width: 100%;
+	bottom: 30px;
+	left: 0;
+}
+
+#top .av-tabsection-arrow > a{
+	width: 30px;
+	margin: -30px 0 0 0;
+	display: none;
+}
+
+#top .av-tabsection-arrow > a.prev-slide{
+	border-radius: 0 5px 5px 0;
+}
+
+#top .av-tabsection-arrow > a.next-slide{
+	border-radius: 5px 0 0 5px;
+}
+
+#top .av-tabsection-arrow.av-visible-prev > a.prev-slide,
+#top .av-tabsection-arrow.av-visible-next > a.next-slide{
+	display: block;
+}
+
+#top .av-tabsection-arrow > a:hover{
+	opacity: 0.7;
+	-webkit-transition: all 0.4s ease-in-out;
+	transition: 		all 0.4s ease-in-out;
 }

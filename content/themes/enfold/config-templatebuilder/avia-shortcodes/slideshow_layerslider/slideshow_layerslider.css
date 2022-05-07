@@ -25,6 +25,11 @@ border-top-width:1px;
 overflow: hidden !important;
 }
 
+/*fixes issue with layerslider overwriting our container size in layerslider "responsive" mode - which is not backward compatible with older implementations of our demo slides*/
+.avia-layerslider.container_wrap{
+max-width: 100% !important;
+}
+
 /*default line-height:normal produces results that do not match the backend*/
 #top #wrap_all .ls-wp-container .ls-slide > *{
 line-height: 1.1em;

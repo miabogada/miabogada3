@@ -1,6 +1,6 @@
 <?php
-if ( !defined('ABSPATH') ){ die(); }
-	
+if ( ! defined( 'ABSPATH' ) ){ die(); }
+
 global $avia_config;
 
 ##############################################################################
@@ -23,8 +23,15 @@ $sidebar = apply_filters('avf_sidebar_position', $sidebar);
 if(empty($sidebar)) return;
 if(!empty($avia_config['overload_sidebar'])) $avia_config['currently_viewing'] = $avia_config['overload_sidebar'];
 
+//get text alignment for left sidebar
+$sidebar_text_alignment = '';
 
-echo "<aside class='sidebar sidebar_".$sidebar." ".$sidebar_smartphone." ".avia_layout_class( 'sidebar', false )." units' ".avia_markup_helper(array('context' => 'sidebar', 'echo' => false)).">";
+if ($sidebar == 'left'){
+    $sidebar_left_textalign = avia_get_option('sidebar_left_textalign');
+    $sidebar_text_alignment = $sidebar_left_textalign !== '' ? 'sidebar_'.$sidebar_left_textalign : '';
+}
+
+echo "<aside class='sidebar sidebar_".$sidebar." ".$sidebar_text_alignment." ".$sidebar_smartphone." ".avia_layout_class( 'sidebar', false )." units' ".avia_markup_helper(array('context' => 'sidebar', 'echo' => false)).">";
     echo "<div class='inner_sidebar extralight-border'>";
 
         //Display a subnavigation for pages that is automatically generated, so the users do not need to work with widgets
@@ -42,16 +49,16 @@ echo "<aside class='sidebar sidebar_".$sidebar." ".$sidebar_smartphone." ".avia_
         {
             $custom_sidebar = get_post_meta($the_id, 'sidebar', true);
         }
-		
+
 		$custom_sidebar = apply_filters('avf_custom_sidebar', $custom_sidebar);
-		
+
         if($custom_sidebar)
         {
             dynamic_sidebar($custom_sidebar);
             $default_sidebar = false;
         }
         else
-        {	
+        {
             if(empty($avia_config['currently_viewing'])) $avia_config['currently_viewing'] = 'page';
 
             // general shop sidebars
@@ -63,6 +70,12 @@ echo "<aside class='sidebar sidebar_".$sidebar." ".$sidebar_smartphone." ".avia_
 
             // general blog sidebars
             if ($avia_config['currently_viewing'] == 'blog' && dynamic_sidebar('Sidebar Blog') ) : $default_sidebar = false; endif;
+
+            // general archive sidebars
+
+            if (avia_get_option('archive_sidebar') == 'archive_sidebar_separate') {
+                if ($avia_config['currently_viewing'] == 'archive' && dynamic_sidebar('Sidebar Archives') ) : $default_sidebar = false; endif;
+            }
 
             // general pages sidebars
             if ($avia_config['currently_viewing'] == 'page' && dynamic_sidebar('Sidebar Pages') ) : $default_sidebar = false; endif;
@@ -83,7 +96,7 @@ echo "<aside class='sidebar sidebar_".$sidebar." ".$sidebar_smartphone." ".avia_
 			 if(apply_filters('avf_show_default_sidebar_pages', true)) {avia_dummy_widget(2);}
              if(apply_filters('avf_show_default_sidebar_categories', true)) {avia_dummy_widget(3);}
              if(apply_filters('avf_show_default_sidebar_archiv', true)) {avia_dummy_widget(4);}
-             
+
              //	customize default sidebar and add your sidebars
 	     do_action ('ava_add_custom_default_sidebars');
         }

@@ -1,6 +1,6 @@
 <?php
-	if ( !defined('ABSPATH') ){ die(); }
-	
+	if( ! defined( 'ABSPATH' ) ){ die(); }
+
 	global $avia_config;
 
 	/*
@@ -8,17 +8,16 @@
 	 */
 	 get_header();
 
+ 	 echo avia_title( array( 'title' => avia_which_archive() ) );
 
- 	 echo avia_title(array('title' => avia_which_archive()));
- 	 
  	 do_action( 'ava_after_main_title' );
 	 ?>
 
-		<div class='container_wrap container_wrap_first main_color <?php avia_layout_class( 'main' ); ?>'>
+		<div class='container_wrap container_wrap_first main_color <?php avia_layout_class( 'main' );?>'>
 
 			<div class='container'>
 
-				<main class='template-page template-portfolio content  <?php avia_layout_class( 'content' ); ?> units' <?php avia_markup_helper(array('context' => 'content','post_type'=>'portfolio'));?>>
+				<main class='template-page template-portfolio content  <?php avia_layout_class( 'content' ); ?> units' <?php avia_markup_helper( array( 'context' => 'content', 'post_type' => 'portfolio' ) );?>>
 
                     <div class="entry-content-wrapper clearfix">
 
@@ -28,15 +27,18 @@
 
                     <?php
 
-                    $grid = new avia_post_grid(array(	'linking' 	=> '',
-                                                        'columns' 	=> '3',
-                                                        'contents' 	=> 'title',
-                                                        'sort' 		=> 'no',
-                                                        'paginate' 	=> 'yes',
-                                                        'set_breadcrumb' => false,
-                                                ));
-                    $grid->use_global_query();
-                    echo $grid->html();
+						$grid = new avia_post_grid(
+										array(
+											'linking'			=> '',
+											'columns'			=> '3',
+											'contents'			=> 'title',
+											'sort'				=> 'no',
+											'paginate'			=> 'yes',
+											'set_breadcrumb'	=> false,
+										));
+
+						$grid->use_global_query();
+						echo $grid->html( '' );
 
                     ?>
                     </div>
@@ -55,5 +57,6 @@
 
 		</div><!-- close default .container_wrap element -->
 
+<?php
+	get_footer();
 
-<?php get_footer(); ?>

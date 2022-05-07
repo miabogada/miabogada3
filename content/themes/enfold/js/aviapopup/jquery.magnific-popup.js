@@ -1,6 +1,7 @@
-/*! Magnific Popup - v1.1.0 - 2016-02-20
+/*! Magnific Popup - v1.2.1 - 2021-03-17
 * http://dimsemenov.com/plugins/magnific-popup/
 * Copyright (c) 2016 Dmitry Semenov; */
+/* slightly modified by www.kriesi.at / guenter - see changelog		*/
 ;(function (factory) { 
 if (typeof define === 'function' && define.amd) { 
  // AMD. Register as an anonymous module. 
@@ -83,7 +84,7 @@ var _mfpOn = function(name, f) {
 			// converts "mfpEventName" to "eventName" callback and triggers it if it's present
 			e = e.charAt(0).toLowerCase() + e.slice(1);
 			if(mfp.st.callbacks[e]) {
-				mfp.st.callbacks[e].apply(mfp, $.isArray(data) ? data : [data]);
+				mfp.st.callbacks[e].apply(mfp, Array.isArray(data) ? data : [data]);
 			}
 		}
 	},
@@ -175,7 +176,7 @@ MagnificPopup.prototype = {
 				}
 			}
 		} else {
-			mfp.items = $.isArray(data.items) ? data.items : [data.items];
+			mfp.items = Array.isArray(data.items) ? data.items : [data.items];
 			mfp.index = data.index || 0;
 		}
 
@@ -641,7 +642,7 @@ MagnificPopup.prototype = {
 		var disableOn = options.disableOn !== undefined ? options.disableOn : $.magnificPopup.defaults.disableOn;
 
 		if(disableOn) {
-			if($.isFunction(disableOn)) {
+			if('function' === typeof disableOn) {
 				if( !disableOn.call(mfp) ) {
 					return true;
 				}
@@ -1117,7 +1118,7 @@ var _imgInterval,
 		var src = mfp.st.image.titleSrc;
 
 		if(src) {
-			if($.isFunction(src)) {
+			if('function' === typeof src) {
 				return src.call(mfp, item);
 			} else if(item.el) {
 				return item.el.attr(src) || '';
@@ -1305,6 +1306,36 @@ $.magnificPopup.registerModule('image', {
 				}
 				item.img = $(img).on('load.mfploader', onLoadComplete).on('error.mfploader', onLoadError);
 				img.src = item.src;
+				
+				if( $( 'body' ).hasClass( 'responsive-images-lightbox-support' ) )
+				{
+					var srcset = item.el.data('srcset');
+					var sizes = item.el.data( 'sizes' );
+					
+					// responsive image info added to <a> tag
+					if( 'undefined' != typeof srcset )
+					{
+						img.srcset = srcset;
+						
+						if( 'undefined' != typeof sizes )
+						{
+							img.sizes = sizes;
+						}
+					}
+					else
+					{
+						srcset = item.el.find( 'img' ).attr( 'srcset' );
+						if( 'undefined' != typeof srcset )
+						{
+							img.srcset = srcset;
+						}
+						sizes = item.el.find( 'img' ).attr( 'sizes' );
+						if( 'undefined' != typeof sizes )
+						{
+							img.sizes = sizes;
+						}
+					}
+				}
 
 				// without clone() "error" event is not firing when IMG is replaced by new IMG
 				// TODO: find a way to avoid such cloning
@@ -1731,10 +1762,10 @@ $.magnificPopup.registerModule('gallery', {
 						arrowLeft = mfp.arrowLeft = $( markup.replace(/%title%/gi, gSt.tPrev).replace(/%dir%/gi, 'left') ).addClass(PREVENT_CLOSE_CLASS),
 						arrowRight = mfp.arrowRight = $( markup.replace(/%title%/gi, gSt.tNext).replace(/%dir%/gi, 'right') ).addClass(PREVENT_CLOSE_CLASS);
 
-					arrowLeft.click(function() {
+					arrowLeft.on('click', function() {
 						mfp.prev();
 					});
-					arrowRight.click(function() {
+					arrowRight.on('click', function() {
 						mfp.next();
 					});
 
@@ -1809,6 +1840,38 @@ $.magnificPopup.registerModule('gallery', {
 					item.loadError = true;
 					_mfpTrigger('LazyLoadError', item);
 				}).attr('src', item.src);
+				
+				if( $( 'body' ).hasClass( 'responsive-images-lightbox-support' ) && ( item.el.length > 0 ) )
+				{
+					var source = $( item.el[0] );
+					var srcset = source.data('srcset');
+					var sizes = source.data( 'sizes' );
+					
+					// responsive image info added to <a> tag
+					if( 'undefined' != typeof srcset )
+					{
+						item.img.attr( 'srcset', srcset );
+						
+						if( 'undefined' != typeof sizes )
+						{
+							item.img.attr('sizes', sizes );
+						}
+					}
+					else
+					{
+						var image = $( item.el[0] ).find( 'img' );
+						srcset = image.attr( 'srcset' );
+						if( 'undefined' != typeof srcset )
+						{
+							item.img.attr( 'srcset', srcset );
+						}
+						sizes = image.attr( 'sizes' );
+						if( 'undefined' != typeof sizes )
+						{
+							item.img.attr('sizes', sizes );
+						}
+					}
+				}
 			}
 
 
