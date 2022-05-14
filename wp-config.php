@@ -25,8 +25,8 @@ if ($_SERVER['HTTP_HOST'] == 'www.miabogada.com') {
     define( 'WP_CONTENT_URL', 'https://' . $_SERVER['HTTP_HOST'] . '/content' );
     $_SERVER['HTTPS'] = 'on';
 } else {
-    define('WP_SITEURL', 'http://www0.miabogada.com:8080/wp');
-    define('WP_HOME',    'http://www0.miabogada.com:8080');
+    define('WP_SITEURL', 'http://www0.miabogada.com/wp');
+    define('WP_HOME',    'http://www0.miabogada.com');
     define( 'WP_CONTENT_URL', 'http://' . $_SERVER['HTTP_HOST'] . '/content' );
 }
 
