@@ -20,7 +20,11 @@ class autoptimizePartners
         if ( $this->enabled() ) {
             add_filter( 'autoptimize_filter_settingsscreen_tabs', array( $this, 'add_partner_tabs' ), 10, 1 );
         }
-        add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
+        if ( is_multisite() && is_network_admin() && autoptimizeOptionWrapper::is_ao_active_for_network() ) {
+            add_action( 'network_admin_menu', array( $this, 'add_admin_menu' ) );
+        } else {
+            add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
+        }
     }
 
     protected function enabled()
@@ -132,8 +136,9 @@ class autoptimizePartners
         color: #23282d;
     }
     </style>
+    <script>document.title = "Autoptimize: <?php _e( 'Optimize More!', 'autoptimize' ); ?> " + document.title;</script>
     <div class="wrap">
-        <h1><?php _e( 'Autoptimize Settings', 'autoptimize' ); ?></h1>
+        <h1><?php apply_filters( 'autoptimize_filter_settings_is_pro', false ) ? _e( 'Autoptimize Pro Settings', 'autoptimize' ) : _e( 'Autoptimize Settings', 'autoptimize' ); ?></h1>
         <?php echo autoptimizeConfig::ao_admin_tabs(); ?>
         <?php echo '<h2>' . __( "These Autoptimize power-ups and related services will improve your site's performance even more!", 'autoptimize' ) . '</h2>'; ?>
         <div>

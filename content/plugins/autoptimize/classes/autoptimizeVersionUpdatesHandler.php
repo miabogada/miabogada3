@@ -47,12 +47,23 @@ class autoptimizeVersionUpdatesHandler
                 $major_update = true;
                 // No break, intentionally, so all upgrades are ran during a single request...
             case '2.4':
-                if ( get_option( 'autoptimize_version', 'none' ) == '2.4.2' ) {
+                if ( autoptimizeOptionWrapper::get_option( 'autoptimize_version', 'none' ) == '2.4.2' ) {
                     $this->upgrade_from_2_4_2();
                 }
                 $this->upgrade_from_2_4();
                 $major_update = false;
                 // No break, intentionally, so all upgrades are ran during a single request...
+            case '2.7':
+                $this->upgrade_from_2_7();
+                $major_update = true;
+                // No break, intentionally, so all upgrades are ran during a single request...
+            case '2.8':
+                // nothing
+            case '2.9':
+                if ( version_compare( autoptimizeOptionWrapper::get_option( 'autoptimize_version', 'none' ), '2.9.999', 'lt' ) ) {
+                    $this->upgrade_from_2_9_before_compatibility();
+                }
+                $major_update = false;
         }
 
         if ( true === $major_update ) {
@@ -69,7 +80,7 @@ class autoptimizeVersionUpdatesHandler
      */
     public static function check_installed_and_update( $target )
     {
-        $db_version = get_option( 'autoptimize_version', 'none' );
+        $db_version = autoptimizeOptionWrapper::get_option( 'autoptimize_version', 'none' );
         if ( $db_version !== $target ) {
             if ( 'none' === $db_version ) {
                 add_action( 'admin_notices', 'autoptimizeMain::notice_installed' );
@@ -79,7 +90,7 @@ class autoptimizeVersionUpdatesHandler
             }
 
             // Versions differed, upgrades happened if needed, store the new version.
-            update_option( 'autoptimize_version', $target );
+            autoptimizeOptionWrapper::update_option( 'autoptimize_version', $target );
         }
     }
 
@@ -103,7 +114,7 @@ class autoptimizeVersionUpdatesHandler
     private function upgrade_from_1_6()
     {
         // If user was on version 1.6.x, force advanced options to be shown by default.
-        update_option( 'autoptimize_show_adv', '1' );
+        autoptimizeOptionWrapper::update_option( 'autoptimize_show_adv', '1' );
 
         // And remove old options.
         $to_delete_options = array(
@@ -128,26 +139,26 @@ class autoptimizeVersionUpdatesHandler
     private function upgrade_from_1_7()
     {
         if ( ! is_multisite() ) {
-            $css_exclude = get_option( 'autoptimize_css_exclude' );
+            $css_exclude = autoptimizeOptionWrapper::get_option( 'autoptimize_css_exclude' );
             if ( empty( $css_exclude ) ) {
                 $css_exclude = 'admin-bar.min.css, dashicons.min.css';
             } elseif ( false === strpos( $css_exclude, 'dashicons.min.css' ) ) {
                 $css_exclude .= ', dashicons.min.css';
             }
-            update_option( 'autoptimize_css_exclude', $css_exclude );
+            autoptimizeOptionWrapper::update_option( 'autoptimize_css_exclude', $css_exclude );
         } else {
             global $wpdb;
             $blog_ids         = $wpdb->get_col( "SELECT blog_id FROM $wpdb->blogs" );
             $original_blog_id = get_current_blog_id();
             foreach ( $blog_ids as $blog_id ) {
                 switch_to_blog( $blog_id );
-                $css_exclude = get_option( 'autoptimize_css_exclude' );
+                $css_exclude = autoptimizeOptionWrapper::get_option( 'autoptimize_css_exclude' );
                 if ( empty( $css_exclude ) ) {
                     $css_exclude = 'admin-bar.min.css, dashicons.min.css';
                 } elseif ( false === strpos( $css_exclude, 'dashicons.min.css' ) ) {
                     $css_exclude .= ', dashicons.min.css';
                 }
-                update_option( 'autoptimize_css_exclude', $css_exclude );
+                autoptimizeOptionWrapper::update_option( 'autoptimize_css_exclude', $css_exclude );
             }
             switch_to_blog( $original_blog_id );
         }
@@ -162,16 +173,16 @@ class autoptimizeVersionUpdatesHandler
     private function upgrade_from_1_9()
     {
         if ( ! is_multisite() ) {
-            update_option( 'autoptimize_css_include_inline', 'on' );
-            update_option( 'autoptimize_js_include_inline', 'on' );
+            autoptimizeOptionWrapper::update_option( 'autoptimize_css_include_inline', 'on' );
+            autoptimizeOptionWrapper::update_option( 'autoptimize_js_include_inline', 'on' );
         } else {
             global $wpdb;
             $blog_ids         = $wpdb->get_col( "SELECT blog_id FROM $wpdb->blogs" );
             $original_blog_id = get_current_blog_id();
             foreach ( $blog_ids as $blog_id ) {
                 switch_to_blog( $blog_id );
-                update_option( 'autoptimize_css_include_inline', 'on' );
-                update_option( 'autoptimize_js_include_inline', 'on' );
+                autoptimizeOptionWrapper::update_option( 'autoptimize_css_include_inline', 'on' );
+                autoptimizeOptionWrapper::update_option( 'autoptimize_js_include_inline', 'on' );
             }
             switch_to_blog( $original_blog_id );
         }
@@ -203,10 +214,10 @@ class autoptimizeVersionUpdatesHandler
      */
     private function do_2_2_settings_update()
     {
-        $nogooglefont    = get_option( 'autoptimize_css_nogooglefont', '' );
-        $ao_extrasetting = get_option( 'autoptimize_extra_settings', '' );
+        $nogooglefont    = autoptimizeOptionWrapper::get_option( 'autoptimize_css_nogooglefont', '' );
+        $ao_extrasetting = autoptimizeOptionWrapper::get_option( 'autoptimize_extra_settings', '' );
         if ( ( $nogooglefont ) && ( empty( $ao_extrasetting ) ) ) {
-            update_option( 'autoptimize_extra_settings', autoptimizeConfig::get_ao_extra_default_options() );
+            autoptimizeOptionWrapper::update_option( 'autoptimize_extra_settings', autoptimizeConfig::get_ao_extra_default_options() );
         }
         delete_option( 'autoptimize_css_nogooglefont' );
     }
@@ -236,8 +247,8 @@ class autoptimizeVersionUpdatesHandler
      * Migrate imgopt options from autoptimize_extra_settings to autoptimize_imgopt_settings
      */
     private function upgrade_from_2_4() {
-        $extra_settings  = get_option( 'autoptimize_extra_settings', '' );
-        $imgopt_settings = get_option( 'autoptimize_imgopt_settings', '' );
+        $extra_settings  = autoptimizeOptionWrapper::get_option( 'autoptimize_extra_settings', '' );
+        $imgopt_settings = autoptimizeOptionWrapper::get_option( 'autoptimize_imgopt_settings', '' );
         if ( empty( $imgopt_settings ) && ! empty( $extra_settings ) ) {
             $imgopt_settings = autoptimizeConfig::get_ao_imgopt_default_options();
             if ( array_key_exists( 'autoptimize_extra_checkbox_field_5', $extra_settings ) ) {
@@ -246,7 +257,28 @@ class autoptimizeVersionUpdatesHandler
             if ( array_key_exists( 'autoptimize_extra_select_field_6', $extra_settings ) ) {
                 $imgopt_settings['autoptimize_imgopt_select_field_2'] = $extra_settings['autoptimize_extra_select_field_6'];
             }
-            update_option( 'autoptimize_imgopt_settings', $imgopt_settings );
+            autoptimizeOptionWrapper::update_option( 'autoptimize_imgopt_settings', $imgopt_settings );
         }
+    }
+
+    /**
+     * remove CCSS request limit option + update jquery exclusion to include WordPress 5.6 jquery.min.js.
+     */    
+    private function upgrade_from_2_7() {
+        delete_option( 'autoptimize_ccss_rlimit' );
+        $js_exclusions = get_option( 'autoptimize_js_exclude', '' );
+        if ( strpos( $js_exclusions, 'js/jquery/jquery.js' ) !== false && strpos( $js_exclusions, 'js/jquery/jquery.min.js' ) === false ) {
+            $js_exclusions .= ', js/jquery/jquery.min.js';
+            autoptimizeOptionWrapper::update_option( 'autoptimize_js_exclude', $js_exclusions );
+        }
+    }
+    
+    /**
+     * set an option to indicate the AO installation predates the compatibility logic, this way we 
+     * can avoid adding compatibility code that is likely not needed and maybe not wanted as it
+     * can introduce performance regressions.
+     */
+    private function upgrade_from_2_9_before_compatibility() {
+        autoptimizeOptionWrapper::update_option( 'autoptimize_installed_before_compatibility', true );
     }
 }
