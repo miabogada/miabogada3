@@ -477,7 +477,8 @@ if ( ! class_exists( 'aviaAssetManager' ) )
 				$check_path = trailingslashit( ABSPATH ) . $path;
 				$check_path = apply_filters( 'avf_compress_file_content_path', $check_path, $path , $file_type , $fallback_url );
 
-				$new_content = file_get_contents( $check_path );
+//				$new_content = file_get_contents( $check_path );
+				$new_content = file_get_contents( $path );
 			}
 
 			//we got a file that we cant read, lets try to access it via remote get

@@ -47,6 +47,7 @@ class OTGS_Installer_Plugin_Finder {
 						'repo'              => $repo_key,
 						'id'                => $plugin_id,
 						'channel'           => $plugin['channel'],
+						'tested'            => isset( $plugin['tested'] ) ? $plugin['tested'] : null,
 					) );
 				}
 			}
@@ -66,6 +67,23 @@ class OTGS_Installer_Plugin_Finder {
 		foreach ( $this->plugins as $plugin ) {
 			if ( $plugin->get_installed_version() ) {
 				$installed_plugins[] = $plugin;
+			}
+		}
+
+		return $installed_plugins;
+	}
+
+	public function get_otgs_installed_plugins_by_repository() {
+		$installed_plugins = [];
+
+		/** @var OTGS_Installer_Plugin $plugin */
+		foreach ( $this->plugins as $plugin ) {
+			if ( $plugin->get_installed_version() ) {
+				$installed_plugins[ $plugin->get_repo() ][] = [
+					'id' => $plugin->get_id(),
+					'slug' => $plugin->get_slug(),
+					'name' => $plugin->get_name(),
+				];
 			}
 		}
 

@@ -8,17 +8,23 @@ class OTGS_Installer_Subscription {
 	const SUBSCRIPTION_STATUS_INACTIVE_UPGRADED = 3;
 	const SUBSCRIPTION_STATUS_ACTIVE_NO_EXPIRATION = 4;
 
+	const SITE_KEY_TYPE_PRODUCTION = 0;
+	const SITE_KEY_TYPE_DEVELOPMENT = 1;
+
 	const SUBSCRIPTION_STATUS_TEXT_EXPIRED = 'expired';
 	const SUBSCRIPTION_STATUS_TEXT_VALID = 'valid';
+	const SUBSCRIPTION_STATUS_TEXT_REFUNDED = 'refunded';
 	const SUBSCRIPTION_STATUS_TEXT_MISSING = 'missing';
 
 	private $status;
 	private $expires;
 	private $site_key;
+	private $site_key_type;
 	private $site_url;
 	private $type;
 	private $registered_by;
 	private $data;
+	private $notes;
 
 	/**
 	 * WPML_Installer_Subscription constructor.
@@ -40,6 +46,10 @@ class OTGS_Installer_Subscription {
 				$this->expires = $subscription['data']->expires;
 			}
 
+			if ( isset( $subscription['data']->notes ) ) {
+				$this->notes = $subscription['data']->notes;
+			}
+
 			if ( isset( $subscription['key'] ) ) {
 				$this->site_key = $subscription['key'];
 			}
@@ -55,6 +65,9 @@ class OTGS_Installer_Subscription {
 			if ( isset( $subscription['data']->subscription_type ) ) {
 				$this->type = $subscription['data']->subscription_type;
 			}
+
+			$this->site_key_type = isset($subscription['key_type'])
+				? $subscription['key_type'] : self::SITE_KEY_TYPE_PRODUCTION;
 		}
 	}
 
@@ -67,17 +80,22 @@ class OTGS_Installer_Subscription {
 			return self::SUBSCRIPTION_STATUS_TEXT_VALID;
 		}
 
+		if ( $this->is_refunded() ) {
+			return self::SUBSCRIPTION_STATUS_TEXT_REFUNDED;
+		}
+
 		return self::SUBSCRIPTION_STATUS_TEXT_MISSING;
 	}
 
 	/**
+	 * @param int $expiredForPeriod
 	 * @return bool
 	 */
-	private function is_expired() {
+	private function is_expired( $expiredForPeriod = 0 ) {
 		return ! $this->is_lifetime()
 		       && (
 			       self::SUBSCRIPTION_STATUS_EXPIRED === $this->get_status()
-			       || ( $this->get_expiration() && strtotime( $this->get_expiration() ) <= time() )
+			       || ( $this->get_expiration() && strtotime( $this->get_expiration() ) <= time() - $expiredForPeriod )
 		       );
 	}
 
@@ -108,6 +126,10 @@ class OTGS_Installer_Subscription {
 		return $this->type;
 	}
 
+	public function get_site_key_type() {
+		return $this->site_key_type;
+	}
+
 	public function get_registered_by() {
 		return $this->registered_by;
 	}
@@ -117,10 +139,17 @@ class OTGS_Installer_Subscription {
 	}
 
 	/**
+	 * @param int $expiredForPeriod
 	 * @return bool
 	 */
-	public function is_valid() {
+	public function is_valid( $expiredForPeriod = 0 ) {
 		return ( $this->is_lifetime()
-		         || ( $this->get_status() === self::SUBSCRIPTION_STATUS_ACTIVE && ! $this->is_expired() ) );
+		         || ( $this->get_status() === self::SUBSCRIPTION_STATUS_ACTIVE && ! $this->is_expired( $expiredForPeriod ) ) );
+	}
+
+	public function is_refunded() {
+		return ! $this->is_lifetime() &&
+		       $this->get_status() === self::SUBSCRIPTION_STATUS_INACTIVE &&
+		       $this->notes === 'Payment refunded to user';
 	}
 }
