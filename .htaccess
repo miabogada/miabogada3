@@ -8,6 +8,8 @@ RewriteEngine On
 RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 RewriteBase /
 RewriteRule ^index\.php$ - [L]
+RewriteRule ^en/wp-login.php /wp-login.php [QSA,L]
+RewriteRule ^es/wp-login.php /wp-login.php [QSA,L]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule . /index.php [L]
