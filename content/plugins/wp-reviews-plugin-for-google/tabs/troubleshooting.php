@@ -1,9 +1,9 @@
 <?php
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 $reviews = [];
-if($trustindex_pm_google->is_noreg_linked() && $trustindex_pm_google->is_noreg_table_exists())
+if($trustindex_pm_google->is_noreg_linked())
 {
-$reviews = $wpdb->get_results('SELECT * FROM `'. $trustindex_pm_google->get_noreg_tablename() .'` ORDER BY date DESC');
+$reviews = $wpdb->get_results('SELECT * FROM `'. $trustindex_pm_google->get_tablename('reviews') .'` ORDER BY date DESC');
 }
 $auto_updates = get_option('auto_update_plugins', []);
 $plugin_slug = "wp-reviews-plugin-for-google/wp-reviews-plugin-for-google.php";
@@ -39,7 +39,7 @@ exit;
 }
 $yes_icon = '<span class="dashicons dashicons-yes-alt"></span>';
 $no_icon = '<span class="dashicons dashicons-dismiss"></span>';
-$plugin_updated = ($trustindex_pm_google->get_plugin_current_version() <= "8.4");
+$plugin_updated = ($trustindex_pm_google->get_plugin_current_version() <= "9.8.5");
 $css_inline = get_option($trustindex_pm_google->get_option_name('load-css-inline'), 0);
 $css = get_option($trustindex_pm_google->get_option_name('css-content'));
 ?>
@@ -112,14 +112,6 @@ echo $no_icon;
 <li><?php echo TrustindexPlugin_google::___('clear the cache'); ?></li>
 <li><?php echo TrustindexPlugin_google::___("exclude Trustindex's JS file:"); ?> <strong><?php echo 'https://cdn.trustindex.io/'; ?>loader.js</strong>
 <ul>
-<li><a href="#" onclick="jQuery('#list-wp-rocket').toggle(); return false;">WP Rocket</a>
-<ol id="list-wp-rocket" style="display: none;">
-<li><?php echo TrustindexPlugin_google::___('Navigate to'); ?> "Settings" > "WP Rocket menu" > "File optimization"</li>
-<li><?php echo TrustindexPlugin_google::___('Scroll to'); ?> "Excluded Javascript files"</li>
-<li><?php echo TrustindexPlugin_google::___('In a new line, add'); ?> https://cdn.trustindex.io/*</li>
-<li><?php echo TrustindexPlugin_google::___('Save'); ?></li>
-</ol>
-</li>
 <li><a href="#" onclick="jQuery('#list-w3-total-cache').toggle(); return false;">W3 Total Cache</a>
 <ol id="list-w3-total-cache" style="display: none;">
 <li><?php echo TrustindexPlugin_google::___('Navigate to'); ?> "Performance" > "Minify"</li>
@@ -180,9 +172,6 @@ $max_execute = filter_var(ini_get('max_execution_time'));
 <textarea class="ti-troubleshooting-info" readonly>
 URL: <?php echo esc_url(get_option('siteurl')) ."\n"; ?>
 MySQL Version: <?php echo esc_html($wpdb->db_version()) ."\n"; ?>
-MySQL Database: <?php echo esc_html(DB_NAME) ."\n"; ?>
-MySQL User: <?php echo esc_html(DB_USER) ."\n"; ?>
-MySQL User rights: <?php echo "\n\t\t - ". esc_html(implode("\n\t\t - ", $trustindex_pm_google->get_mysql_rights())) ."\n"; ?>
 WP Table Prefix: <?php echo esc_html($wpdb->prefix) ."\n"; ?>
 WP Version: <?php echo esc_html($wp_version) ."\n"; ?>
 Server Name: <?php echo esc_html($_SERVER['SERVER_NAME']) ."\n"; ?>
@@ -246,7 +235,13 @@ Plugins: <?php foreach (get_plugins() as $key => $plugin) {
 echo "\n\t". esc_html($plugin['Name'].' ('.$plugin['Version'] . (is_plugin_active($key) ? ' - active' : '') . ')');
 } ?>
 </textarea>
-<a href=".ti-troubleshooting-info" class="btn-text btn-copy2clipboard ti-pull-right"><?php echo TrustindexPlugin_google::___("Copy to clipboard"); ?></a>
+<a href=".ti-troubleshooting-info" class="btn-text btn-copy2clipboard ti-pull-right ti-tooltip toggle-tooltip ti-tooltip-left">
+<?php echo TrustindexPlugin_google::___("Copy to clipboard") ;?>
+<span class="ti-tooltip-message">
+<span style="color: #00ff00; margin-right: 2px">✓</span>
+<?php echo TrustindexPlugin_google::___("Copied"); ?>
+</span>
+</a>
 <div class="clear"></div>
 </div>
 <div class="ti-box">

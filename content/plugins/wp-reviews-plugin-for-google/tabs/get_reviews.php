@@ -13,21 +13,21 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 </div>
 <?php if(class_exists('Woocommerce')): ?>
 <div class="ti-box">
-<div class="ti-header"><?php echo TrustindexPlugin_google::___('Get new features for your WooCommerce shop'); ?></div>
-<?php if(!class_exists('TrustindexWoocommercePlugin')): ?>
-<p><?php echo TrustindexPlugin_google::___("Download our new <a href='%s' target='_blank'>%s</a> plugin and get features for free!", [ 'https://wordpress.org/plugins/customer-reviews-for-woocommerce/', TrustindexPlugin_google::___('Customer Reviews for WooCommerce') ]); ?></p>
+<div class="ti-header"><?php echo TrustindexPlugin_google::___('Collect reviews automatically for your WooCommerce shop'); ?></div>
+<?php if(!class_exists('TrustindexCollectorPlugin')): ?>
+<p><?php echo TrustindexPlugin_google::___("Download our new <a href='%s' target='_blank'>%s</a> plugin and get features for free!", [ 'https://wordpress.org/plugins/customer-reviews-collector-for-woocommerce/', TrustindexPlugin_google::___('Customer Reviews Collector for WooCommerce') ]); ?></p>
 <?php endif; ?>
 <ul class="ti-check" style="margin-bottom: 20px">
-<li><?php echo TrustindexPlugin_google::___('set up Trustindex company profile and get high quality backlink'); ?></li>
-<li><?php echo TrustindexPlugin_google::___('set up review-collector campaigns to get new ratings / reviews / recommendations automatically'); ?></li>
-<li><?php echo TrustindexPlugin_google::___('show customer reviews in fancy widgets'); ?></li>
+<li><?php echo TrustindexPlugin_google::___('Send unlimited review invitations for free'); ?></li>
+<li><?php echo TrustindexPlugin_google::___('E-mail templates are fully customizable'); ?></li>
+<li><?php echo TrustindexPlugin_google::___('Collect reviews on 100+ review platforms (Google, Facebook, Yelp, etc.)'); ?></li>
 </ul>
-<?php if(class_exists('TrustindexWoocommercePlugin')): ?>
-<a href="?page=customer-reviews-for-woocommerce%2Fsettings.php" class="btn-text">
-<?php echo TrustindexPlugin_google::___("Get Reviews"); ?>
+<?php if(class_exists('TrustindexCollectorPlugin')): ?>
+<a href="?page=customer-reviews-collector-for-woocommerce%2Fadmin.php&tab=settings" class="btn-text">
+<?php echo TrustindexPlugin_google::___("Collect reviews automatically"); ?>
 </a>
 <?php else: ?>
-<a href="https://wordpress.org/plugins/customer-reviews-for-woocommerce/" target="_blank" class="btn-text">
+<a href="https://wordpress.org/plugins/customer-reviews-collector-for-woocommerce/" target="_blank" class="btn-text">
 <?php echo TrustindexPlugin_google::___("Download plugin"); ?>
 </a>
 <?php endif; ?>

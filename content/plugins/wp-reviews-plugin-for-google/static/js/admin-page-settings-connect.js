@@ -1,1 +1,317 @@
-jQuery.fn.delayKeyup=function(e,b){var d=0;var c=jQuery(this);var a=c.val();c.on("input",function(f){if(a!=c.val()){a=c.val();clearTimeout(d);d=setTimeout(e,b)}});return jQuery(this)};var Trustindex_Autocomplete=null;jQuery(document).ready(function(){Trustindex_Autocomplete={box:jQuery("#trustindex-plugin-settings-page .autocomplete .results"),load:jQuery("#trustindex-plugin-settings-page .autocomplete .loading"),input:jQuery("#trustindex-plugin-settings-page .autocomplete input.name"),button:jQuery("#trustindex-plugin-settings-page .btn-search"),svg:{Hotels:'<svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M810.666667 298.666667h-341.333334v298.666666H128V213.333333H42.666667v640h85.333333v-128h768v128h85.333333v-384a170.666667 170.666667 0 0 0-170.666666-170.666666M298.666667 554.666667a128 128 0 0 0 128-128 128 128 0 0 0-128-128 128 128 0 0 0-128 128 128 128 0 0 0 128 128z" fill="" /></svg>',Restaurants:'<svg id="Layer_1" version="1.1" viewBox="0 0 30 30" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M23,19l-3.328-3.232C19.239,15.273,19,14.637,19,13.98V12c0-4.945,3.157-9.535,3.157-9.535L23,2.999V19z"/><circle cx="23" cy="3" r="1"/><path d="M24,3h-2l-1,10v13.5c0,0.828,0.672,1.5,1.5,1.5h0c0.828,0,1.5-0.672,1.5-1.5V3z"/><path d="M13.087,2.445C13.037,2.186,12.811,2,12.548,2C12.245,2,12,2.245,12,2.548v5.807C12,8.711,11.711,9,11.355,9  c-0.329,0-0.605-0.247-0.641-0.574l-0.66-5.939C10.023,2.21,9.789,2,9.509,2H9.5H9.491C9.211,2,8.977,2.21,8.946,2.488l-0.66,5.939  C8.25,8.753,7.974,9,7.645,9C7.289,9,7,8.711,7,8.355V2.548C7,2.245,6.755,2,6.452,2C6.189,2,5.963,2.186,5.913,2.445  C5.671,3.713,5,7.362,5,9c0,4,3,5,3,5v12.5C8,27.328,8.672,28,9.5,28s1.5-0.672,1.5-1.5V14c0,0,3-1,3-5  C14,7.362,13.329,3.713,13.087,2.445z"/></svg>',Attractions:'<svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M533.333333 128.810667l43.008 0.149333c23.573333 0.085333 42.666667 19.413333 42.666667 42.816V213.333333H405.653333c0.298667-14.357333 0.106667-42.346667 0.106667-42.346666a42.197333 42.197333 0 0 1 42.56-42.496L490.666667 128.64V64a21.333333 21.333333 0 0 1 42.666666 0v64.810667zM726.677333 661.333333c85.482667 174.272 190.698667 277.333333 190.698667 277.333334H662.186667c-65.450667-148.181333-236.032-149.056-299.029334 0H105.088s105.173333-99.925333 191.146667-277.333334H234.666667a21.333333 21.333333 0 0 1 0-42.666666h554.666666a21.333333 21.333333 0 0 1 0 42.666666h-62.634666z m-103.872-362.666666c9.237333 102.464 34.346667 195.690667 66.304 277.333333H333.333333a1074.709333 1074.709333 0 0 0 66.986667-277.333333H362.666667a21.333333 21.333333 0 0 1 0-42.666667h298.666666a21.333333 21.333333 0 0 1 0 42.666667h-38.506666z" fill="#3D3D3D" /></svg>',LodgingBusiness:'<svg class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg"><path d="M810.666667 298.666667h-341.333334v298.666666H128V213.333333H42.666667v640h85.333333v-128h768v128h85.333333v-384a170.666667 170.666667 0 0 0-170.666666-170.666666M298.666667 554.666667a128 128 0 0 0 128-128 128 128 0 0 0-128-128 128 128 0 0 0-128 128 128 128 0 0 0 128 128z" fill="" /></svg>'},searching:false,cache:[],search:function(b){let query_term=Trustindex_Autocomplete.input.val();if(query_term.length<4){Trustindex_Autocomplete.box.html("<span>"+Trustindex_Autocomplete.box.data("tooshorttext")+"</span>");Trustindex_Autocomplete.box.show();return false}if(Trustindex_Autocomplete.input.data("url")===undefined&&(query_term.substr(0,4)=="www."||query_term.substr(0,7)=="http://"||query_term.substr(0,8)=="https://")){Trustindex_Autocomplete.box.html("<span>This is an URL. "+Trustindex_Autocomplete.input.attr("placeholder")+"</span>");Trustindex_Autocomplete.box.show();return false}else{if(Trustindex_Autocomplete.input.data("url")===true&&(query_term.substr(0,4)=="www."||query_term.substr(0,7)=="http://"||query_term.substr(0,8)=="https://")&&Trustindex_Autocomplete.checkRegex&&!Trustindex_Autocomplete.checkRegex.test(query_term)){Trustindex_Autocomplete.box.html("<span>"+Trustindex_Autocomplete.box.data("url-errortext")+"</span>");Trustindex_Autocomplete.box.show();return false}}if(Trustindex_Autocomplete.searching){return false}Trustindex_Autocomplete.box.hide();Trustindex_Autocomplete.load.show();Trustindex_Autocomplete.searching=true;let cache_term=query_term.trim();if(Trustindex_Autocomplete.cache[cache_term]!==undefined){setTimeout(function(){Trustindex_Autocomplete.showResults(Trustindex_Autocomplete.cache[cache_term])},400);return}jQuery.ajax({method:"POST",url:"https://admin.trustindex.io/api/searchPage",data:{q:query_term,platform:b},dataType:"jsonp",success:function(c){Trustindex_Autocomplete.cache[cache_term]=c;Trustindex_Autocomplete.showResults(c)}})},showResults:function(b){Trustindex_Autocomplete.load.hide();Trustindex_Autocomplete.searching=false;if(b.success&&b.result&&b.result.length){let html="";b.result.forEach(function(c){html+='<li class="result" data-page-id="'+c.page_id+'" data-name="'+c.name+'" data-type="'+c.type+'" data-url="'+c.url+'" data-address="'+c.address+'" data-avatar-url="'+(c.avatar_url||"")+'">'+(Trustindex_Autocomplete.svg[c.type]||"")+'<p class="title">'+c.name+'</p><p class="location">'+(c.address||c.url)+"</p></li>"});Trustindex_Autocomplete.box.html("<ul>"+html+"</ul>");Trustindex_Autocomplete.box.show()}else{if(b.success){Trustindex_Autocomplete.box.html("<span>"+Trustindex_Autocomplete.box.data("noresultstext")+"</span>");Trustindex_Autocomplete.box.show()}else{Trustindex_Autocomplete.box.html('<span class="error">'+Trustindex_Autocomplete.box.data("errortext")+"</span>");Trustindex_Autocomplete.box.show()}}},showResult:function(b,c){Trustindex_Autocomplete.load.hide();Trustindex_Autocomplete.searching=false;if(typeof c=="undefined"){c="errortext"}if(b.success&&b.result){let page_details={id:b.result.page_id,name:b.result.name,address:b.result.address,avatar_url:b.result.avatar_url};let form=jQuery("#submit-form");let div=form.find(".ti-selected-source");form.find("#ti-noreg-page_details").val(JSON.stringify(page_details));div.find("img").attr("src",page_details.avatar_url);div.find("#label-noreg-page_name").html(page_details.name);if(page_details.address){div.find("#label-noreg-address").html(page_details.address+"<br />")}div.find("#label-noreg-url").html("<a target='_blank' href='"+b.result.url+"'>"+b.result.url+"</a>");jQuery("#trustindex-plugin-settings-page .btn-check").addClass("btn-disabled");div.fadeIn()}else{Trustindex_Autocomplete.box.html('<span class="error">'+Trustindex_Autocomplete.box.data(c)+"</span>");Trustindex_Autocomplete.box.show()}},check:function(){let input=jQuery("#trustindex-plugin-settings-page #page-link");if(!Trustindex_Autocomplete.checkRegex){return false}let m=Trustindex_Autocomplete.checkRegex.exec(input.val());if(!Trustindex_Autocomplete.checkRegexValid(m)){Trustindex_Autocomplete.box.html("<span>"+Trustindex_Autocomplete.box.data("errortext")+"</span>");Trustindex_Autocomplete.box.show();return false}if(Trustindex_Autocomplete.searching){return false}let part1=m[1]||m[3]||"";let part2=m[2]||m[4]||"";let page_id=part1;if(part2){if(part1){page_id+=Trustindex_Autocomplete.pageIdSeparator}page_id+=part2}if(page_id.trim()==""){Trustindex_Autocomplete.box.html("<span>"+Trustindex_Autocomplete.box.data("errortext")+"</span>");Trustindex_Autocomplete.box.show();return false}Trustindex_Autocomplete.box.hide();Trustindex_Autocomplete.load.show();Trustindex_Autocomplete.searching=true;let cache_term=page_id;if(Trustindex_Autocomplete.cache[cache_term]!==undefined){setTimeout(function(){Trustindex_Autocomplete.showResult(Trustindex_Autocomplete.cache[cache_term])},400);return}jQuery.ajax({method:"POST",url:"https://admin.trustindex.io/api/getPageDetails",data:{platform:jQuery("#submit-form").data("platform"),page_id:page_id},dataType:"jsonp",success:function(b){Trustindex_Autocomplete.cache[cache_term]=b;Trustindex_Autocomplete.showResult(b)}})},checkRegex:null,checkRegexValid:function(b){if(!b){return false}for(let i=0;i<b.length;i++){if(b[i]===""){return false}}return true},pageIdSeparator:"|"};if(Trustindex_Autocomplete.input.length){Trustindex_Autocomplete.input.delayKeyup(function(){Trustindex_Autocomplete.button.click()},650)}if(Trustindex_Autocomplete.button.length){Trustindex_Autocomplete.button.click(function(b){b.preventDefault();Trustindex_Autocomplete.search(Trustindex_Autocomplete.button.closest("form").data("platform"))})}jQuery(document).on("click","#trustindex-plugin-settings-page .autocomplete .results li[data-page-id]",function(){let selected_element=jQuery(this);let form=selected_element.closest("form");let div=form.find(".ti-selected-source");let page_details={id:selected_element.data("page-id"),name:selected_element.data("name"),address:selected_element.data("address"),avatar_url:selected_element.data("avatar-url")};form.find("#ti-noreg-page_details").val(JSON.stringify(page_details));if(page_details.avatar_url){div.find("img").attr("src",page_details.avatar_url).show()}else{div.find("img").hide()}div.find("#label-noreg-page_name").html(selected_element.data("name"));div.find("#label-noreg-url").html("<a target='_blank' href='"+selected_element.data("url")+"'>"+selected_element.data("url")+"</a>");if(selected_element.data("address")){div.find("#label-noreg-address").html(selected_element.data("address")+"<br />")}Trustindex_Autocomplete.box.hide();div.fadeIn();Trustindex_Autocomplete.button.addClass("btn-default").removeClass("btn-primary")});jQuery("#trustindex-plugin-settings-page form:not([data-platform='facebook']) .btn-connect").click(function(b){let btn=jQuery(this);btn.css("pointer-events","none");btn.addClass("btn-default").removeClass("btn-primary");btn.blur();TI_manage_dots(btn);Trustindex_Autocomplete.button.css("pointer-events","none");jQuery("#trustindex-plugin-settings-page .btn-check").css("pointer-events","none")});jQuery("#trustindex-plugin-settings-page .btn-refresh").click(function(b){let btn=jQuery(this);btn.css("pointer-events","none");btn.addClass("btn-default").removeClass("btn-primary");btn.blur();TI_manage_dots(btn);jQuery("#trustindex-plugin-settings-page .btn").css("pointer-events","none")});jQuery("#trustindex-plugin-settings-page .btn-check").click(function(b){b.preventDefault();Trustindex_Autocomplete.check()});var a=[];jQuery("#ti-reg-email, #ti-reg-password").blur(function(){let email=jQuery("#ti-reg-email").val();if(jQuery.inArray(email,a)!=-1){jQuery("#txt-email-used").fadeIn();return false}jQuery.ajax({method:"POST",url:"https://admin.trustindex.io/api/userCheckEmail",data:{email:email,s:"wp"},dataType:"jsonp",success:function(b){if(b==-1){}else{if(b==0){jQuery("#txt-email-used").fadeOut()}else{let link=jQuery("#txt-email-used").find("a");link.html(link.html().replace("$email",email));jQuery("#txt-email-used").fadeIn();jQuery("#ti-reg-email").val("");a.push(email)}}}})});jQuery("#form-reg").submit(function(b){return !jQuery("#txt-email-used").is(":visible")})});
+if(typeof Trustindex_JS_loaded == 'undefined')
+{
+	var Trustindex_JS_loaded = {};
+}
+
+Trustindex_JS_loaded.connect = true;
+
+// Autocomplete config
+var Trustindex_Connect = null;
+jQuery(document).ready(function($) {
+	/*************************************************************************/
+	/* NO REG MODE */
+	Trustindex_Connect = {
+		box: $('#trustindex-plugin-settings-page .autocomplete .results'),
+		input: $('#trustindex-plugin-settings-page #page-link'),
+		button: $('#trustindex-plugin-settings-page .btn-check'),
+		form: $('#submit-form'),
+		check: function(event) {
+			event.preventDefault();
+
+			if(!Trustindex_Connect.regex)
+			{
+				return false;
+			}
+
+			let m = Trustindex_Connect.regex.exec(Trustindex_Connect.input.val().trim());
+			if(!Trustindex_Connect.is_regex_valid(m))
+			{
+				Trustindex_Connect.box.html('<span>'+ Trustindex_Connect.box.data('errortext') +'</span>');
+				Trustindex_Connect.box.show();
+				return false;
+			}
+
+			// support for 2 regexes
+			let part1 = m[1] || m[3] || "";
+			let part2 = m[2] || m[4] || "";
+
+			let page_id = part1;
+			if(part2)
+			{
+				if(part1)
+				{
+					page_id += Trustindex_Connect.page_id_separator;
+				}
+
+				page_id += part2;
+			}
+
+			let valid = true;
+			if(Trustindex_Connect.form.data('platform') == 'arukereso')
+			{
+				page_id = page_id.replace(/^com/, 'bg');
+			}
+			else if(Trustindex_Connect.form.data('platform') == 'amazon')
+			{
+				valid = (
+					!(
+					page_id.search(/stores\/[^\/]+\/page/) > -1
+					|| page_id.search(/stores\/[^\/]+\/[^\/]+\/page/) > -1
+					|| page_id.indexOf("account/") > -1
+					|| (page_id.indexOf("gp/") > -1 && page_id.indexOf("gp/product/") == -1)
+					|| page_id.search(/\-\/[^\/]{2}\/[^\/]{2}$/) > -1
+					)
+					&& page_id.indexOf("product-reviews/") == -1
+					&& page_id.indexOf("/AccountInfo/") == -1
+					&& page_id.indexOf("/SellerProfileView/") == -1
+				);
+			}
+			else if(Trustindex_Connect.form.data('platform') == 'tripadvisor')
+			{
+				// set source to first page
+				let not_first_page = page_id.match(/\-or[\d]+\-/);
+				if (not_first_page && not_first_page[0])
+				{
+					page_id = page_id.replace(not_first_page[0], '-');
+				}
+
+				// add .html if not in page_id
+				if (page_id.indexOf(".html") == -1)
+				{
+					page_id = page_id + ".html";
+				}
+			}
+
+			// no page_id
+			if(page_id.trim() == '' || !valid)
+			{
+				Trustindex_Connect.box.html('<span>'+ Trustindex_Connect.box.data('errortext') +'</span>');
+				Trustindex_Connect.box.show();
+				return false;
+			}
+
+			Trustindex_Connect.box.hide();
+
+			$('#ti-noreg-page-id').val(page_id);
+
+			// show result
+			let page_details = { id: page_id };
+			let url = Trustindex_Connect.input.val().trim();
+
+			let div = Trustindex_Connect.form.find('.ti-selected-source');
+			Trustindex_Connect.form.find('#ti-noreg-page_details').val(JSON.stringify(page_details));
+
+			div.find('img').attr('src', 'https://cdn.trustindex.io/assets/platform/Google/icon.png');
+			div.find('.ti-source-info').html('<a target="_blank" href="'+ url +'">'+ url +'</a>');
+
+			Trustindex_Connect.button.addClass('btn-disabled');
+			div.fadeIn();
+		},
+		regex: null,
+		is_regex_valid: function(m) {
+			if(!m)
+			{
+				return false;
+			}
+
+			for(let i = 0; i < m.length; i++) {
+				if(m[i] === "")
+				{
+					return false;
+				}
+			}
+
+			return true;
+		},
+		page_id_separator: '|',
+		async_request: function(callback) {
+			// get url params
+			let params = new URLSearchParams({
+				type: 'google',
+				page_id: $('#ti-noreg-page-id').val().trim(),
+				access_token: $('#ti-noreg-access-token').length ? $('#ti-noreg-access-token').val() : "",
+				webhook_url: $('#ti-noreg-webhook-url').val(),
+				email: $('#ti-noreg-email').val(),
+				token: $('#ti-noreg-connect-token').val(),
+				version: $('#ti-noreg-version').val()
+			});
+
+			// show popup info
+			$('#ti-connect-info').fadeIn();
+
+			// open window
+			let ti_window = window.open('https://admin.trustindex.io/source/wordpressPageRequest?' + params.toString(), 'trustindex', 'width=1000,height=1000,menubar=0');
+
+			// wait for process complete
+			window.addEventListener('message', function(event) {
+				if(event.origin.startsWith('https://admin.trustindex.io/'.replace(/\/$/,'')) && event.data.success)
+				{
+					ti_window.close();
+
+					$('#ti-connect-info').hide();
+
+					callback($('#ti-noreg-connect-token').val(), event.data.request_id, typeof event.data.manual_download != 'undefined' && event.data.manual_download ? 1 : 0, event.data.place || null);
+				}
+				if(event.origin.startsWith('https://admin.trustindex.io/'.replace(/\/$/,'')) && !event.data.success)
+				{
+					ti_window.close();
+
+					// reset connect form, with invalid input message
+					Trustindex_Connect.form.find(".ti-selected-source").hide();
+					Trustindex_Connect.button.removeClass("btn-disabled");
+					Trustindex_Connect.box.html("<span>" + Trustindex_Connect.box.data("errortext") + "</span>");
+					Trustindex_Connect.box.show();
+				}
+			});
+		}
+	};
+
+	// check button clicked
+	if(Trustindex_Connect.button.length)
+	{
+		Trustindex_Connect.button.click(Trustindex_Connect.check);
+	}
+
+	// show loading text on connect
+	Trustindex_Connect.form.find('.btn-connect').on('click', function(event) {
+		event.preventDefault();
+
+		// change button
+		let btn = $(this);
+
+		btn.css('pointer-events', 'none');
+		btn.addClass('btn-default').removeClass('btn-primary');
+		btn.blur();
+		TI_manage_dots(btn);
+
+		Trustindex_Connect.button.css('pointer-events', 'none');
+
+		// do request
+		Trustindex_Connect.async_request(function(token, request_id, manual_download, place) {
+			$('#ti-noreg-review-download').val(token);
+			$('#ti-noreg-review-request-id').val(request_id);
+			$('#ti-noreg-manual-download').val(manual_download);
+
+			if(place)
+			{
+				$("#ti-noreg-page_details").val(JSON.stringify(place));
+			}
+
+			Trustindex_Connect.form.submit();
+		});
+	});
+
+	// show loading text on refresh
+	$('#trustindex-plugin-settings-page .btn-refresh').click(function(event) {
+		let btn = jQuery(this);
+
+		btn.css('pointer-events', 'none');
+		btn.addClass('btn-default').removeClass('btn-primary');
+		btn.blur();
+		TI_manage_dots(btn);
+
+		jQuery('#trustindex-plugin-settings-page .btn').css('pointer-events', 'none');
+	});
+
+	// make async request on review download
+	$('.btn-download-reviews').on('click', function(event) {
+		event.preventDefault();
+
+		Trustindex_Connect.async_request(function(token, request_id, manual_download, place) {
+			if(place)
+			{
+				$.ajax({
+					type: "POST",
+					data: { review_download_timestamp: place.timestamp }
+				}).always(function(r) {
+					location.reload();
+				});
+			}
+			else
+			{
+				$.ajax({
+					type: "POST",
+					data: {
+						review_download_request: token,
+						review_download_request_id: request_id,
+						manual_download: manual_download
+					}
+				}).always(function(r) {
+					location.reload();
+				});
+			}
+		});
+	});
+
+	// manual download
+	$('#review-manual-download').on('click', function(event) {
+		event.preventDefault();
+
+		let btn = $(this);
+
+		btn.blur().addClass('btn-disabled');
+
+		TI_manage_dots(btn);
+
+		$.ajax({
+			url: location.search.replace(/&tab=[^&]+/, '&tab=setup_no_reg'),
+			type: 'POST',
+			data: { command: 'review-manual-download' },
+			success: function() {
+				location.reload();
+			},
+			error: function() {
+				btn.restore();
+				btn.addClass('show-tooltip');
+			}
+		});
+	});
+
+	/*************************************************************************/
+	/* CONNECT TO TRUSTINDEX */
+	var used_emails = [];
+	$("#ti-reg-email, #ti-reg-password").blur(function() {
+		let email = jQuery("#ti-reg-email").val();
+
+		//if previously checked
+		if (jQuery.inArray(email, used_emails) != -1)
+		{
+			jQuery("#txt-email-used").fadeIn();
+			return false;
+		}
+
+		jQuery.ajax({
+			method: "POST",
+			url: "https://admin.trustindex.io/" + "api/userCheckEmail",
+			data: { 'email': email, 's': 'wp' },
+			dataType: "jsonp",
+			success: function(data) {
+				//invalid e-mail
+				if (data == -1)
+				{
+
+				}
+				//new e-mail
+				else if (data == 0)
+				{
+					jQuery("#txt-email-used").fadeOut();
+				}
+				//used e-mail
+				else
+				{
+					let link = jQuery("#txt-email-used").find("a");
+					link.html(link.html().replace("$email", email));
+					jQuery("#txt-email-used").fadeIn();
+					jQuery("#ti-reg-email").val("");
+
+					//register as used email
+					used_emails.push(email);
+				}
+			}
+		});
+	});
+
+	$("#form-reg").submit(function(e) {
+		return !jQuery("#txt-email-used").is(":visible");
+	});
+});

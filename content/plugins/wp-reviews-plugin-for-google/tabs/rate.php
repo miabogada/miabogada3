@@ -18,7 +18,7 @@ wp_enqueue_script('trustindex-js', 'https://cdn.trustindex.io/loader.js', [], fa
 <hr>
 <div class="ti-row">
 <div class="ti-col-12">
-<div src='https://cdn.trustindex.io/loader.js?c1c627610fde227dfc5bbac1ec'></div>
+<div src='https://cdn.trustindex.io/loader.js?<?php echo '3ef6962888fb40403c525129f9'; ?>'></div>
 </div>
 </div>
 </div>

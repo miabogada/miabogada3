@@ -43,7 +43,7 @@ $demo_list = [
 23 => 'ligth-border',
 11 => 'drop-shadow-large',
 12 => 'light-minimal',
-20 => 'light-minimal'
+55 => 'light-minimal'
 ];
 foreach($demo_list as $layout => $style): ?>
 <?php

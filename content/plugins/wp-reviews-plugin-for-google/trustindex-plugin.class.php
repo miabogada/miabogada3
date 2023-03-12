@@ -18,6 +18,104 @@ public function getShortName()
 {
 return $this->shortname;
 }
+public function get_webhook_action()
+{
+return 'trustindex_reviews_hook_' . $this->shortname;
+}
+public function get_webhook_url()
+{
+return admin_url('admin-ajax.php') . '?action='. $this->get_webhook_action();
+}
+public function is_review_download_in_progress()
+{
+return get_option($this->get_option_name('review-download-inprogress'), 0);
+}
+public function is_review_manual_download()
+{
+return get_option($this->get_option_name('review-manual-download'), 0);
+}
+public function delete_async_request()
+{
+$request_id = get_option($this->get_option_name('review-download-request-id'));
+if(!$request_id)
+{
+return false;
+}
+wp_remote_post('https://admin.trustindex.io/source/wordpressPageRequest', [
+'body' => [
+'is_delete' => 1,
+'id' => $request_id
+],
+'timeout' => '30',
+'redirection' => '5',
+'blocking' => true
+]);
+return true;
+}
+public function save_details($tmp)
+{
+$details = [
+'id' => isset($tmp['page_id']) ? $tmp['page_id'] : $tmp['id'],
+'name' => isset($tmp['name']) ? sanitize_text_field(stripslashes($tmp['name'])) : "",
+'address' => isset($tmp['address']) ? sanitize_text_field(stripslashes($tmp['address'])) : "",
+'avatar_url' => isset($tmp['avatar_url']) ? sanitize_text_field(stripslashes($tmp['avatar_url'])) : "",
+'rating_number' => isset($tmp['reviews']['count']) ? intval($tmp['reviews']['count']) : 0,
+'rating_score' => isset($tmp['reviews']['score']) ? floatval($tmp['reviews']['score']) : 0,
+];
+if(isset($tmp['access_token']))
+{
+$details['access_token'] = sanitize_text_field(stripslashes($tmp['access_token']));
+}
+update_option($this->get_option_name('page-details'), $details, false);
+}
+public function save_reviews($tmp)
+{
+global $wpdb;
+$table_name = $this->get_tablename('reviews');
+$wpdb->query('TRUNCATE `'. $table_name .'`');
+if($wpdb->last_error)
+{
+throw new Exception('DB truncate failed: '. $wpdb->last_error);
+}
+foreach($tmp as $i => $review)
+{
+foreach($review as $key => $value)
+{
+if(is_array($value))
+{
+if($key == 'reviewer')
+{
+$review[ $key ] = array_map(function($v) {
+return $v ? sanitize_text_field(stripslashes($v)) : $v;
+}, $value);
+}
+else
+{
+unset($review[ $key ]);
+}
+}
+else if($key == 'text')
+{
+$review[ $key ] = $value ? wp_kses_post(stripslashes($value)) : $value;
+}
+else
+{
+$review[ $key ] = $value ? sanitize_text_field(stripslashes($value)) : $value;
+}
+}
+$wpdb->insert($table_name, [
+'user' => $review['reviewer']['name'],
+'user_photo' => $review['reviewer']['avatar_url'],
+'text' => $review['text'],
+'rating' => $review['rating'] ? $review['rating'] : 5,
+'date' => substr($review['created_at'], 0, 10)
+]);
+if($wpdb->last_error)
+{
+throw new Exception('DB instert failed: '. $wpdb->last_error);
+}
+}
+}
 
 
 public function get_plugin_dir()
@@ -65,15 +163,8 @@ public function output_buffer()
 
 public function uninstall()
 {
-foreach ($this->get_option_names() as $opt_name)
-{
-delete_option($this->get_option_name($opt_name));
-}
-if($this->is_noreg_table_exists())
-{
-global $wpdb;
-$wpdb->query('DROP TABLE `'. $this->get_noreg_tablename() .'`');
-}
+$this->delete_async_request();
+include $this->get_plugin_dir() . 'include' . DIRECTORY_SEPARATOR . 'uninstall.php';
 if(is_file($this->getCssFile()))
 {
 unlink($this->getCssFile());
@@ -83,36 +174,15 @@ unlink($this->getCssFile());
 
 public function activate()
 {
-if ($this->is_need_update())
-{
-add_option($this->get_option_name('active'), '1');
-update_option($this->get_option_name('version'), $this->version);
-}
+include $this->get_plugin_dir() . 'include' . DIRECTORY_SEPARATOR . 'activate.php';
 }
 public function deactivate()
 {
+update_option($this->get_option_name('active'), '0');
 }
 public function is_enabled()
 {
-$active = get_option($this->get_option_name('active'));
-if (empty($active) || $active === '0')
-{
-return false;
-}
-return true;
-}
-public function is_need_update()
-{
-$version = (string)get_option($this->get_option_name('version'));
-if (!$version)
-{
-$version = '0';
-}
-if (version_compare($version, $this->version, '<'))
-{
-return true;
-}
-return false;
+return get_option($this->get_option_name('active'), 0);
 }
 
 public function add_setting_menu()
@@ -237,6 +307,7 @@ return [
 'no-rating-text',
 'dateformat',
 'rate-us',
+'rate-us-feedback',
 'verified-icon',
 'enable-animation',
 'show-arrows',
@@ -249,7 +320,13 @@ return [
 'show-stars',
 'load-css-inline',
 'align',
-'amp-hidden-notification'
+'review-text-mode',
+'amp-hidden-notification',
+'review-download-token',
+'review-download-inprogress',
+'review-download-request-id',
+'review-manual-download',
+'review-download-notification'
 ];
 }
 public function get_platforms()
@@ -338,7 +415,8 @@ return "<div style='margin:20px 0px; padding:10px; " . $types[$type]['css'] . " 
 public function get_trustindex_widget($ti_id)
 {
 wp_enqueue_script('trustindex-js', 'https://cdn.trustindex.io/loader.js', [], false, true);
-return "<div src='https://cdn.trustindex.io/loader.js?" . $ti_id . "'></div>";
+$ti_id = preg_replace('/[^a-zA-Z0-9]/', '', $ti_id);
+return "<div data-src='https://cdn.trustindex.io/loader.js?" . $ti_id . "'></div>";
 }
 public function get_shortcode_name()
 {
@@ -346,10 +424,22 @@ return 'trustindex';
 }
 public function init_shortcode()
 {
-if (!shortcode_exists($this->get_shortcode_name()))
+$tag = $this->get_shortcode_name();
+$current_version = floatval($this->version);
+if(shortcode_exists($tag))
 {
-add_shortcode( $this->get_shortcode_name(), [$this, 'shortcode_func'] );
+$inited_version = floatval(get_option('trustindex-core-shortcode-inited', 0));
+if(!$inited_version || $inited_version <= $current_version)
+{
+remove_shortcode($tag);
 }
+else
+{
+return false;
+}
+}
+update_option('trustindex-core-shortcode-inited', $current_version, false);
+add_shortcode($tag, [ $this, 'shortcode_func' ]);
 }
 public function shortcode_func($atts)
 {
@@ -379,15 +469,10 @@ $chosed_platform_slug = $this->plugin_slugs[ $force_platform ];
 $current_platform_slug = $this->plugin_slugs[ $this->shortname ];
 $file_path = preg_replace('/[^\/\\\\]+([\\\\\/]trustindex-plugin\.class\.php)/', $chosed_platform_slug . '$1', $file_path);
 }
-$chosed_platform = new self($force_platform, $file_path, "do-not-care-8.4", "do-not-care-Widgets for Google Reviews", "do-not-care-Google");
-if(!$chosed_platform->is_noreg_linked() || !$chosed_platform->is_noreg_table_exists($force_platform))
+$chosed_platform = new self($force_platform, $file_path, "do-not-care-9.8.5", "do-not-care-Widgets for Google Reviews", "do-not-care-Google");
+if(!$chosed_platform->is_noreg_linked())
 {
-return self::get_alertbox(
-"error",
-" @ <strong>". self::___('Trustindex plugin') ."</strong><br /><br />"
-.self::___('You have to connect your business (%s)!', [$force_platform]),
-false
-);
+return $this->error_box_for_admins(self::___('You have to connect your business (%s)!', [$force_platform]));
 }
 else
 {
@@ -396,13 +481,16 @@ return $chosed_platform->get_noreg_list_reviews($force_platform);
 }
 else
 {
-return self::get_alertbox(
-"error",
-" @ <strong>". self::___('Trustindex plugin') ."</strong><br /><br />"
-.self::___('Your shortcode is deficient: Trustindex Widget ID is empty! Example: ') . '<br /><code>['.$this->get_shortcode_name().' data-widget-id="478dcc2136263f2b3a3726ff"]</code>',
-false
-);
+return $this->error_box_for_admins(self::___('Your shortcode is deficient: Trustindex Widget ID is empty! Example: ') . '<br /><code>['.$this->get_shortcode_name().' data-widget-id="478dcc2136263f2b3a3726ff"]</code>');
 }
+}
+public function error_box_for_admins($text)
+{
+if(!current_user_can('manage_options'))
+{
+return "";
+}
+return self::get_alertbox('error', ' @ <strong>'. self::___('Trustindex plugin') .'</strong> <i style="opacity: 0.65">('. self::___('This message is not be visible to visitors in public mode.') .')</i><br /><br />'. $text, false);
 }
 
 /* WITHOUT REG MODE HELPERS
@@ -415,18 +503,6 @@ public function is_noreg_linked()
 {
 $page_details = get_option($this->get_option_name('page-details'));
 return $page_details && !empty($page_details);
-}
-public function get_noreg_tablename($force_platform = null)
-{
-global $wpdb;
-$force_platform = $force_platform ? $force_platform : $this->shortname;
-return $wpdb->prefix ."trustindex_".$force_platform."_reviews";
-}
-public function is_noreg_table_exists($force_platform = null)
-{
-global $wpdb;
-$dbtable = $this->get_noreg_tablename($force_platform);
-return ($wpdb->get_var("SHOW TABLES LIKE '$dbtable'") == $dbtable);
 }
 public function noreg_save_css($set_change = false)
 {
@@ -446,6 +522,7 @@ $params = [
 'nav' => get_option($this->get_option_name('show-arrows'), 1) ? true : false,
 'hover-anim' => get_option($this->get_option_name('enable-animation'), 1) ? true : false,
 'enable-font' => get_option($this->get_option_name('disable-font'), 0) ? false : true,
+'review-text-mode' => get_option($this->get_option_name('review-text-mode'), 'readmore')
 ]
 ];
 if(in_array($style_id, [ 36, 37, 38, 39 ]))
@@ -478,7 +555,7 @@ update_option($this->get_option_name('scss-set'), $server_output['default'], fal
 }
 if($server_output['css'])
 {
-if($style_id == 17 || $style_id == 21)
+if(in_array($style_id, [ 17, 21, 52, 53 ]))
 {
 $server_output['css'] .= '.ti-preview-box { position: initial !important }';
 }
@@ -492,13 +569,13 @@ public function plugin_loaded()
 global $wpdb;
 $version = $this->version;
 
-if($this->is_noreg_linked() && $this->is_noreg_table_exists())
+if($this->is_noreg_linked())
 {
-$db_table_name = $this->get_noreg_tablename();
+$table_name = $this->get_tablename('reviews');
 
-if($version >= 6.3 && count($wpdb->get_results("SHOW COLUMNS FROM $db_table_name LIKE 'highlight'")) == 0)
+if($version >= 6.3 && count($wpdb->get_results('SHOW COLUMNS FROM `'. $table_name .'` LIKE "highlight"')) == 0)
 {
-$wpdb->query("ALTER TABLE $db_table_name ADD highlight VARCHAR(11) NULL AFTER rating");
+$wpdb->query('ALTER TABLE `'. $table_name .'` ADD highlight VARCHAR(11) NULL AFTER rating');
 }
 }
 if($this->is_noreg_linked() && get_option( $this->get_option_name('review-content') ))
@@ -513,7 +590,7 @@ $this->noreg_save_css(true);
 }
 $this->handleCssFile();
 $this->loadI18N();
-if ( !class_exists('TrustindexGutenbergPlugin') && function_exists( 'register_block_type' ) )
+if ( !class_exists('TrustindexGutenbergPlugin') && function_exists( 'register_block_type' ) && !WP_Block_Type_Registry::get_instance()->is_registered( 'trustindex/block-selector' ))
 {
 require_once dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'static' . DIRECTORY_SEPARATOR . 'block-editor' . DIRECTORY_SEPARATOR . 'block-editor.php';
 TrustindexGutenbergPlugin::instance();
@@ -625,12 +702,12 @@ public static $widget_templates = array (
  'categories' => 
  array (
  'slider' => '4,5,13,15,19,34,36,37,39,44,45,46,47',
- 'sidebar' => '6,7,8,9,10,18',
+ 'sidebar' => '6,7,8,9,10,18,54',
  'list' => '33',
  'grid' => '16,31,38,48',
- 'badge' => '11,12,20,22,23',
- 'button' => '24,25,26,27,28,29,30,32,35',
- 'floating' => '17,21',
+ 'badge' => '11,12,20,22,23,55,56,57,58',
+ 'button' => '24,25,26,27,28,29,30,32,35,59,60,61,62',
+ 'floating' => '17,21,52,53',
  'popup' => '23,30,32',
  ),
  'templates' => 
@@ -715,6 +792,11 @@ public static $widget_templates = array (
  'name' => 'Sidebar slider II.',
  'type' => 'sidebar',
  ),
+ 54 => 
+ array (
+ 'name' => 'Sidebar slider III.',
+ 'type' => 'sidebar',
+ ),
  8 => 
  array (
  'name' => 'Full sidebar I.',
@@ -765,19 +847,39 @@ public static $widget_templates = array (
  'name' => 'Button VI.',
  'type' => 'button',
  ),
- 30 => 
- array (
- 'name' => 'Button VII. - with dropdown',
- 'type' => 'button',
- ),
  35 => 
  array (
  'name' => 'Button VII.',
  'type' => 'button',
  ),
+ 30 => 
+ array (
+ 'name' => 'Button VII. - with dropdown',
+ 'type' => 'button',
+ ),
  32 => 
  array (
  'name' => 'Button VII. - with popup',
+ 'type' => 'button',
+ ),
+ 59 => 
+ array (
+ 'name' => 'Button VIII.',
+ 'type' => 'button',
+ ),
+ 60 => 
+ array (
+ 'name' => 'Button IX.',
+ 'type' => 'button',
+ ),
+ 61 => 
+ array (
+ 'name' => 'Button X.',
+ 'type' => 'button',
+ ),
+ 62 => 
+ array (
+ 'name' => 'Button XI.',
  'type' => 'button',
  ),
  22 => 
@@ -800,9 +902,24 @@ public static $widget_templates = array (
  'name' => 'HTML badge II.',
  'type' => 'badge',
  ),
- 20 => 
+ 55 => 
  array (
  'name' => 'HTML badge III.',
+ 'type' => 'badge',
+ ),
+ 56 => 
+ array (
+ 'name' => 'HTML badge IV.',
+ 'type' => 'badge',
+ ),
+ 57 => 
+ array (
+ 'name' => 'HTML badge V.',
+ 'type' => 'badge',
+ ),
+ 58 => 
+ array (
+ 'name' => 'HTML badge VI.',
  'type' => 'badge',
  ),
  17 => 
@@ -813,6 +930,16 @@ public static $widget_templates = array (
  21 => 
  array (
  'name' => 'Floating II.',
+ 'type' => 'floating',
+ ),
+ 52 => 
+ array (
+ 'name' => 'Floating III.',
+ 'type' => 'floating',
+ ),
+ 53 => 
+ array (
+ 'name' => 'Floating IV.',
  'type' => 'floating',
  ),
  ),
@@ -844,17 +971,15 @@ public static $widget_styles = array (
  'box-border-color' => '#efefef',
  'box-border-radius' => '4px',
  'box-padding' => '15px',
- 'scroll' => 'true',
  'scroll-color' => '#555555',
  'arrow-color' => '#cccccc',
  'float-widget-align' => 'left',
- 'nav' => 'true',
+ 'nav' => 'desktop',
  'dots' => 'mobile',
  'hover-anim' => 'true',
  'review-italic' => 'false',
  'enable-font' => 'true',
  'align-mini' => 'center',
- 'readmore' => 'true',
  'popup-background' => '#ffffff',
  'popup-company-color' => '#333333',
  'popup-company-size' => '16px',
@@ -878,6 +1003,8 @@ public static $widget_styles = array (
  'review-title' => 'normal',
  'content-align' => 'center',
  'text-align' => 'left',
+ 'star-color' => '#f6bb06',
+ 'review-text-mode' => 'readmore',
  'original-rating-text' => '14px',
  ),
  ),
@@ -907,17 +1034,15 @@ public static $widget_styles = array (
  'box-border-color' => '#f8f9f9',
  'box-border-radius' => '12px',
  'box-padding' => '25px',
- 'scroll' => 'true',
  'scroll-color' => '#c3c3c3',
  'arrow-color' => '#cccccc',
  'float-widget-align' => 'left',
- 'nav' => 'false',
+ 'nav' => 'desktop',
  'dots' => 'true',
  'hover-anim' => 'true',
  'review-italic' => 'false',
  'enable-font' => 'true',
  'align-mini' => 'center',
- 'readmore' => 'true',
  'popup-background' => '#ffffff',
  'popup-company-color' => '#333333',
  'popup-company-size' => '16px',
@@ -941,6 +1066,8 @@ public static $widget_styles = array (
  'review-title' => 'normal',
  'content-align' => 'center',
  'text-align' => 'left',
+ 'star-color' => '#f6bb06',
+ 'review-text-mode' => 'readmore',
  'original-rating-text' => '14px',
  ),
  ),
@@ -970,17 +1097,15 @@ public static $widget_styles = array (
  'box-border-color' => '#e5e5e5',
  'box-border-radius' => '4px',
  'box-padding' => '15px',
- 'scroll' => 'true',
  'scroll-color' => '#555555',
  'arrow-color' => '#cccccc',
  'float-widget-align' => 'left',
- 'nav' => 'true',
+ 'nav' => 'desktop',
  'dots' => 'mobile',
  'hover-anim' => 'true',
  'review-italic' => 'false',
  'enable-font' => 'true',
  'align-mini' => 'center',
- 'readmore' => 'true',
  'popup-background' => '#ffffff',
  'popup-company-color' => '#333333',
  'popup-company-size' => '16px',
@@ -1004,6 +1129,8 @@ public static $widget_styles = array (
  'review-title' => 'normal',
  'content-align' => 'center',
  'text-align' => 'left',
+ 'star-color' => '#f6bb06',
+ 'review-text-mode' => 'readmore',
  'original-rating-text' => '14px',
  ),
  ),
@@ -1033,17 +1160,15 @@ public static $widget_styles = array (
  'box-border-color' => '#efefef',
  'box-border-radius' => '10px',
  'box-padding' => '25px',
- 'scroll' => 'true',
  'scroll-color' => '#b4b4b4',
  'arrow-color' => '#cccccc',
  'float-widget-align' => 'left',
- 'nav' => 'false',
+ 'nav' => 'desktop',
  'dots' => 'true',
  'hover-anim' => 'true',
  'review-italic' => 'false',
  'enable-font' => 'true',
  'align-mini' => 'center',
- 'readmore' => 'true',
  'popup-background' => '#ffffff',
  'popup-company-color' => '#333333',
  'popup-company-size' => '16px',
@@ -1067,6 +1192,8 @@ public static $widget_styles = array (
  'review-title' => 'normal',
  'content-align' => 'center',
  'text-align' => 'left',
+ 'star-color' => '#f6bb06',
+ 'review-text-mode' => 'readmore',
  'original-rating-text' => '14px',
  ),
  ),
@@ -1096,17 +1223,15 @@ public static $widget_styles = array (
  'box-border-color' => '#e2e2e2',
  'box-border-radius' => '4px',
  'box-padding' => '25px',
- 'scroll' => 'true',
  'scroll-color' => '#cccccc',
  'arrow-color' => '#cccccc',
  'float-widget-align' => 'left',
- 'nav' => 'false',
+ 'nav' => 'desktop',
  'dots' => 'true',
  'hover-anim' => 'true',
  'review-italic' => 'false',
  'enable-font' => 'true',
  'align-mini' => 'center',
- 'readmore' => 'true',
  'popup-background' => '#ffffff',
  'popup-company-color' => '#333333',
  'popup-company-size' => '16px',
@@ -1130,6 +1255,8 @@ public static $widget_styles = array (
  'review-title' => 'normal',
  'content-align' => 'center',
  'text-align' => 'left',
+ 'star-color' => '#f6bb06',
+ 'review-text-mode' => 'readmore',
  'original-rating-text' => '14px',
  ),
  ),
@@ -1159,17 +1286,15 @@ public static $widget_styles = array (
  'box-border-color' => '#d93623',
  'box-border-radius' => '0px',
  'box-padding' => '25px',
- 'scroll' => 'true',
  'scroll-color' => '#8d8d8d',
  'arrow-color' => '#8d8d8d',
  'float-widget-align' => 'left',
- 'nav' => 'false',
+ 'nav' => 'desktop',
  'dots' => 'true',
  'hover-anim' => 'true',
  'review-italic' => 'false',
  'enable-font' => 'true',
  'align-mini' => 'center',
- 'readmore' => 'true',
  'popup-background' => '#ffffff',
  'popup-company-color' => '#333333',
  'popup-company-size' => '16px',
@@ -1193,6 +1318,8 @@ public static $widget_styles = array (
  'review-title' => 'normal',
  'content-align' => 'center',
  'text-align' => 'left',
+ 'star-color' => '#f6bb06',
+ 'review-text-mode' => 'readmore',
  'original-rating-text' => '14px',
  ),
  ),
@@ -1222,17 +1349,15 @@ public static $widget_styles = array (
  'box-border-color' => '#ffffff',
  'box-border-radius' => '5px',
  'box-padding' => '15px',
- 'scroll' => 'true',
  'scroll-color' => '#555555',
  'arrow-color' => '#cccccc',
  'float-widget-align' => 'right',
- 'nav' => 'true',
+ 'nav' => 'desktop',
  'dots' => 'mobile',
  'hover-anim' => 'false',
  'review-italic' => 'false',
  'enable-font' => 'true',
  'align-mini' => 'center',
- 'readmore' => 'true',
  'popup-background' => '#ffffff',
  'popup-company-color' => '#333333',
  'popup-company-size' => '16px',
@@ -1256,6 +1381,8 @@ public static $widget_styles = array (
  'review-title' => 'normal',
  'content-align' => 'center',
  'text-align' => 'left',
+ 'star-color' => '#f6bb06',
+ 'review-text-mode' => 'readmore',
  'original-rating-text' => '14px',
  ),
  ),
@@ -1285,17 +1412,15 @@ public static $widget_styles = array (
  'box-border-color' => '#ffffff',
  'box-border-radius' => '12px',
  'box-padding' => '25px',
- 'scroll' => 'true',
  'scroll-color' => '#939393',
  'arrow-color' => '#cccccc',
  'float-widget-align' => 'right',
- 'nav' => 'false',
+ 'nav' => 'desktop',
  'dots' => 'true',
  'hover-anim' => 'true',
  'review-italic' => 'false',
  'enable-font' => 'true',
  'align-mini' => 'center',
- 'readmore' => 'true',
  'popup-background' => '#ffffff',
  'popup-company-color' => '#333333',
  'popup-company-size' => '16px',
@@ -1319,6 +1444,8 @@ public static $widget_styles = array (
  'review-title' => 'normal',
  'content-align' => 'center',
  'text-align' => 'left',
+ 'star-color' => '#f6bb06',
+ 'review-text-mode' => 'readmore',
  'original-rating-text' => '14px',
  ),
  ),
@@ -1348,17 +1475,15 @@ public static $widget_styles = array (
  'box-border-color' => '#efefef',
  'box-border-radius' => '0px',
  'box-padding' => '15px',
- 'scroll' => 'true',
  'scroll-color' => '#555555',
  'arrow-color' => '#cccccc',
  'float-widget-align' => 'right',
- 'nav' => 'true',
+ 'nav' => 'desktop',
  'dots' => 'mobile',
  'hover-anim' => 'true',
  'review-italic' => 'false',
  'enable-font' => 'true',
  'align-mini' => 'center',
- 'readmore' => 'true',
  'popup-background' => '#ffffff',
  'popup-company-color' => '#333333',
  'popup-company-size' => '16px',
@@ -1382,6 +1507,8 @@ public static $widget_styles = array (
  'review-title' => 'normal',
  'content-align' => 'center',
  'text-align' => 'left',
+ 'star-color' => '#f6bb06',
+ 'review-text-mode' => 'readmore',
  'original-rating-text' => '14px',
  ),
  ),
@@ -1411,17 +1538,15 @@ public static $widget_styles = array (
  'box-border-color' => '#ffffff',
  'box-border-radius' => '0px',
  'box-padding' => '20px',
- 'scroll' => 'false',
  'scroll-color' => '#555555',
  'arrow-color' => '#cccccc',
  'float-widget-align' => 'right',
- 'nav' => 'false',
+ 'nav' => 'desktop',
  'dots' => 'true',
  'hover-anim' => 'true',
  'review-italic' => 'false',
  'enable-font' => 'true',
  'align-mini' => 'center',
- 'readmore' => 'true',
  'popup-background' => '#ffffff',
  'popup-company-color' => '#333333',
  'popup-company-size' => '16px',
@@ -1445,6 +1570,8 @@ public static $widget_styles = array (
  'review-title' => 'normal',
  'content-align' => 'center',
  'text-align' => 'left',
+ 'star-color' => '#f6bb06',
+ 'review-text-mode' => 'truncated',
  'original-rating-text' => '14px',
  ),
  ),
@@ -1474,17 +1601,15 @@ public static $widget_styles = array (
  'box-border-color' => '#ffffff',
  'box-border-radius' => '4px',
  'box-padding' => '15px',
- 'scroll' => 'true',
  'scroll-color' => '#555555',
  'arrow-color' => '#b7b7b7',
  'float-widget-align' => 'left',
- 'nav' => 'true',
+ 'nav' => 'desktop',
  'dots' => 'mobile',
  'hover-anim' => 'true',
  'review-italic' => 'false',
  'enable-font' => 'true',
  'align-mini' => 'center',
- 'readmore' => 'true',
  'popup-background' => '#ffffff',
  'popup-company-color' => '#333333',
  'popup-company-size' => '16px',
@@ -1508,6 +1633,8 @@ public static $widget_styles = array (
  'review-title' => 'normal',
  'content-align' => 'center',
  'text-align' => 'left',
+ 'star-color' => '#f6bb06',
+ 'review-text-mode' => 'readmore',
  'original-rating-text' => '14px',
  ),
  ),
@@ -1537,17 +1664,15 @@ public static $widget_styles = array (
  'box-border-color' => '#dddddd',
  'box-border-radius' => '0px',
  'box-padding' => '15px',
- 'scroll' => 'true',
  'scroll-color' => '#555555',
  'arrow-color' => '#cccccc',
  'float-widget-align' => 'right',
- 'nav' => 'true',
+ 'nav' => 'desktop',
  'dots' => 'mobile',
  'hover-anim' => 'true',
  'review-italic' => 'false',
  'enable-font' => 'true',
  'align-mini' => 'center',
- 'readmore' => 'true',
  'popup-background' => '#ffffff',
  'popup-company-color' => '#333333',
  'popup-company-size' => '16px',
@@ -1571,6 +1696,8 @@ public static $widget_styles = array (
  'review-title' => 'normal',
  'content-align' => 'center',
  'text-align' => 'left',
+ 'star-color' => '#f6bb06',
+ 'review-text-mode' => 'readmore',
  'original-rating-text' => '14px',
  ),
  ),
@@ -1600,17 +1727,15 @@ public static $widget_styles = array (
  'box-border-color' => '#dddddd',
  'box-border-radius' => '0px',
  'box-padding' => '15px',
- 'scroll' => 'true',
  'scroll-color' => '#555555',
  'arrow-color' => '#cccccc',
  'float-widget-align' => 'right',
- 'nav' => 'true',
+ 'nav' => 'desktop',
  'dots' => 'mobile',
  'hover-anim' => 'true',
  'review-italic' => 'false',
  'enable-font' => 'true',
  'align-mini' => 'center',
- 'readmore' => 'true',
  'popup-background' => '#ffffff',
  'popup-company-color' => '#333333',
  'popup-company-size' => '16px',
@@ -1634,6 +1759,8 @@ public static $widget_styles = array (
  'review-title' => 'normal',
  'content-align' => 'center',
  'text-align' => 'left',
+ 'star-color' => '#f6bb06',
+ 'review-text-mode' => 'readmore',
  'original-rating-text' => '14px',
  ),
  ),
@@ -1663,17 +1790,15 @@ public static $widget_styles = array (
  'box-border-color' => '#cccccc',
  'box-border-radius' => '4px',
  'box-padding' => '15px',
- 'scroll' => 'true',
  'scroll-color' => '#555555',
  'arrow-color' => '#cccccc',
  'float-widget-align' => 'left',
- 'nav' => 'true',
+ 'nav' => 'desktop',
  'dots' => 'mobile',
  'hover-anim' => 'true',
  'review-italic' => 'false',
  'enable-font' => 'true',
  'align-mini' => 'center',
- 'readmore' => 'true',
  'popup-background' => '#ffffff',
  'popup-company-color' => '#333333',
  'popup-company-size' => '16px',
@@ -1697,6 +1822,8 @@ public static $widget_styles = array (
  'review-title' => 'normal',
  'content-align' => 'center',
  'text-align' => 'left',
+ 'star-color' => '#f6bb06',
+ 'review-text-mode' => 'readmore',
  'original-rating-text' => '14px',
  ),
  ),
@@ -1726,17 +1853,15 @@ public static $widget_styles = array (
  'box-border-color' => '#dddfe2',
  'box-border-radius' => '4px',
  'box-padding' => '15px',
- 'scroll' => 'true',
  'scroll-color' => '#555555',
  'arrow-color' => '#cccccc',
  'float-widget-align' => 'left',
- 'nav' => 'true',
+ 'nav' => 'desktop',
  'dots' => 'mobile',
  'hover-anim' => 'true',
  'review-italic' => 'false',
  'enable-font' => 'true',
  'align-mini' => 'center',
- 'readmore' => 'true',
  'popup-background' => '#ffffff',
  'popup-company-color' => '#333333',
  'popup-company-size' => '16px',
@@ -1760,6 +1885,8 @@ public static $widget_styles = array (
  'review-title' => 'normal',
  'content-align' => 'center',
  'text-align' => 'left',
+ 'star-color' => '#f6bb06',
+ 'review-text-mode' => 'readmore',
  'original-rating-text' => '14px',
  ),
  ),
@@ -1789,17 +1916,15 @@ public static $widget_styles = array (
  'box-border-color' => '#fbf9fc',
  'box-border-radius' => '15px',
  'box-padding' => '25px',
- 'scroll' => 'true',
  'scroll-color' => '#593072',
  'arrow-color' => '#593072',
  'float-widget-align' => 'left',
- 'nav' => 'false',
+ 'nav' => 'desktop',
  'dots' => 'true',
  'hover-anim' => 'true',
  'review-italic' => 'false',
  'enable-font' => 'true',
  'align-mini' => 'center',
- 'readmore' => 'true',
  'popup-background' => '#ffffff',
  'popup-company-color' => '#333333',
  'popup-company-size' => '16px',
@@ -1823,6 +1948,8 @@ public static $widget_styles = array (
  'review-title' => 'normal',
  'content-align' => 'center',
  'text-align' => 'left',
+ 'star-color' => '#f6bb06',
+ 'review-text-mode' => 'readmore',
  'original-rating-text' => '14px',
  ),
  ),
@@ -1852,17 +1979,15 @@ public static $widget_styles = array (
  'box-border-color' => '#ffffff',
  'box-border-radius' => '8px',
  'box-padding' => '15px',
- 'scroll' => 'true',
  'scroll-color' => '#555555',
  'arrow-color' => '#999999',
  'float-widget-align' => 'right',
- 'nav' => 'true',
+ 'nav' => 'desktop',
  'dots' => 'mobile',
  'hover-anim' => 'false',
  'review-italic' => 'false',
  'enable-font' => 'true',
  'align-mini' => 'center',
- 'readmore' => 'true',
  'popup-background' => '#ffffff',
  'popup-company-color' => '#333333',
  'popup-company-size' => '16px',
@@ -1886,6 +2011,8 @@ public static $widget_styles = array (
  'review-title' => 'normal',
  'content-align' => 'center',
  'text-align' => 'left',
+ 'star-color' => '#f6bb06',
+ 'review-text-mode' => 'readmore',
  'original-rating-text' => '15px',
  ),
  ),
@@ -1915,17 +2042,15 @@ public static $widget_styles = array (
  'box-border-color' => '#222222',
  'box-border-radius' => '4px',
  'box-padding' => '15px',
- 'scroll' => 'true',
  'scroll-color' => '#555555',
  'arrow-color' => '#555555',
  'float-widget-align' => 'left',
- 'nav' => 'true',
+ 'nav' => 'desktop',
  'dots' => 'mobile',
  'hover-anim' => 'true',
  'review-italic' => 'false',
  'enable-font' => 'true',
  'align-mini' => 'center',
- 'readmore' => 'true',
  'popup-background' => '#ffffff',
  'popup-company-color' => '#333333',
  'popup-company-size' => '16px',
@@ -1949,6 +2074,8 @@ public static $widget_styles = array (
  'review-title' => 'normal',
  'content-align' => 'center',
  'text-align' => 'left',
+ 'star-color' => '#f6bb06',
+ 'review-text-mode' => 'readmore',
  'original-rating-text' => '14px',
  ),
  ),
@@ -1978,17 +2105,15 @@ public static $widget_styles = array (
  'box-border-color' => '#252c44',
  'box-border-radius' => '0px',
  'box-padding' => '25px',
- 'scroll' => 'true',
  'scroll-color' => '#ffffff',
  'arrow-color' => '#252c44',
  'float-widget-align' => 'left',
- 'nav' => 'false',
+ 'nav' => 'desktop',
  'dots' => 'true',
  'hover-anim' => 'true',
  'review-italic' => 'false',
  'enable-font' => 'true',
  'align-mini' => 'center',
- 'readmore' => 'true',
  'popup-background' => '#ffffff',
  'popup-company-color' => '#333333',
  'popup-company-size' => '16px',
@@ -2012,6 +2137,8 @@ public static $widget_styles = array (
  'review-title' => 'normal',
  'content-align' => 'center',
  'text-align' => 'left',
+ 'star-color' => '#f6bb06',
+ 'review-text-mode' => 'readmore',
  'original-rating-text' => '14px',
  ),
  ),
@@ -2041,17 +2168,15 @@ public static $widget_styles = array (
  'box-border-color' => '#2aa8d7',
  'box-border-radius' => '0px',
  'box-padding' => '25px',
- 'scroll' => 'true',
  'scroll-color' => '#ffffff',
  'arrow-color' => '#242f62',
  'float-widget-align' => 'left',
- 'nav' => 'false',
+ 'nav' => 'desktop',
  'dots' => 'true',
  'hover-anim' => 'true',
  'review-italic' => 'false',
  'enable-font' => 'true',
  'align-mini' => 'center',
- 'readmore' => 'true',
  'popup-background' => '#ffffff',
  'popup-company-color' => '#333333',
  'popup-company-size' => '16px',
@@ -2075,6 +2200,8 @@ public static $widget_styles = array (
  'review-title' => 'normal',
  'content-align' => 'center',
  'text-align' => 'left',
+ 'star-color' => '#f6bb06',
+ 'review-text-mode' => 'readmore',
  'original-rating-text' => '14px',
  ),
  ),
@@ -2104,17 +2231,15 @@ public static $widget_styles = array (
  'box-border-color' => '#303030',
  'box-border-radius' => '4px',
  'box-padding' => '15px',
- 'scroll' => 'true',
  'scroll-color' => '#555555',
  'arrow-color' => '#666666',
  'float-widget-align' => 'left',
- 'nav' => 'true',
+ 'nav' => 'desktop',
  'dots' => 'mobile',
  'hover-anim' => 'true',
  'review-italic' => 'false',
  'enable-font' => 'true',
  'align-mini' => 'center',
- 'readmore' => 'true',
  'popup-background' => '#ffffff',
  'popup-company-color' => '#333333',
  'popup-company-size' => '16px',
@@ -2138,6 +2263,8 @@ public static $widget_styles = array (
  'review-title' => 'normal',
  'content-align' => 'center',
  'text-align' => 'left',
+ 'star-color' => '#f6bb06',
+ 'review-text-mode' => 'readmore',
  'original-rating-text' => '14px',
  ),
  ),
@@ -2167,17 +2294,15 @@ public static $widget_styles = array (
  'box-border-color' => '#444444',
  'box-border-radius' => '0px',
  'box-padding' => '15px',
- 'scroll' => 'true',
  'scroll-color' => '#555555',
  'arrow-color' => '#cccccc',
  'float-widget-align' => 'right',
- 'nav' => 'true',
+ 'nav' => 'desktop',
  'dots' => 'mobile',
  'hover-anim' => 'true',
  'review-italic' => 'false',
  'enable-font' => 'true',
  'align-mini' => 'center',
- 'readmore' => 'true',
  'popup-background' => '#ffffff',
  'popup-company-color' => '#333333',
  'popup-company-size' => '16px',
@@ -2201,6 +2326,8 @@ public static $widget_styles = array (
  'review-title' => 'normal',
  'content-align' => 'center',
  'text-align' => 'left',
+ 'star-color' => '#f6bb06',
+ 'review-text-mode' => 'readmore',
  'original-rating-text' => '14px',
  ),
  ),
@@ -2230,17 +2357,15 @@ public static $widget_styles = array (
  'box-border-color' => '#444444',
  'box-border-radius' => '4px',
  'box-padding' => '15px',
- 'scroll' => 'true',
  'scroll-color' => '#555555',
  'arrow-color' => '#444444',
  'float-widget-align' => 'left',
- 'nav' => 'true',
+ 'nav' => 'desktop',
  'dots' => 'mobile',
  'hover-anim' => 'true',
  'review-italic' => 'false',
  'enable-font' => 'true',
  'align-mini' => 'center',
- 'readmore' => 'true',
  'popup-background' => '#ffffff',
  'popup-company-color' => '#333333',
  'popup-company-size' => '16px',
@@ -2264,6 +2389,8 @@ public static $widget_styles = array (
  'review-title' => 'normal',
  'content-align' => 'center',
  'text-align' => 'left',
+ 'star-color' => '#f6bb06',
+ 'review-text-mode' => 'readmore',
  'original-rating-text' => '14px',
  ),
  ),
@@ -2293,17 +2420,15 @@ public static $widget_styles = array (
  'box-border-color' => '#ffffff',
  'box-border-radius' => '4px',
  'box-padding' => '15px',
- 'scroll' => 'true',
  'scroll-color' => '#555555',
  'arrow-color' => '#ffffff',
  'float-widget-align' => 'left',
- 'nav' => 'true',
+ 'nav' => 'desktop',
  'dots' => 'mobile',
  'hover-anim' => 'true',
  'review-italic' => 'false',
  'enable-font' => 'true',
  'align-mini' => 'center',
- 'readmore' => 'true',
  'popup-background' => '#ffffff',
  'popup-company-color' => '#333333',
  'popup-company-size' => '16px',
@@ -2327,6 +2452,8 @@ public static $widget_styles = array (
  'review-title' => 'normal',
  'content-align' => 'center',
  'text-align' => 'left',
+ 'star-color' => '#f6bb06',
+ 'review-text-mode' => 'readmore',
  'original-rating-text' => '14px',
  ),
  ),
@@ -2356,17 +2483,15 @@ public static $widget_styles = array (
  'box-border-color' => '#000000',
  'box-border-radius' => '5px',
  'box-padding' => '20px',
- 'scroll' => 'true',
  'scroll-color' => '#555555',
  'arrow-color' => '#cccccc',
  'float-widget-align' => 'right',
- 'nav' => 'true',
+ 'nav' => 'desktop',
  'dots' => 'mobile',
  'hover-anim' => 'false',
  'review-italic' => 'false',
  'enable-font' => 'true',
  'align-mini' => 'center',
- 'readmore' => 'true',
  'popup-background' => '#ffffff',
  'popup-company-color' => '#333333',
  'popup-company-size' => '16px',
@@ -2390,6 +2515,8 @@ public static $widget_styles = array (
  'review-title' => 'normal',
  'content-align' => 'center',
  'text-align' => 'left',
+ 'star-color' => '#f6bb06',
+ 'review-text-mode' => 'readmore',
  'original-rating-text' => '15px',
  ),
  ),
@@ -2446,7 +2573,7 @@ public static $widget_languages = [
 'ka' => 'ქართული',
 'kk' => 'қазақ'
 ];
-public static $widget_dateformats = [ 'j. F, Y.', 'F j, Y.', 'Y.m.d.', 'Y-m-d', 'd/m/Y' ];
+public static $widget_dateformats = [ 'modern', 'j F Y', 'j. F, Y', 'F j, Y', 'Y.m.d.', 'Y-m-d', 'd/m/Y', 'hide' ];
 private static $widget_rating_texts = array (
  'en' => 
  array (
@@ -3104,7 +3231,7 @@ private static $widget_recommendation_texts = array (
 private static $widget_verified_texts = array (
  'en' => 'Verified',
  'fr' => 'vérifié',
- 'de' => 'Verifizierte',
+ 'de' => 'Verifiziert',
  'es' => 'Verificada',
  'ar' => 'تم التحقق',
  'cs' => 'Ověřená',
@@ -3152,6 +3279,62 @@ private static $widget_verified_texts = array (
  'hy' => 'Ստուգված',
  'ka' => 'დამოწმებული',
  'kk' => 'тексерілген',
+);
+public static $verified_platforms = array (
+ 0 => 'Abia',
+ 1 => 'Agoda',
+ 2 => 'Airbnb',
+ 3 => 'Alibaba',
+ 4 => 'Aliexpress',
+ 5 => 'Amazon',
+ 6 => 'AppleAppstore',
+ 7 => 'Booking',
+ 8 => 'CarGurus',
+ 9 => 'Classpass',
+ 10 => 'Ebay',
+ 11 => 'Ekomi',
+ 12 => 'Etsy',
+ 13 => 'Expedia',
+ 14 => 'Fresha',
+ 15 => 'Getyourguide',
+ 16 => 'Hotels',
+ 17 => 'HotelSpecials',
+ 18 => 'Immobilienscout24',
+ 19 => 'Indeed',
+ 20 => 'Justdial',
+ 21 => 'Lawyerscom',
+ 22 => 'Martindale',
+ 23 => 'Meilleursagents',
+ 24 => 'Mobilede',
+ 25 => 'OnlinePenztarca',
+ 26 => 'Opentable',
+ 27 => 'Peerspot',
+ 28 => 'ProductReview',
+ 29 => 'Realself',
+ 30 => 'Reco',
+ 31 => 'Resellerratings',
+ 32 => 'ReserveOut',
+ 33 => 'Reviewsio',
+ 34 => 'Sitejabber',
+ 35 => 'SoftwareAdvice',
+ 36 => 'SourceForge',
+ 37 => 'Szallashu',
+ 38 => 'Talabat',
+ 39 => 'Tandlakare',
+ 40 => 'TheFork',
+ 41 => 'Thumbtack',
+ 42 => 'Tripadvisor',
+ 43 => 'TrustedShops',
+ 44 => 'TrustRadius',
+ 45 => 'Vardense',
+ 46 => 'Vrbo',
+ 47 => 'WeddingWire',
+ 48 => 'Whatclinic',
+ 49 => 'Whichtrustedtraders',
+ 50 => 'Yelp',
+ 51 => 'Zillow',
+ 52 => 'ZocDoc',
+ 53 => 'Zomato',
 );
 private static $widget_month_names = array (
  'en' => 
@@ -3905,6 +4088,77 @@ private static $widget_month_names = array (
  11 => 'желтоқсан',
  ),
 );
+private static $dot_separated_languages = array (
+ 0 => 'ar',
+ 1 => 'en',
+ 2 => 'es',
+ 3 => 'ms',
+ 4 => 'ga',
+ 5 => 'hi',
+ 6 => 'iw',
+ 7 => 'jp',
+ 8 => 'ko',
+ 9 => 'mi',
+ 10 => 'mt',
+ 11 => 'ne',
+ 12 => 'si',
+ 13 => 'th',
+ 14 => 'tl',
+ 15 => 'ur',
+ 16 => 'zh',
+);
+public static $widget_date_format_locales = array (
+ 'en' => '%d %s ago|today|day|days|week|weeks|month|months|year|years',
+ 'fr' => 'il y a %d %s|aujourd\'hui|jour|jours|semaine|semaines|mois|mois|année|ans',
+ 'de' => 'vor %d %s|heute|tag|tagen|woche|wochen|monat|monaten|jahr|jahren',
+ 'es' => 'hace %d %s|hoy|día|días|semana|semanas|mes|meses|año|años',
+ 'ar' => '%d %s مضى|اليوم|يوم|أيام|أسبوع|أسابيع|شهر|شهور|سنة|سنوات',
+ 'cs' => 'před %d %s|dnes|dnem|dny|týdnem|týdny|měsícem|měsíci|rokem|roky',
+ 'da' => '%d %s siden|i dag|dag|dage|uge|uger|måned|måneder|år|år',
+ 'et' => '%d %s tagasi|täna|päev|päeva|nädal|nädalat|kuu|kuud|aasta|aastat',
+ 'el' => 'πριν από %d ημέρα|σήμερα|ημέρα|ημέρες|εβδομάδα|εβδομάδες|μήνα|μήνες|χρόνο|χρόνια',
+ 'fi' => '%d %s sitten|tänään|päivä|päivää|viikko|viikkoa|kuukausi|kuukautta|vuosi|vuotta',
+ 'hi' => '%d %s पहले|आज|दिन|दिन|सप्ताह|सप्ताह|महीने|महीने|वर्ष|वर्ष',
+ 'hu' => '%d %s|ma|napja|napja|hete|hete|hónapja|hónapja|éve|éve',
+ 'it' => '%d %s fa|oggi|giorno|giorni|settimana|settimane|mese|mesi|anno|anni',
+ 'ja' => '%d %s 前|今日|日|日|週間|週間|か月|か月|年|年',
+ 'nl' => '%d %s geleden|vandaag|dag|dagen|week|weken|maand|maanden|jaar|jaar',
+ 'no' => '%d %s siden|i dag|dag|dager|uke|uker|måned|måneder|år|år',
+ 'pl' => '%d %s temu|dziś|dzień|dni|tydzień|tygodni|miesiąc|miesięcy|rok|lat',
+ 'pt' => '%d %s atrás|hoje|dia|dias|semana|semanas|mês|meses|ano|anos',
+ 'ro' => 'acum %d %s|astăzi|zi|zile|săptămână|săptămâni|lună|luni|an|ani',
+ 'ru' => '%d %s назад|сегодня|день|дней|неделю|недель|месяц|месяцев|год|лет',
+ 'sl' => 'pred %d %s|danes|dnevom|dnevi|tednom|tedni|mesecem|meseci|letom|leti',
+ 'sk' => 'pred %d %s|dnes|dňom|dňami|týždňom|týždňami|mesiacom|mesiacmi|rokom|rokmi',
+ 'sv' => '%d %s sedan|i dag|dag|dagar|vecka|veckor|månad|månader|år|år',
+ 'tr' => '%d %s önce|bugün|gün|gün|hafta|hafta|ay|ay|yıl|yıl',
+ 'uk' => '%d %s тому|сьогодні|день|днів|тиждень|тижнів|місяць|місяців|рік|років',
+ 'zh' => '%d %s 前|今天|天|天|周|周|个月|个月|年|年',
+ 'gd' => '%d %s air ais|an diugh|latha|làithean|seachdain|seachdainean|mìos|mìosan|bliadhna|bliadhna',
+ 'hr' => 'prije %d %s|danas|dan|dana|tjedan|tjedana|mjesec|mjeseci|godinu|godina',
+ 'id' => '%d %s lalu|hari ini|hari|hari yang|minggu|minggu yang|bulan|bulan yang|tahun|tahun yang',
+ 'is' => 'fyrir %d %s|í dag|degi|dögum|viku|vikum|mánuði|mánuðum|ári|árum',
+ 'he' => '%d לפני %s|היום|יום|ימים|שבוע|שבועות|חודש|חודשים|שנה|שנים',
+ 'ko' => '%d %s 전|오늘|일|일|주|주|월|월|년|년',
+ 'lt' => 'prieš %d %s|šiandien|dieną|dienų|savaitę|savaites|mėnesį|mėnesių|metų|metų',
+ 'ms' => '%d %s lalu|hari ini|hari|hari|minggu|minggu|bulan|bulan|tahun|tahun',
+ 'sr' => 'пре %d %s|данас|дан|дана|недељу|недеље|месец|месеци|године|година',
+ 'th' => '%d %s ที่แล้ว|วันนี้|วัน|วัน|สัปดาห์|สัปดาห์|เดือน|เดือน|ปี|ปี',
+ 'vi' => '%d %s trước|hôm nay|ngày|ngày|tuần|tuần|tháng|tháng|năm|năm',
+ 'mk' => 'пред %d %s|денес|ден|дена|недела|недели|месец|месеци|година|години',
+ 'bg' => 'преди %d %s|днес|ден|дни|седмица|седмици|месец|месеца|година|години',
+ 'sq' => '%d %s më parë|sot|ditë|ditë|javë|javë|muaj|muaj|vit|vit',
+ 'af' => '%d %s gelede|vandag|dag|dae|week|weke|maand|maande|jaar|jaar',
+ 'az' => '%d %s əvvəl|bu gün|gün|gün|həftə|həftə|ay|ay|il|il',
+ 'bn' => '%d %s আগে|আজ|দিন|দিন|সপ্তাহ|সপ্তাহ|মাস|মাস|বছর|বছর',
+ 'bs' => 'prije %d %s|danas|dan|dana|sedmicu|sedmica|mjesec|mjeseci|godinu|godina',
+ 'cy' => '%d %s yn ôl|heddiw|diwrnod|diwrnod|wythnos|wythnosau|mis|mis|flwyddyn|flynyddoedd',
+ 'fa' => '%d %s قبل|امروز|روز|روز|هفته|هفته|ماه|ماه|سال|سال',
+ 'gl' => 'hai %d %s|hoxe|día|días|semana|semanas|mes|meses|ano|anos',
+ 'hy' => '%d %s առաջ|այսօր|օր|օր|շաբաթ|շաբաթ|ամիս|ամիս|տարի|տարի',
+ 'ka' => '%d %s წინ|დღეს|დღის|დღის|კვირის|კვირის|თვის|თვის|წლის|წლის',
+ 'kk' => '%d %s бұрын|бүгін|күн|күн|апта|апта|ай|ай|жыл|жыл',
+);
 private static $page_urls = array (
  'facebook' => 'https://www.facebook.com/pg/%page_id%',
  'google' => 'https://www.google.com/maps/search/?api=1&query=Google&query_place_id=%page_id%',
@@ -3917,7 +4171,7 @@ private static $page_urls = array (
  'hotels' => 'https://hotels.com/%page_id%',
  'opentable' => 'https://www.opentable.com/%page_id%',
  'foursquare' => 'https://foursquare.com/v/%25page_id%25',
- 'capterra' => 'https://www.capterra.com/p/%page_id%/reviews',
+ 'capterra' => 'https://www.capterra.%page_id%',
  'szallashu' => 'https://szallas.hu/%page_id%?#rating',
  'thumbtack' => 'https://www.thumbtack.com/%page_id%',
  'expedia' => 'https://www.expedia.com/%page_id%',
@@ -3963,7 +4217,49 @@ if($this->shortname == "amazon" && strpos($page_id, '/') !== false)
 {
 $url = str_replace('sp?seller=', '', $url);
 }
+if($this->shortname == 'google' && $this->getGoogleType($page_id) == 'shop')
+{
+$url = 'https://customerreviews.google.com/v/merchant?q=' . $page_id;
+}
 return $url;
+}
+private function getGoogleType($page_id)
+{
+return preg_match('/&c=\w+&v=\d+/', $page_id) ? 'shop' : 'map';
+}
+public function getReviewPageUrl()
+{
+$page_details = get_option($this->get_option_name('page-details'));
+if(!$page_details)
+{
+return "";
+}
+$page_id = $page_details['id'];
+if($this->getGoogleType($page_id) == 'shop')
+{
+return "https://customerreviews.google.com/v/merchant?q=" . $page_id;
+}
+else
+{
+return "http://search.google.com/local/reviews?placeid=". $page_id;
+}
+}
+public function getReviewWriteUrl()
+{
+$page_details = get_option($this->get_option_name('page-details'));
+if(!$page_details)
+{
+return "";
+}
+$page_id = $page_details['id'];
+if($this->getGoogleType($page_id) == 'shop')
+{
+return "https://customerreviews.google.com/v/merchant?q=" . $page_id;
+}
+else
+{
+return "http://search.google.com/local/writereview?placeid=". $page_id;
+}
 }
 public function getReviewHtml($review)
 {
@@ -4034,8 +4330,8 @@ if($this->is_ten_scale_rating_platform())
 {
 $sql_rating_field = 'ROUND(rating / 2, 0)';
 }
-$sql = 'SELECT *, rating as original_rating, '. $sql_rating_field .' as rating FROM `'. $this->get_noreg_tablename($force_platform) .'` ';
-$filter = get_option($this->get_option_name('filter'));
+$sql = 'SELECT *, rating as original_rating, '. $sql_rating_field .' as rating FROM `'. $this->get_tablename('reviews') .'` ';
+$filter = get_option($this->get_option_name('filter'), $this->get_widget_default_filter());
 if(!$list_all && $filter)
 {
 if(count($filter['stars']) == 0)
@@ -4050,7 +4346,7 @@ if(in_array(5, $filter['stars']))
 $sql .= ' or rating IS NULL';
 }
 $sql .= ') ';
-if($filter['only-ratings'])
+if(isset($filter['only-ratings']) && $filter['only-ratings'])
 {
 $sql .= 'and text != "" ';
 }
@@ -4071,11 +4367,7 @@ $sql .= ' LIMIT 10';
 break;
 }
 }
-$reviews = [];
-if($this->is_noreg_table_exists())
-{
 $reviews = $wpdb->get_results($sql);
-}
 if($default_reviews && ($force_default_reviews || !count($reviews)))
 {
 $lang = substr(get_locale(), 0, 2);
@@ -4118,19 +4410,20 @@ $reviews = $this->getRandomReviews($rating_num);
 }
 if(!count($reviews))
 {
-return self::get_alertbox(
-"error",
-'<br />' . self::___('There are no reviews on your %s platform.', [ ucfirst($this->shortname) ]),
-false
-);
+$text = self::___('There are no reviews on your %s platform.', [ ucfirst($this->shortname) ]);
+if($this->is_review_download_in_progress())
+{
+$text = self::___('Your reviews are downloading in the background.');
+if(!in_array($this->shortname, [ 'facebook', 'google' ]))
+{
+$text .= ' ' . self::___('This can take up to a few hours depending on the load and platform.');
+}
+}
+return $this->error_box_for_admins($text);
 }
 if(self::is_amp_active() && self::is_amp_enabled())
 {
-return self::get_alertbox(
-"error",
-'<br />' . self::___('Free plugin features are unavailable with AMP plugin.'),
-false
-);
+return $this->error_box_for_admins(self::___('Free plugin features are unavailable with AMP plugin.'));
 }
 $script_name = 'trustindex-js';
 if(!wp_script_is($script_name, 'enqueued'))
@@ -4221,7 +4514,11 @@ array_push($class_appends, $free_css_class);
 }
 if($class_appends)
 {
-$content = str_replace('class="ti-widget" data-layout-id=', 'class="ti-widget '. implode(' ', $class_appends) .'" data-layout-id=', $content);
+$content = str_replace('" data-layout-id=', ' '. implode(' ', $class_appends) .'" data-layout-id=', $content);
+}
+if($dateformat == 'modern')
+{
+$content = preg_replace('/class="(ti-widget[^\'"]*)" data-layout-id=/', 'class="$1" data-time-locale="'. self::$widget_date_format_locales[ $lang ] .'" data-layout-id=', $content);
 }
 if(!$only_preview)
 {
@@ -4234,11 +4531,7 @@ if (class_exists('\Elementor\Plugin') && \Elementor\Plugin::$instance->editor->i
 }
 else
 {
-return self::get_alertbox(
-"error",
-'<br />' . self::___('CSS file could not saved.'),
-false
-);
+return $this->error_box_for_admins(self::___('CSS file could not saved.'));
 }
 }
 $content .= '<style type="text/css">'. $widget_css .'</style>';
@@ -4258,10 +4551,22 @@ if(isset($matches[1]))
 $reviewContent = "";
 if($array['reviews'] && count($array['reviews'])) foreach($array['reviews'] as $r)
 {
+$custom_attributes = 'data-empty="'. (empty($r->text) ? 1 : 0) .'"';
 $date = "&nbsp;";
 if($r->date && $r->date != '0000-00-00')
 {
+if(in_array($array['dateformat'], [ 'hide', 'modern' ]))
+{
+$date = '';
+if($array['dateformat'] == 'modern')
+{
+$custom_attributes .= ' data-time="'. strtotime($r->date) .'"';
+}
+}
+else
+{
 $date = str_replace(self::$widget_month_names['en'], self::$widget_month_names[$array['language']], date($array['dateformat'], strtotime($r->date)));
+}
 }
 $rating_content = $this->get_rating_stars($r->rating);
 if($this->shortname == 'facebook' && in_array($r->rating, [ 1, 5 ]))
@@ -4311,9 +4616,10 @@ $rating_content = '<span class="ti-polarity"><span class="ti-polarity-icon ' . $
 }
 else if($this->is_ten_scale_rating_platform())
 {
-$rating_content = '<div class="ti-rating-box">'. $this->formatTenRating($r->original_rating) .'</div>';
+$rating_content = '<div class="ti-rating-box">'. $this->formatTenRating($r->original_rating, $array['language']) .'</div>';
 }
-if($array['verified_icon'])
+$platform_name = ucfirst($this->getShortName());
+if($array['verified_icon'] && in_array($platform_name, self::$verified_platforms))
 {
 if($array['style_id'] == 21)
 {
@@ -4324,7 +4630,6 @@ else
 $rating_content .= '<span class="ti-verified-review"><span class="ti-verified-tooltip">'. self::$widget_verified_texts[ $array['language'] ] .'</span></span>';
 }
 }
-$platform_name = ucfirst($this->getShortName());
 if($platform_name == 'Szallashu')
 {
 $tmp = explode('/', $array['page_details']['id']);
@@ -4340,14 +4645,18 @@ $reviewContent .= str_replace([
 '%reviewer_name%',
 '%created_at%',
 '%text%',
-'<span class="ti-star f"></span><span class="ti-star f"></span><span class="ti-star f"></span><span class="ti-star f"></span><span class="ti-star f"></span>'
+'<span class="ti-star f"></span><span class="ti-star f"></span><span class="ti-star f"></span><span class="ti-star f"></span><span class="ti-star f"></span>',
+'%rating_score%',
+'class="ti-review-item'
  ], [
 $platform_name,
 $r->user_photo,
 $r->user,
 $date,
 $this->getReviewHtml($r),
-$rating_content
+$rating_content,
+round($r->original_rating),
+$custom_attributes . ' class="ti-review-item'
  ], $matches[1]);
 $reviewContent = str_replace('<div></div>', '', $reviewContent);
 }
@@ -4389,7 +4698,7 @@ $this->is_ten_scale_rating_platform() ? 10 : 5,
 $this->get_rating_text($rating_score, $array['language']),
 $array['page_details']['avatar_url'],
 $this->get_platform_name($this->getShortName(), $array['page_details']['id']),
-$this->is_ten_scale_rating_platform() ? "<div class='ti-rating-box'>". $this->formatTenRating($rating_score) ."</div>" : $this->get_rating_stars($rating_score),
+$this->is_ten_scale_rating_platform() ? "<div class='ti-rating-box'>". $this->formatTenRating($rating_score, $array['language']) ."</div>" : $this->get_rating_stars($rating_score),
 '<div class="ti-small-logo"><img src="'. $this->get_plugin_file_url('static/img/platform/logo.svg') . '" alt="'. ucfirst($this->getShortName()) .'"></div>',
  ], $array['content']);
 if($this->isDarkLogo($array['style_id'], $array['set_id']))
@@ -4419,15 +4728,22 @@ $array['content'] = str_replace('img/platform/logo-hu', 'img/platform/logo', $ar
 $array['content'] = str_replace('platform/'. ucfirst($this->getShortName()) .'/logo-hu', 'platform/'. ucfirst($this->getShortName()) .'/logo', $array['content']);
 }
 }
-if(in_array($array['style_id'], [24, 25, 26, 27, 28, 29, 35]))
+if(in_array($array['style_id'], [11, 12, 20, 22, 24, 25, 26, 27, 28, 29, 35, 55, 56, 57, 58, 59, 60, 61, 62]))
+{
+if($this->shortname == 'google')
+{
+$array['content'] = str_replace('%footer_link%', in_array($array['style_id'], [ 26, 59 ]) ? $this->getReviewWriteUrl() : $this->getReviewPageUrl(), $array['content']);
+}
+else
 {
 $array['content'] = str_replace('%footer_link%', $this->getPageUrl(), $array['content']);
+}
 }
 else
 {
 $array['content'] = preg_replace('/<a href=[\'"]%footer_link%[\'"][^>]*>(.+)<\/a>/mU', '$1', $array['content']);
 }
-if($array['no_rating_text'] && $array['style_id'] != 11)
+if($array['no_rating_text'] && !in_array($array['style_id'], [ 11, 12, 20, 22, 55, 56, 57, 58 ]))
 {
 if(in_array($array['style_id'], [6, 7]))
 {
@@ -4442,10 +4758,13 @@ else
 $array['content'] = preg_replace('/<div class="ti-rating-text">.*<\/div>/mU', '', $array['content']);
 }
 }
+if(!in_array($array['style_id'], [ 53, 54 ]))
+{
 preg_match('/src="([^"]+logo[^\.]*\.svg)"/m', $array['content'], $matches);
 if(isset($matches[1]) && !empty($matches[1]))
 {
 $array['content'] = str_replace($matches[0], $matches[0] . ' width="150" height="25"', $array['content']);
+}
 }
 return $array['content'];
 }
@@ -4518,6 +4837,19 @@ else
 return strtoupper($texts[$rating - 1]);
 }
 }
+public function get_widget_default_filter()
+{
+global $wpdb;
+$only_ratings_default = false;
+if($this->is_noreg_linked())
+{
+$only_ratings_default = intval($wpdb->get_var('SELECT COUNT(`id`) FROM `'. $this->get_tablename('reviews') .'` WHERE `text` != ""')) >= 3;
+}
+return [
+'stars' => [1, 2, 3, 4, 5],
+'only-ratings' => $only_ratings_default
+];
+}
 public function get_rating_stars($rating_score)
 {
 $text = "";
@@ -4589,57 +4921,6 @@ $i++;
 }
 return $reviews;
 }
-public function download_noreg_reviews($page_details, $force_platform = null)
-{
-$force_platform = $force_platform ? $force_platform : $this->getShortName();
-$url = "https://admin.trustindex.io/" . "api/getPromoReviews?platform=".$force_platform."&page_id=" . $page_details['id'];
-if($force_platform == 'facebook')
-{
-$url .= '&access_token='. $page_details['access_token'];
-}
-if(!isset($page_details['id']) && !trim($page_details['id']))
-{
-return [ 'success' => false ];
-}
-$server_output = $this->post_request($url, [
-'body' => [ 'wp_info' => $this->get_wp_details() ],
-'timeout' => '30',
-'redirection' => '5',
-'blocking' => true
-]);
-if($server_output[0] !== '[' && $server_output[0] !== '{')
-{
-$server_output = substr($server_output, strpos($server_output, '('));
-$server_output = trim($server_output,'();');
-}
-$server_output = json_decode($server_output, true);
-return $server_output;
-}
-public function download_noreg_details($page_details, $force_platform = null)
-{
-if(!isset($page_details['id']) || empty(trim($page_details['id'])))
-{
-return null;
-}
-$force_platform = $force_platform ? $force_platform : $this->getShortName();
-$url = "https://admin.trustindex.io/" . "api/getPageDetails?platform=".$force_platform."&page_id=" . $page_details['id'];
-if($force_platform == "facebook")
-{
-$url .= "&access_token=". $page_details['access_token'];
-}
-$server_output = $this->post_request($url, [
-'timeout' => '20',
-'redirection' => '5',
-'blocking' => true
-]);
-if($server_output[0] !== '[' && $server_output[0] !== '{')
-{
-$server_output = substr($server_output, strpos($server_output, '('));
-$server_output = trim($server_output,'();');
-}
-$server_output = json_decode($server_output, true);
-return $server_output;
-}
 public function get_plugin_current_version()
 {
 add_action('http_api_curl', function( $handle ){
@@ -4656,7 +4937,7 @@ return $json['version'];
 }
 
 
-private function post_request($url, $args)
+public function post_request($url, $args)
 {
 $response = wp_remote_post($url, $args);
 if(is_wp_error($response))
@@ -4814,7 +5095,7 @@ if(file_exists($this->get_plugin_dir() . 'static' . DIRECTORY_SEPARATOR . 'js' .
 {
 wp_enqueue_script('trustindex_settings_script_connect_'. $this->shortname, $this->get_plugin_file_url('static/js/admin-page-settings-connect.js'));
 }
-if(file_exists($this->get_plugin_dir() . 'static' . DIRECTORY_SEPARATOR . 'js' . DIRECTORY_SEPARATOR . 'admin-page-settings.js'))
+if(in_array($this->shortname, [ 'google', 'facebook' ]) && file_exists($this->get_plugin_dir() . 'static' . DIRECTORY_SEPARATOR . 'js' . DIRECTORY_SEPARATOR . 'admin-page-settings.js'))
 {
 wp_enqueue_script('trustindex_settings_script_'. $this->shortname, $this->get_plugin_file_url('static/js/admin-page-settings.js') );
 }
@@ -4934,15 +5215,19 @@ return json_encode($data);
 
 public function is_ten_scale_rating_platform()
 {
-return in_array($this->shortname, [ 'booking', 'hotels', 'foursquare', 'szallashu' ]);
+return in_array($this->shortname, [ 'booking', 'hotels', 'foursquare', 'szallashu', 'expedia' ]);
 }
-public function formatTenRating($rating)
+public function formatTenRating($rating, $language = null)
 {
+if(!$language)
+{
+$language = get_option($this->get_option_name('lang'), 'en');
+}
 if($rating == 10)
 {
 $rating = '10';
 }
-if($this->shortname == "booking")
+if(!in_array($language, self::$dot_separated_languages))
 {
 $rating = str_replace('.', ',', $rating);
 }
@@ -4981,14 +5266,6 @@ else
 {
 return false;
 }
-}
-public static function get_mysql_rights()
-{
-global $wpdb;
-return array_map(function($a) {
-$key = key($a);
-return $a->$key;
-}, $wpdb->get_results('SHOW GRANTS'));
 }
 public function filter_filesystem_method($method)
 {
@@ -5038,6 +5315,31 @@ register_rest_route( 'trustindex/v1', '/setup-complete', array(
 'callback' => array($this, 'is_widget_setted_up'),
 'permission_callback' => '__return_true'
 ) );
+}
+
+
+public function get_tablename($name = "")
+{
+global $wpdb;
+return $wpdb->prefix . 'trustindex_' . $this->shortname . '_' . $name;
+}
+public function is_table_exists($name = "")
+{
+global $wpdb;
+$table_name = $this->get_tablename($name);
+return ($wpdb->get_var("SHOW TABLES LIKE '$table_name'") == $table_name);
+}
+public function get_noreg_tablename($force_platform = null)
+{
+global $wpdb;
+$force_platform = $force_platform ? $force_platform : $this->shortname;
+return $wpdb->prefix ."trustindex_".$force_platform."_reviews";
+}
+public function is_noreg_table_exists($force_platform = null)
+{
+global $wpdb;
+$dbtable = $this->get_noreg_tablename($force_platform);
+return ($wpdb->get_var("SHOW TABLES LIKE '$dbtable'") == $dbtable);
 }
 }
 ?>

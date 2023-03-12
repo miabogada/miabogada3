@@ -32,6 +32,38 @@
 </p>
 </div>
 <?php endif; ?>
+<?php if($is_review_download_in_progress === 'error'): ?>
+<div class="ti-notice notice-error" style="margin: 0 0 15px 0">
+<p>
+<?php echo TrustindexPlugin_google::___('While downloading the reviews, we noticed that your connected page is not found.<br />If it really exists, please contact us to resolve the issue or try connect it again.'); ?><br />
+</p>
+</div>
+<?php elseif($is_review_download_in_progress && ($trustindex_pm_google->is_review_manual_download() || !in_array('google', [ 'facebook', 'google' ]))): ?>
+<div class="ti-notice notice-warning" style="margin: 0 0 15px 0">
+<p>
+<?php echo TrustindexPlugin_google::___('Your reviews are downloading in the background.'); ?>
+<?php if(!in_array('google', [ 'facebook', 'google' ])): ?>
+<?php echo TrustindexPlugin_google::___('This can take up to a few hours depending on the load and platform.'); ?>
+<?php endif; ?>
+<?php if(!count($reviews)): ?>
+<br />
+<?php echo TrustindexPlugin_google::___('In the meantime, you can setup your widget with a few example reviews.'); ?>
+<?php endif; ?>
+<?php if($trustindex_pm_google->is_review_manual_download()): ?>
+<br />
+<a href="#" id="review-manual-download" class="button button-primary ti-tooltip" style="margin-top: 10px" data-loading-text="<?php echo TrustindexPlugin_google::___("Loading") ;?>">
+<?php echo TrustindexPlugin_google::___("Manual download") ;?>
+<span class="ti-tooltip-message">
+<?php echo TrustindexPlugin_google::___('Your reviews are downloading in the background.'); ?>
+<?php if(!in_array('google', [ 'facebook', 'google' ])): ?>
+<?php echo TrustindexPlugin_google::___('This can take up to a few hours depending on the load and platform.'); ?>
+<?php endif; ?>
+</span>
+</a>
+<?php endif; ?>
+</p>
+</div>
+<?php endif; ?>
 <?php if(TrustindexPlugin_google::is_amp_active() && !get_option($trustindex_pm_google->get_option_name('amp-hidden-notification'), 0)): ?>
 <div class="ti-notice notice-warning is-dismissible" style="margin: 0 0 15px 0">
 <p>
@@ -56,8 +88,10 @@
 <img src="<?php echo esc_url($page_details['avatar_url']); ?>" />
 <?php endif; ?>
 <div class="ti-source-info">
+<?php if(isset($page_details['name'])): ?>
 <strong><?php echo esc_html($page_details['name']); ?></strong><br />
-<?php if ($page_details['address']): ?>
+<?php endif; ?>
+<?php if(isset($page_details['address']) && $page_details['address']): ?>
 <?php echo esc_html($page_details['address']); ?><br />
 <?php endif; ?>
 <a href="<?php echo esc_url($trustindex_pm_google->getPageUrl()); ?>" target="_blank"><?php echo esc_url($trustindex_pm_google->getPageUrl()); ?></a>
@@ -77,6 +111,22 @@ required="required"
 id="ti-noreg-page_details"
 value=""
 />
+<?php
+$review_download_token = get_option($trustindex_pm_google->get_option_name('review-download-token'));
+if(!$review_download_token)
+{
+$review_download_token = wp_create_nonce('ti-noreg-connect-token');
+update_option($trustindex_pm_google->get_option_name('review-download-token'), $review_download_token, false);
+}
+?>
+<input type="hidden" id="ti-noreg-connect-token" name="ti-noreg-connect-token" value="<?php echo $review_download_token; ?>" />
+<input type="hidden" id="ti-noreg-webhook-url" value="<?php echo $trustindex_pm_google->get_webhook_url(); ?>" />
+<input type="hidden" id="ti-noreg-email" value="<?php echo get_option('admin_email'); ?>" />
+<input type="hidden" id="ti-noreg-version" value="9.8.5" />
+<input type="hidden" id="ti-noreg-review-download" name="review_download" value="0" />
+<input type="hidden" id="ti-noreg-review-request-id" name="review_request_id" value="" />
+<input type="hidden" id="ti-noreg-manual-download" name="manual_download" value=0 />
+<input type="hidden" id="ti-noreg-page-id" value="" />
 <div class="autocomplete">
 <?php include( plugin_dir_path(__FILE__ ) . "setup_no_reg_platform.php" ); ?>
 </div>
@@ -84,14 +134,13 @@ value=""
 <label class="ti-left-label"><?php echo TrustindexPlugin_google::___("Source"); ?>:</label>
 <div class="ti-source-box ti-original-source-box">
 <img />
-<div class="ti-source-info">
-<strong id="label-noreg-page_name"></strong><br />
-<span id="label-noreg-address"></span>
-<span id="label-noreg-url"></span>
-</div>
+<div class="ti-source-info"></div>
 <button class="btn btn-text btn-connect" data-loading-text="<?php echo TrustindexPlugin_google::___("Loading") ;?>"><?php echo TrustindexPlugin_google::___("Connect") ;?></button>
 </div>
 <div class="clear"></div>
+</div>
+<div class="ti-notice notice-warning" style="margin: 20px 0; margin-bottom: 0; display: none" id="ti-connect-info">
+<p><?php echo TrustindexPlugin_google::___("A popup window should be appear! Please, go to there and continue the steps! (If there is no popup window, you can check the the browser's popup blocker)"); ?></p>
 </div>
 </form>
 </div>
@@ -103,7 +152,7 @@ value=""
 2. <?php echo TrustindexPlugin_google::___('Select Layout'); ?>
 <a href="?page=<?php echo esc_attr($_GET['page']); ?>&tab=setup_no_reg&step=1" class="ti-back-icon"><?php echo TrustindexPlugin_google::___('Back'); ?></a>
 </h1>
-<?php if(!count($reviews)): ?>
+<?php if(!count($reviews) && !$is_review_download_in_progress): ?>
 <div class="ti-notice notice-warning" style="margin: 0 0 15px 0">
 <p>
 <?php echo TrustindexPlugin_google::___('There are no reviews on your %s platform.', [ 'Google' ]); ?>
@@ -127,13 +176,18 @@ value=""
 <?php foreach(TrustindexPlugin_google::$widget_templates['templates'] as $id => $template): ?>
 <?php
 $class_name = 'ti-full-width';
-if(in_array($template['type'], [ 'badge', 'button', 'floating', 'popup', 'sidebar' ]))
+if($id != 54 && in_array($template['type'], [ 'badge', 'button', 'floating', 'popup', 'sidebar' ]))
 {
 $class_name = 'ti-half-width';
 }
+$set = 'light-background';
+if(in_array($template['type'], [ 'badge', 'button' ]))
+{
+$set = 'drop-shadow';
+}
 ?>
 <div class="<?php echo esc_attr($class_name); ?>">
-<div class="ti-box ti-preview-boxes" data-layout-id="<?php echo esc_attr($id); ?>" data-set-id="light-background">
+<div class="ti-box ti-preview-boxes" data-layout-id="<?php echo esc_attr($id); ?>" data-set-id="<?php echo $set; ?>">
 <div class="ti-header">
 <span class="ti-header-layout-text">
 <?php echo TrustindexPlugin_google::___('Layout'); ?>:
@@ -143,7 +197,7 @@ $class_name = 'ti-half-width';
 <div class="clear"></div>
 </div>
 <div class="preview">
-<?php echo $trustindex_pm_google->get_noreg_list_reviews(null, true, $id, 'light-background', true, true); ?>
+<?php echo str_replace('ti-widget ti-disabled', 'ti-widget', $trustindex_pm_google->get_noreg_list_reviews(null, true, $id, $set, true, true)); ?>
 </div>
 </div>
 </div>
@@ -154,7 +208,7 @@ $class_name = 'ti-half-width';
 3. <?php echo TrustindexPlugin_google::___('Select Style'); ?>
 <a href="?page=<?php echo esc_attr($_GET['page']); ?>&tab=setup_no_reg&step=2" class="ti-back-icon"><?php echo TrustindexPlugin_google::___('Back'); ?></a>
 </h1>
-<?php if(!count($reviews)): ?>
+<?php if(!count($reviews) && !$is_review_download_in_progress): ?>
 <div class="ti-notice notice-warning" style="margin: 0 0 15px 0">
 <p>
 <?php echo TrustindexPlugin_google::___('There are no reviews on your %s platform.', [ 'Google' ]); ?>
@@ -196,7 +250,7 @@ $widget_has_reviews = !in_array($widget_type, [ 'button', 'badge' ]) || in_array
 4. <?php echo TrustindexPlugin_google::___('Set up widget'); ?>
 <a href="?page=<?php echo esc_attr($_GET['page']); ?>&tab=setup_no_reg&step=3" class="ti-back-icon"><?php echo TrustindexPlugin_google::___('Back'); ?></a>
 </h1>
-<?php if(!count($reviews)): ?>
+<?php if(!count($reviews) && !$is_review_download_in_progress): ?>
 <div class="ti-notice notice-warning" style="margin: 0 0 15px 0">
 <p>
 <?php echo TrustindexPlugin_google::___('There are no reviews on your %s platform.', [ 'Google' ]); ?>
@@ -206,7 +260,7 @@ $widget_has_reviews = !in_array($widget_type, [ 'button', 'badge' ]) || in_array
 <div class="ti-box ti-preview-boxes" data-layout-id="<?php echo esc_attr($style_id); ?>" data-set-id="<?php echo esc_attr($scss_set); ?>">
 <div class="ti-header">
 <?php echo TrustindexPlugin_google::___('Widget Preview'); ?>
-<?php if(!in_array($style_id, [ 17, 21 ])): ?>
+<?php if(!in_array($style_id, [ 17, 21, 52, 53 ])): ?>
 <span class="ti-header-layout-text ti-pull-right">
 <?php echo TrustindexPlugin_google::___('Style'); ?>:
 <strong><?php echo esc_html(TrustindexPlugin_google::___(TrustindexPlugin_google::$widget_styles[$scss_set]['name'])); ?></strong>
@@ -265,12 +319,31 @@ $widget_has_reviews = !in_array($widget_type, [ 'button', 'badge' ]) || in_array
 <?php wp_nonce_field( 'save-dateformat_'.$trustindex_pm_google->get_plugin_slug(), '_wpnonce_dateformat' ); ?>
 <select class="form-control" name="dateformat" id="ti-dateformat-id">
 <?php foreach(TrustindexPlugin_google::$widget_dateformats as $format): ?>
-<option value="<?php echo esc_attr($format); ?>" <?php echo $dateformat == $format ? 'selected' : ''; ?>><?php echo date($format); ?></option>
+<option value="<?php echo esc_attr($format); ?>" <?php echo $dateformat == $format ? 'selected' : ''; ?>><?php
+switch($format)
+{
+case 'modern':
+$lang = substr(get_locale(), 0, 2);
+if(!in_array($lang, array_keys(TrustindexPlugin_google::$widget_date_format_locales)))
+{
+$lang = 'en';
+}
+$tmp = explode('|', TrustindexPlugin_google::$widget_date_format_locales[ $lang ]);
+echo str_replace([ '%d', '%s' ], [ 2, $tmp[3] ], $tmp[0]);
+break;
+case 'hide':
+echo TrustindexPlugin_google::___('Hide');
+break;
+default:
+echo date($format);
+break;
+}
+?></option>
 <?php endforeach; ?>
 </select>
 </form>
 </div>
-<?php if(!in_array($style_id, [ 17, 21 ])): ?>
+<?php if(!in_array($style_id, [ 17, 21, 52, 53 ])): ?>
 <div class="ti-input-row">
 <label><?php echo TrustindexPlugin_google::___('Align'); ?></label>
 <form method="post" action="">
@@ -279,6 +352,22 @@ $widget_has_reviews = !in_array($widget_type, [ 'button', 'badge' ]) || in_array
 <select class="form-control" name="align" id="ti-align-id">
 <?php foreach([ 'left', 'center', 'right', 'justify' ] as $align_type): ?>
 <option value="<?php echo esc_attr($align_type); ?>" <?php echo $align_type == $align ? 'selected' : ''; ?>><?php echo TrustindexPlugin_google::___($align_type); ?></option>
+<?php endforeach; ?>
+</select>
+</form>
+</div>
+<div class="ti-input-row">
+<label><?php echo TrustindexPlugin_google::___('Review text'); ?></label>
+<form method="post" action="">
+<input type="hidden" name="command" value="save-review-text-mode" />
+<?php wp_nonce_field( 'save-review-text-mode_'.$trustindex_pm_google->get_plugin_slug(), '_wpnonce_review_text_mode' ); ?>
+<select class="form-control" name="review_text_mode" id="ti-review-text-mode-id">
+<?php foreach([
+'scroll' => 'Scroll',
+'readmore' => 'Read more',
+'truncated' => 'Truncated'
+] as $type => $translated): ?>
+<option value="<?php echo esc_attr($type); ?>" <?php echo $type == $review_text_mode ? 'selected' : ''; ?>><?php echo TrustindexPlugin_google::___($translated); ?></option>
 <?php endforeach; ?>
 </select>
 </form>
@@ -296,25 +385,25 @@ $widget_has_reviews = !in_array($widget_type, [ 'button', 'badge' ]) || in_array
 <label><?php echo TrustindexPlugin_google::___("Hide reviews without comments"); ?></label>
 </span>
 <?php endif; ?>
-<?php if(!in_array($style_id, [ 11, 17, 18, 21, 24, 25, 26, 27, 28, 29, 30, 35 ]) && TrustindexPlugin_google::$widget_styles[$scss_set]['_vars']['dots'] !== 'true'): ?>
+<?php if(!in_array($style_id, [ 11, 12, 17, 18, 20, 21, 22, 24, 25, 26, 27, 28, 29, 30, 35, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62 ]) && TrustindexPlugin_google::$widget_styles[$scss_set]['_vars']['dots'] !== 'true'): ?>
 <span class="ti-checkbox row">
 <input type="checkbox" name="no-rating-text" value="1" <?php if($no_rating_text): ?>checked<?php endif;?>>
 <label><?php echo TrustindexPlugin_google::___("Hide rating text"); ?></label>
 </span>
 <?php endif; ?>
-<?php if($widget_has_reviews): ?>
+<?php if($widget_has_reviews && in_array(ucfirst($trustindex_pm_google->shortname), TrustindexPlugin_google::$verified_platforms)): ?>
 <span class="ti-checkbox row">
 <input type="checkbox" name="verified-icon" value="1" <?php if($verified_icon): ?>checked<?php endif;?>>
 <label><?php echo TrustindexPlugin_google::___("Show verified review icon"); ?></label>
 </span>
 <?php endif; ?>
-<?php if(in_array($widget_type, [ 'slider', 'sidebar' ]) && !in_array($style_id, [ 8, 9, 10, 18, 19, 37 ])): ?>
+<?php if(in_array($widget_type, [ 'slider', 'sidebar' ]) && !in_array($style_id, [ 8, 9, 10, 18, 19, 37, 54 ])): ?>
 <span class="ti-checkbox row">
 <input type="checkbox" name="show-arrows" value="1" <?php if($show_arrows): ?>checked<?php endif;?>>
 <label><?php echo TrustindexPlugin_google::___("Show navigation arrows"); ?></label>
 </span>
 <?php endif; ?>
-<?php if($widget_has_reviews): ?>
+<?php if($widget_has_reviews && $style_id != 52): ?>
 <span class="ti-checkbox row">
 <input type="checkbox" name="show-reviewers-photo" value="1" <?php if($show_reviewers_photo): ?>checked<?php endif;?>>
 <label><?php echo TrustindexPlugin_google::___("Show reviewers' photo"); ?></label>
@@ -327,10 +416,12 @@ $widget_has_reviews = !in_array($widget_type, [ 'button', 'badge' ]) || in_array
 </label>
 </span>
 <?php endif; ?>
+<?php if(!in_array($widget_type, [ 'floating' ])): ?>
 <span class="ti-checkbox row">
 <input type="checkbox" name="enable-animation" value="1" <?php if($enable_animation): ?>checked<?php endif;?>>
 <label><?php echo TrustindexPlugin_google::___("Enable mouseover animation"); ?></label>
 </span>
+<?php endif; ?>
 <span class="ti-checkbox row">
 <input type="checkbox" name="disable-font" value="1" <?php if($disable_font): ?>checked<?php endif;?>>
 <label><?php echo TrustindexPlugin_google::___("Use site's font"); ?></label>
@@ -360,7 +451,7 @@ $widget_has_reviews = !in_array($widget_type, [ 'button', 'badge' ]) || in_array
 5. <?php echo TrustindexPlugin_google::___('Insert code'); ?>
 <a href="?page=<?php echo esc_attr($_GET['page']); ?>&tab=setup_no_reg&step=4" class="ti-back-icon"><?php echo TrustindexPlugin_google::___('Back'); ?></a>
 </h1>
-<?php if(!count($reviews)): ?>
+<?php if(!count($reviews) && !$is_review_download_in_progress): ?>
 <div class="ti-notice notice-warning" style="margin: 0 0 15px 0">
 <p>
 <?php echo TrustindexPlugin_google::___('There are no reviews on your %s platform.', [ 'Google' ]); ?>
@@ -372,50 +463,89 @@ $widget_has_reviews = !in_array($widget_type, [ 'button', 'badge' ]) || in_array
 <div class="ti-input-row" style="margin-bottom: 2px">
 <label>Shortcode</label>
 <code class="code-shortcode">[<?php echo $trustindex_pm_google->get_shortcode_name(); ?> no-registration=google]</code>
-<a href=".code-shortcode" class="btn-text btn-copy2clipboard"><?php echo TrustindexPlugin_google::___("Copy to clipboard") ;?></a>
+<a href=".code-shortcode" class="btn-text btn-copy2clipboard ti-tooltip toggle-tooltip ti-tooltip-left">
+<?php echo TrustindexPlugin_google::___("Copy to clipboard") ;?>
+<span class="ti-tooltip-message">
+<span style="color: #00ff00; margin-right: 2px">✓</span>
+<?php echo TrustindexPlugin_google::___("Copied"); ?>
+</span>
+</a>
 </div>
 <?php echo TrustindexPlugin_google::___('Copy and paste this shortcode into post, page or widget.'); ?>
 </div>
+<?php if(!$rate_us_feedback): ?>
+<div class="ti-box ti-rate-us-box">
+<div class="ti-header"><?php echo TrustindexPlugin_google::___("How's experience with Trustindex?"); ?></div>
+<p><?php echo TrustindexPlugin_google::___('Rate us clicking on the stars'); ?></p>
+<div class="ti-quick-rating">
+<?php for($i = 5; $i >= 1; $i--): ?><div class="ti-star-check <?php if($i == 5): ?>active<?php endif; ?>" data-value="<?php echo $i; ?>"></div><?php endfor; ?>
+</div>
+</div>
+<?php endif; ?>
 <h1 class="ti-free-title"><?php echo TrustindexPlugin_google::___("Want to get more customers?"); ?></h1>
 <div class="ti-box">
 <div class="ti-header"><?php echo TrustindexPlugin_google::___('Increase SEO, trust and sales using customer reviews.'); ?></div>
 <a class="btn-text" href="https://www.trustindex.io/ti-redirect.php?a=sys&c=wp-google-1" target="_blank"><?php echo TrustindexPlugin_google::___('Create a Free Account for More Features'); ?></a>
-<div class="ti-notice notice-success ti-special-offer">
-<img src="<?php echo $trustindex_pm_google->get_plugin_file_url('static/img/special_30.jpg'); ?>">
-<p><?php echo TrustindexPlugin_google::___('Now we offer you a 30%% discount off your subscription! Create your free account and benefit from the onboarding discount now!'); ?></p>
-<div class="clear"></div>
-</div>
 <ul class="ti-seo-list">
 <li>
-<strong><?php echo TrustindexPlugin_google::___("%d Review Platforms", [ 58 ]); ?></strong><br />
-<?php echo TrustindexPlugin_google::___("Add more reviews to your widget from %s, etc. to enjoy more trust, and to keep customers on your site.", [ 'Google, Facebook, Yelp, Amazon, Tripadvisor, Booking.com, Airbnb, Hotels.com, Capterra, Foursquare, Opentable' ]); ?><br />
-<img src="<?php echo $trustindex_pm_google->get_plugin_file_url('static/img/platforms.png'); ?>" alt="" style="margin-top: 5px" />
+<strong><?php echo TrustindexPlugin_google::___("Display unlimited number of reviews"); ?></strong><br />
+<?php echo TrustindexPlugin_google::___("You can test Trustindex with 10 reviews in the free version. Upgrade to Business to display ALL the reviews received. Be the undisputed customer choice in your industry!"); ?>
 </li>
 <li>
-<strong><?php echo TrustindexPlugin_google::___("Create Unlimited Number of Widgets"); ?></strong><br />
+<strong><?php echo TrustindexPlugin_google::___("Create unlimited number of widgets"); ?></strong><br />
 <?php echo TrustindexPlugin_google::___("Use the widgets matching your page the best to build trust."); ?>
+</li>
+<li>
+<strong><?php echo TrustindexPlugin_google::___("%d review platforms", [ 128 ]); ?></strong><br />
+<?php echo TrustindexPlugin_google::___("Add more reviews to your widget from %s, etc. to enjoy more trust, and to keep customers on your site.", [ 'Google, Facebook, Yelp, Amazon, Tripadvisor, Booking.com, Airbnb, Hotels.com, Capterra, Foursquare, Opentable' ]); ?><br />
+<img src="<?php echo $trustindex_pm_google->get_plugin_file_url('static/img/platforms.png'); ?>" alt="" style="margin-top: 5px" />
 </li>
 <li>
 <strong><?php echo TrustindexPlugin_google::___("Mix Reviews"); ?></strong><br />
 <?php echo TrustindexPlugin_google::___("You can mix your reviews from different platforms and display them in 1 review widget."); ?>
 </li>
 <li>
-<strong><?php echo TrustindexPlugin_google::___("Get More Reviews!"); ?></strong><br />
+<strong><?php echo TrustindexPlugin_google::___("Get more reviews"); ?></strong><br />
 <?php echo TrustindexPlugin_google::___("Use our Review Invitation System to collect hundreds of new reviews. Become impossible to resist!"); ?>
 </li>
 <li>
-<strong><?php echo TrustindexPlugin_google::___("Manage Reviews"); ?></strong><br />
+<strong><?php echo TrustindexPlugin_google::___("Manage all reviews in one place"); ?></strong><br />
 <?php echo TrustindexPlugin_google::___("Turn on email alert to ALL new reviews, so that you can manage them quickly."); ?>
 </li>
 <li>
 <strong><?php echo TrustindexPlugin_google::___("Automatically update with NEW reviews"); ?></strong><br />
 <?php echo TrustindexPlugin_google::___("Wordpress cannot update reviews, but Trustindex can! As soon as you get a new review, Trustindex Business can automatically add it to your website. Customers love fresh reviews!"); ?>
 </li>
-<li>
-<strong><?php echo TrustindexPlugin_google::___("Display UNLIMITED number of reviews"); ?></strong><br />
-<?php echo TrustindexPlugin_google::___("You can test Trustindex with 10 reviews in the free version. Upgrade to Business to display ALL the reviews received. Be the undisputed customer choice in your industry!"); ?>
-</li>
 </ul>
 <a class="btn-text" href="https://www.trustindex.io/ti-redirect.php?a=sys&c=wp-google-2" target="_blank"><?php echo TrustindexPlugin_google::___('Create a Free Account for More Features'); ?></a>
+<div class="ti-notice notice-success ti-special-offer">
+<img src="<?php echo $trustindex_pm_google->get_plugin_file_url('static/img/special_30.jpg'); ?>">
+<p><?php echo TrustindexPlugin_google::___('Now we offer you a 30%% discount off your subscription! Create your free account and benefit from the onboarding discount now!'); ?></p>
+<div class="clear"></div>
 </div>
+</div>
+<?php if(!$rate_us_feedback): ?>
+<div class="ti-modal ti-rateus-modal" id="ti-rateus-modal-feedback">
+<div class="ti-modal-dialog">
+<div class="ti-modal-content">
+<span class="ti-close-icon btn-modal-close"></span>
+<div class="ti-modal-body">
+<div class="ti-rating-textbox">
+<div class="ti-quick-rating">
+<?php for($i = 5; $i >= 1; $i--): ?><div class="ti-star-check" data-value="<?php echo $i; ?>"></div><?php endfor; ?>
+<div class="clear"></div>
+</div>
+</div>
+<div class="ti-rateus-title"><?php echo TrustindexPlugin_google::___('Thanks for your feedback!<br />Let us know how we can improve.') ;?></div>
+<input type="text" class="form-control" placeholder="<?php echo TrustindexPlugin_google::___('Contact e-mail') ;?>" value="<?php echo $current_user->user_email; ?>" />
+<textarea class="form-control" placeholder="<?php echo TrustindexPlugin_google::___('Describe your experience') ;?>"></textarea>
+</div>
+<div class="ti-modal-footer">
+<a href="#" class="btn-text btn-modal-close"><?php echo TrustindexPlugin_google::___('Cancel') ;?></a>
+<a href="#" class="btn-text btn-rateus-support" data-loading-text="<?php echo TrustindexPlugin_google::___('Loading') ;?>"><?php echo TrustindexPlugin_google::___('Contact our support') ;?></a>
+</div>
+</div>
+</div>
+</div>
+<?php endif; ?>
 <?php endif; ?>

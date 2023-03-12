@@ -41,18 +41,13 @@ if(!$was_error && $instance['ti-widget-ID'])
 {
 echo $trustindex_pm_google->get_trustindex_widget($instance['ti-widget-ID']);
 }
-elseif($trustindex_pm_google->is_noreg_linked() && $trustindex_pm_google->is_noreg_table_exists())
+elseif($trustindex_pm_google->is_noreg_linked())
 {
 echo $trustindex_pm_google->get_noreg_list_reviews();
 }
 else
 {
-echo TrustindexPlugin_google::get_alertbox(
-"error",
-" in <strong>".TrustindexPlugin_google::___('Widgets for Google Reviews')."</strong> plugin<br /><br />"
-.TrustindexPlugin_google::___("Please fill out <strong>all the required fields</strong> in the <a href='%s'>widget settings</a> page", [admin_url('admin.php?page='.$trustindex_pm_google->get_plugin_slug().'/settings.php')]),
-false
-);
+echo $trustindex_pm_google->error_box_for_admins(TrustindexPlugin_google::___("Please fill out <strong>all the required fields</strong> in the <a href='%s'>widget settings</a> page", [ admin_url('admin.php?page='.$trustindex_pm_google->get_plugin_slug().'/settings.php') ]));
 }
 echo $after_widget;
 }

@@ -74,7 +74,7 @@ return true;
 if (function_exists('get_current_screen'))
 {
 $current_screen = get_current_screen();
-if ( method_exists( $current_screen, 'is_block_editor' ) &&
+if ($current_screen && method_exists( $current_screen, 'is_block_editor' ) &&
 $current_screen->is_block_editor()
 ) {
 return true;

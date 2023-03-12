@@ -30,7 +30,7 @@ switch(sanitize_text_field($_GET['wc_notification']))
 {
 case 'open':
 update_option('trustindex-wc-notification', 'hide', false);
-$url = 'https://wordpress.org/plugins/customer-reviews-for-woocommerce/';
+$url = 'https://wordpress.org/plugins/customer-reviews-collector-for-woocommerce/';
 header('Location: '. $url);
 die;
 case 'hide':
@@ -44,6 +44,12 @@ if(isset($_GET['test_proxy']))
 {
 delete_option($trustindex_pm_google->get_option_name('proxy-check'));
 header('Location: admin.php?page=' . sanitize_text_field($_GET['page']) .'&tab=' . sanitize_text_field($_GET['tab']));
+exit;
+}
+if(isset($_GET['review_download_notification']))
+{
+delete_option($trustindex_pm_google->get_option_name('review-download-notification'));
+header('Location: admin.php?page=' . sanitize_text_field($_GET['page']) .'&tab=setup_no_reg');
 exit;
 }
 $tabs = [];
@@ -138,18 +144,105 @@ $proxy_check = $db_data;
 ?>
 <div id="ti-assets-error" class="notice notice-warning" style="display: none; margin-left: 0; margin-right: 0; padding-bottom: 9px">
 <p>
-<?php echo TrustindexPlugin_google::___("You got an error while trying to run this plugin. Please upgrade all the plugins from Trustindex and if the error still persist send the content of the webserver's error log and the content of the Troubleshooting tab to the support!"); ?>
+<?php echo TrustindexPlugin_google::___('For some reason, the <strong>CSS</strong> file required to run the plugin was not loaded.<br />One of your plugins is probably causing the problem.'); ?>
 </p>
-<a href="?page=<?php echo esc_attr($_GET['page']); ?>&tab=troubleshooting" class="button button-primary"><?php echo TrustindexPlugin_google::___("Troubleshooting") ;?></a>
 </div>
 <script type="text/javascript">
 window.onload = function() {
-let warning_box = document.getElementById("ti-assets-error");
-let link = document.getElementById("trustindex_settings_style_google-css");
-if(typeof Trustindex_Autocomplete == "undefined" || typeof TI_copyTextToClipboard == "undefined" || !link || !Boolean(link.sheet))
+let not_loaded = [];
+let loaded_count = 0;
+let js_files = [
 {
-warning_box.style.display = "block";
+url: '<?php echo $trustindex_pm_google->get_plugin_file_url('static/js/admin-page-settings-connect.js'); ?>',
+id: 'connect'
+},
+{
+url: '<?php echo $trustindex_pm_google->get_plugin_file_url('static/js/admin-page-settings-common.js'); ?>',
+id: 'common'
+},
+<?php if(in_array($trustindex_pm_google->shortname, [ 'google', 'facebook' ])): ?>
+{
+url: '<?php echo $trustindex_pm_google->get_plugin_file_url('static/js/admin-page-settings.js'); ?>',
+id: 'unique'
 }
+<?php endif; ?>
+];
+let addElement = function(type, url, callback) {
+let element = document.createElement(type);
+if(type == 'script')
+{
+element.type = 'text/javascript';
+element.src = url;
+}
+else
+{
+element.type = 'text/css';
+element.rel = 'stylesheet';
+element.href = url;
+element.id = 'trustindex_settings_style_google-css';
+}
+document.head.appendChild(element);
+element.addEventListener('load', function() { callback(true); });
+element.addEventListener('error', function() { callback(false); });
+};
+let isCSSExists = function() {
+let link = document.getElementById('trustindex_settings_style_google-css');
+return link && Boolean(link.sheet);
+};
+let isJSExists = function(id) {
+return typeof Trustindex_JS_loaded != 'undefined' && typeof Trustindex_JS_loaded[ id ] != 'undefined';
+};
+let process = function() {
+if(loaded_count < js_files.length + 1)
+{
+return false;
+}
+if(not_loaded.length)
+{
+document.getElementById('trustindex-plugin-settings-page').remove();
+let warning_box = document.getElementById('ti-assets-error');
+if(warning_box)
+{
+warning_box.style.display = 'block';
+warning_box.querySelector('p strong').innerHTML = not_loaded.join(', ');
+}
+}
+}
+if(!isCSSExists())
+{
+addElement('link', '<?php echo $trustindex_pm_google->get_plugin_file_url('static/css/admin-page-settings.css'); ?>', function(success) {
+loaded_count++;
+if(!success)
+{
+not_loaded.push('CSS');
+}
+process();
+});
+}
+else
+{
+loaded_count++;
+}
+js_files.forEach(function(js) {
+if(!isJSExists(js.id))
+{
+addElement('script', js.url, function(success) {
+loaded_count++;
+if(!success)
+{
+if(not_loaded.indexOf('JS') == -1)
+{
+not_loaded.push('JS');
+}
+}
+process();
+});
+}
+else
+{
+loaded_count++;
+}
+});
 };
 </script>
 <div id="trustindex-plugin-settings-page" class="ti-toggle-opacity">
