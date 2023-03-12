@@ -1,0 +1,41 @@
+<?php return array(
+    'root' => array(
+        'name' => 'wpml/st',
+        'pretty_version' => '3.2.4',
+        'version' => '3.2.4.0',
+        'reference' => '3bf8d2a6f71e40f5ac8a09180f7b28e733160bb0',
+        'type' => 'wordpress-plugin',
+        'install_path' => __DIR__ . '/../../',
+        'aliases' => array(),
+        'dev' => false,
+    ),
+    'versions' => array(
+        'wpml-shared/wpml-lib-dependencies' => array(
+            'pretty_version' => '0.1.6',
+            'version' => '0.1.6.0',
+            'reference' => '723824a61bfec7dd535afcd7260fad50d8bfe6e8',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../wpml-shared/wpml-lib-dependencies',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'wpml/st' => array(
+            'pretty_version' => '3.2.4',
+            'version' => '3.2.4.0',
+            'reference' => '3bf8d2a6f71e40f5ac8a09180f7b28e733160bb0',
+            'type' => 'wordpress-plugin',
+            'install_path' => __DIR__ . '/../../',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+        'wpml/st-api' => array(
+            'pretty_version' => 'dev-develop',
+            'version' => 'dev-develop',
+            'reference' => '104b343c98fd69c59644964e755cf17545b78481',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../wpml/st-api',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
+    ),
+);

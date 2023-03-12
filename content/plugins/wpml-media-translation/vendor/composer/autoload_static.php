@@ -4,9 +4,18 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitc5e56ec5dc878250480373475cddeb1b
+class ComposerStaticInit139c100947ebe20dc53665d8d73fa297
 {
     public static $classMap = array (
+        'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'WPML\\Media\\Classes\\WPML_Media_Classic_Audio_Parser' => __DIR__ . '/../..' . '/classes/media-translation/class-wpml-media-classic-audio-parser.php',
+        'WPML\\Media\\Classes\\WPML_Media_Classic_Element_Parser' => __DIR__ . '/../..' . '/classes/media-translation/class-wpml-media-classic-element-parser.php',
+        'WPML\\Media\\Classes\\WPML_Media_Classic_Video_Parser' => __DIR__ . '/../..' . '/classes/media-translation/class-wpml-media-classic-video-parser.php',
+        'WPML\\Media\\Classes\\WPML_Media_Element_Parser' => __DIR__ . '/../..' . '/classes/media-translation/class-wpml-media-element-parser.php',
+        'WPML\\Media\\Classes\\WPML_Media_File_Parser' => __DIR__ . '/../..' . '/classes/media-translation/class-wpml-media-file-parser.php',
+        'WPML\\Media\\Classes\\WPML_Media_Href_Parser' => __DIR__ . '/../..' . '/classes/media-translation/class-wpml-media-href-parser.php',
+        'WPML\\Media\\Classes\\WPML_Media_Image_Parser' => __DIR__ . '/../..' . '/classes/media-translation/class-wpml-media-image-parser.php',
+        'WPML\\Media\\Factories\\WPML_Media_Element_Parser_Factory' => __DIR__ . '/../..' . '/classes/media-translation/factories/class-wpml-media-element-parser-factory.php',
         'WPML\\Media\\Widgets\\Block\\DisplayTranslation' => __DIR__ . '/../..' . '/classes/Widgets/Block/DisplayTranslation.php',
         'WPML_Cache_Directory' => __DIR__ . '/..' . '/wpml-shared/wpml-lib-cache/src/cache/class-wpml-cache-directory.php',
         'WPML_Core_Version_Check' => __DIR__ . '/..' . '/wpml-shared/wpml-lib-dependencies/src/dependencies/class-wpml-core-version-check.php',
@@ -15,8 +24,6 @@ class ComposerStaticInitc5e56ec5dc878250480373475cddeb1b
         'WPML_Media_2_3_0_Migration' => __DIR__ . '/../..' . '/classes/upgrade/class-wpml-media-2-3-0-migration.php',
         'WPML_Media_Add_To_Basket' => __DIR__ . '/../..' . '/classes/media-selector/class-wpml-media-add-to-basket.php',
         'WPML_Media_Add_To_Basket_Factory' => __DIR__ . '/../..' . '/classes/media-selector/class-wpml-media-add-to-basket-factory.php',
-        'WPML_Media_Add_To_Translation_Package' => __DIR__ . '/../..' . '/classes/media-translation/class-wpml-media-add-to-translation-package.php',
-        'WPML_Media_Add_To_Translation_Package_Factory' => __DIR__ . '/../..' . '/classes/media-translation/class-wpml-media-add-to-translation-package-factory.php',
         'WPML_Media_Attachment_By_URL' => __DIR__ . '/../..' . '/classes/class-wpml-media-attachment-by-url.php',
         'WPML_Media_Attachment_By_URL_Factory' => __DIR__ . '/../..' . '/classes/class-wpml-media-attachment-by-url-factory.php',
         'WPML_Media_Attachment_Image_Update' => __DIR__ . '/../..' . '/classes/media-translation/class-wpml-media-attachment-image-update.php',
@@ -39,7 +46,6 @@ class ComposerStaticInitc5e56ec5dc878250480373475cddeb1b
         'WPML_Media_Help_Tab' => __DIR__ . '/../..' . '/classes/menus/wpml-media-help-tab.php',
         'WPML_Media_Help_Tab_Factory' => __DIR__ . '/../..' . '/classes/menus/wpml-media-help-tab-factory.php',
         'WPML_Media_Image_Translate' => __DIR__ . '/../..' . '/classes/media-translation/class-wpml-media-image-translate.php',
-        'WPML_Media_Img_Parse' => __DIR__ . '/../..' . '/classes/media-translation/class-wpml-media-img-parse.php',
         'WPML_Media_Menus' => __DIR__ . '/../..' . '/classes/menus/wpml-media-menus.php',
         'WPML_Media_Menus_Factory' => __DIR__ . '/../..' . '/classes/menus/wpml-media-menus-factory.php',
         'WPML_Media_Populate_Media_Strings_Translations' => __DIR__ . '/../..' . '/classes/media-translation/wpml-translation-editor/class-wpml-media-populate-media-strings-translations.php',
@@ -74,10 +80,7 @@ class ComposerStaticInitc5e56ec5dc878250480373475cddeb1b
         'WPML_Media_Submitted_Basket_Notice' => __DIR__ . '/../..' . '/classes/media-selector/class-wpml-media-submitted-basket-notice.php',
         'WPML_Media_Submitted_Basket_Notice_Factory' => __DIR__ . '/../..' . '/classes/media-selector/class-wpml-media-submitted-basket-notice-factory.php',
         'WPML_Media_Translated_Images_Update' => __DIR__ . '/../..' . '/classes/media-translation/class-wpml-media-translated-images-update.php',
-        'WPML_Media_Translation_Editor_Layout' => __DIR__ . '/../..' . '/classes/translation-editor-layout/class-wpml-media-translation-editor-layout.php',
-        'WPML_Media_Translation_Editor_Layout_Factory' => __DIR__ . '/../..' . '/classes/translation-editor-layout/class-wpml-media-translation-editor-layout-factory.php',
         'WPML_Media_Translation_Status' => __DIR__ . '/../..' . '/classes/media-translation/class-wpml-media-translation-status.php',
-        'WPML_Media_Translation_Status_Factory' => __DIR__ . '/../..' . '/classes/media-translation/class-wpml-media-translation-status-factory.php',
         'WPML_Media_Translations_UI' => __DIR__ . '/../..' . '/classes/menus/wpml-media-translations-ui.php',
         'WPML_Media_Upgrade' => __DIR__ . '/../..' . '/inc/wpml-media-upgrade.class.php',
         'WPML_Media_Usage' => __DIR__ . '/../..' . '/classes/media-usage/class-wpml-media-usage.php',
@@ -88,7 +91,7 @@ class ComposerStaticInitc5e56ec5dc878250480373475cddeb1b
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->classMap = ComposerStaticInitc5e56ec5dc878250480373475cddeb1b::$classMap;
+            $loader->classMap = ComposerStaticInit139c100947ebe20dc53665d8d73fa297::$classMap;
 
         }, null, ClassLoader::class);
     }
