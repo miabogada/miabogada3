@@ -5138,6 +5138,7 @@ body.elementor-page .elementor-widget-menu-anchor {
 .elementor-widget-video .elementor-wrapper video {
   height: 100%;
   width: 100%;
+  display: flex;
   border: none;
   background-color: #000000;
 }
