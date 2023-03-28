@@ -1,3 +1,6 @@
 [submodule "wp"]
 	path = wp
 	url = https://github.com/WordPress/WordPress.git
+[submodule "content/plugins/official-facebook-pixel/vendor/techcrunch/wp-async-task"]
+	path = content/plugins/official-facebook-pixel/vendor/techcrunch/wp-async-task
+	url = https://github.com/techcrunch/wp-async-task.git
